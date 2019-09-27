@@ -1,0 +1,41 @@
+From bc7703115e1a9408b51ab454e8ab63e22074c8d7 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Wed, 10 Oct 2018 10:54:52 +0200
+Subject: [PATCH 1/4] early mount using cmdline androidboot.bootdevice
+ parameter
+
+  A devicetree dev path (compatible "android,fstab") example:
+    /dev/block/platform/soc/bootdevice/by-name/<partition>
+
+  bootdevice string is then replaced by the received cmdline parameter
+
+Change-Id: I9bf86ced19664095e9d58f9aad82c2d17fa28db5
+---
+ fs_mgr/fs_mgr_fstab.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/fs_mgr/fs_mgr_fstab.cpp b/fs_mgr/fs_mgr_fstab.cpp
+index c9fb7aa..2e1efbe 100644
+--- a/fs_mgr/fs_mgr_fstab.cpp
++++ b/fs_mgr/fs_mgr_fstab.cpp
+@@ -439,6 +439,17 @@ static std::string read_fstab_from_dt() {
+             LERROR << "dt_fstab: Failed to find device for partition " << dp->d_name;
+             return {};
+         }
++        const std::string bdstr = "bootdevice";
++        size_t start_pos = value.find(bdstr);
++        if(start_pos != std::string::npos) {
++            std::string out_val;
++            if (fs_mgr_get_boot_config(bdstr, &out_val)) {
++                value.replace(start_pos, bdstr.length(), out_val);
++                LINFO << "generic bootdevice replaced: " << value;
++            } else {
++                LERROR << "can't find androidboot.bootdevice parameter in kernel cmdline";
++            }
++        }
+         fstab_entry.push_back(value);
+ 
+         std::string mount_point;
+-- 
+2.7.4
+

@@ -1,0 +1,37 @@
+From dbb4d66ea37daed7a9aa206ac69746b3c921fd6a Mon Sep 17 00:00:00 2001
+From: Arnaud Chevalier <achevalier@witekio.com>
+Date: Fri, 1 Mar 2019 16:03:25 +0100
+Subject: [PATCH] Add misc and userdata image for sdk generation
+
+Change-Id: Ib5cb188acf2646445de023ed7906b0e0f49958a1
+---
+ build/sdk.atree | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build/sdk.atree b/build/sdk.atree
+index 08ae755..c34a94e 100644
+--- a/build/sdk.atree
++++ b/build/sdk.atree
+@@ -209,7 +209,7 @@ prebuilts/sdk/sdk-annotations/annotations.zip platforms/${PLATFORM_NAME}/data/an
+ ${OUT_DIR}/target/common/obj/PACKAGING/metalava-api-stubs_annotations.zip platforms/${PLATFORM_NAME}/data/annotations.zip
+ 
+ # Eclipse Editors support
+-framework/layoutlib-legacy.jar            platforms/${PLATFORM_NAME}/data/layoutlib.jar
++# framework/layoutlib-legacy.jar            platforms/${PLATFORM_NAME}/data/layoutlib.jar
+ frameworks/base/core/res/res              platforms/${PLATFORM_NAME}/data/res
+ docs/activity_actions.txt                 platforms/${PLATFORM_NAME}/data/activity_actions.txt
+ docs/broadcast_actions.txt                platforms/${PLATFORM_NAME}/data/broadcast_actions.txt
+@@ -238,8 +238,8 @@ development/sdk/sdk_files_NOTICE.txt      platforms/${PLATFORM_NAME}/skins/NOTIC
+ system.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/system.img
+ vendor.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/vendor.img
+ ramdisk.img                                system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/ramdisk.img
+-device/generic/goldfish/data/etc/userdata.img    system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/userdata.img
+-data/misc                                        system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/data/misc
++userdata.img                               system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/userdata.img
++misc.img                                   system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/data/misc
+ system/build.prop                          system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/build.prop
+ 
+ # Note: the kernel image is handled by sdk-android-<abi>.atree now.
+-- 
+2.7.4
+

@@ -1,0 +1,22 @@
+# STM USB init
+allow init configfs:dir create_file_perms;
+allow init configfs:file write;
+allow init configfs:lnk_file { create unlink };
+allow init configfs:file create;
+# STM USB drive init
+allow init tmpfs:lnk_file { create unlink };
+# STM load module capability (to be removed when kernel generated without module loading capability)
+allow init self:capability sys_module;
+# STM LEDs init
+allow init sysfs_leds:lnk_file read;
+
+allow init kernel:system module_request;
+
+allow init proc_cpu_alignment:file w_file_perms;
+allow init proc_slabinfo:file setattr;
+
+allow init system_file:system module_load;
+allow init vendor_file:system module_load;
+allow init shell_data_file:sock_file getattr;
+
+dontaudit init self:capability dac_read_search;

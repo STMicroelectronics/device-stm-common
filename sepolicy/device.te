@@ -1,0 +1,2 @@
+type render_device, dev_type, mlstrustedobject;
+type removable_device, dev_type;

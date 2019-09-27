@@ -1,0 +1,5 @@
+# access to kernel module request (used for IP service)
+allow netd kernel:system module_request;
+allow netd self:capability sys_module;
+allow netd proc_net:file create;
+allow netd shell:fifo_file write;

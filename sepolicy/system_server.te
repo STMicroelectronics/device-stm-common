@@ -1,0 +1,27 @@
+#============= system_server ==============
+# Needed for app
+allow system_server {
+    platform_app
+    priv_app
+    system_app
+    untrusted_app
+    untrusted_app_25
+    isolated_app
+}:file write;
+
+allow system_server {
+    render_device
+    rpmsg_device
+    # Needed by hubconnection for sensor hub
+    sensors_device
+    uhid_device
+}:chr_file { rw_file_perms };
+
+allow system_server thermal_service:service_manager { find };
+
+get_prop(system_server, graphics_prop)
+get_prop(system_server, primary_physical_prop)
+
+#For running CTS:
+allow system_server shell_data_file:file map;
+

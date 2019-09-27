@@ -1,0 +1,5 @@
+# ueventd
+allow ueventd rpmsg_device:chr_file { relabelfrom relabelto };
+allow ueventd device:chr_file { relabelfrom relabelto };
+allow ueventd input_device:chr_file { relabelfrom relabelto };
+allow ueventd usb_device:chr_file { relabelfrom relabelto };

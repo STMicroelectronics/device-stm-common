@@ -1,0 +1,26 @@
+From d3695a8581af978af8cb2a3add52379fb374c6f6 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Fri, 11 Jan 2019 14:01:44 +0100
+Subject: [PATCH 1/2] Increase timeout for service availability
+
+Change-Id: I2d5a253549df1b84faa830b297761eadecda66d3
+---
+ services/core/java/com/android/server/am/ActiveServices.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/services/core/java/com/android/server/am/ActiveServices.java b/services/core/java/com/android/server/am/ActiveServices.java
+index ca715b5..5ce7711 100644
+--- a/services/core/java/com/android/server/am/ActiveServices.java
++++ b/services/core/java/com/android/server/am/ActiveServices.java
+@@ -112,7 +112,7 @@ public final class ActiveServices {
+     private static final boolean SHOW_DUNGEON_NOTIFICATION = false;
+ 
+     // How long we wait for a service to finish executing.
+-    static final int SERVICE_TIMEOUT = 20*1000;
++    static final int SERVICE_TIMEOUT = 40*1000;
+ 
+     // How long we wait for a service to finish executing.
+     static final int SERVICE_BACKGROUND_TIMEOUT = SERVICE_TIMEOUT * 10;
+-- 
+2.7.4
+

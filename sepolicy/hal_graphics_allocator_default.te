@@ -1,0 +1,6 @@
+allow hal_graphics_allocator_default render_device:chr_file { rw_file_perms };
+
+allow hal_graphics_allocator_default graphics_device:dir search;
+allow hal_graphics_allocator_default graphics_device:chr_file { read open ioctl write map };
+
+get_prop(hal_graphics_allocator_default, graphics_prop)

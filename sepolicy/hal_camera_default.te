@@ -1,0 +1,6 @@
+allow hal_camera_default render_device:chr_file { rw_file_perms };
+
+get_prop(hal_camera_default, graphics_prop)
+get_prop(hal_camera_default, camera_prop)
+
+allow hal_camera_default hal_graphics_mapper_hwservice:hwservice_manager { find };

@@ -1,0 +1,166 @@
+From 0bba6ca1dcb728c470a4c15cabf7c8ad8c759395 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Tue, 7 May 2019 18:24:18 +0200
+Subject: [PATCH] Add SE policy for CoproService
+
+Change-Id: I660e38950e6c359a511f1336790c1efc35fb3952
+---
+ prebuilts/api/28.0/private/compat/26.0/26.0.ignore.cil | 3 ++-
+ prebuilts/api/28.0/private/compat/27.0/27.0.ignore.cil | 3 ++-
+ prebuilts/api/28.0/private/seapp_contexts              | 1 +
+ prebuilts/api/28.0/private/service_contexts            | 2 ++
+ prebuilts/api/28.0/public/attributes                   | 1 +
+ prebuilts/api/28.0/public/service.te                   | 3 +++
+ private/compat/26.0/26.0.ignore.cil                    | 3 ++-
+ private/compat/27.0/27.0.ignore.cil                    | 3 ++-
+ private/seapp_contexts                                 | 1 +
+ private/service_contexts                               | 2 ++
+ public/attributes                                      | 1 +
+ public/service.te                                      | 3 +++
+ 12 files changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/prebuilts/api/28.0/private/compat/26.0/26.0.ignore.cil b/prebuilts/api/28.0/private/compat/26.0/26.0.ignore.cil
+index 4e0aae2..29a0822 100644
+--- a/prebuilts/api/28.0/private/compat/26.0/26.0.ignore.cil
++++ b/prebuilts/api/28.0/private/compat/26.0/26.0.ignore.cil
+@@ -146,7 +146,8 @@
+     wpantund_exec
+     wpantund_service
+     wpantund_tmpfs
+-    wm_trace_data_file))
++    wm_trace_data_file
++    copro_service))
+ 
+ ;; private_objects - a collection of types that were labeled differently in
+ ;;     older policy, but that should not remain accessible to vendor policy.
+diff --git a/prebuilts/api/28.0/private/compat/27.0/27.0.ignore.cil b/prebuilts/api/28.0/private/compat/27.0/27.0.ignore.cil
+index 747478c..48d2314 100644
+--- a/prebuilts/api/28.0/private/compat/27.0/27.0.ignore.cil
++++ b/prebuilts/api/28.0/private/compat/27.0/27.0.ignore.cil
+@@ -124,7 +124,8 @@
+     wpantund
+     wpantund_exec
+     wpantund_service
+-    wpantund_tmpfs))
++    wpantund_tmpfs
++    copro_service))
+ 
+ ;; private_objects - a collection of types that were labeled differently in
+ ;;     older policy, but that should not remain accessible to vendor policy.
+diff --git a/prebuilts/api/28.0/private/seapp_contexts b/prebuilts/api/28.0/private/seapp_contexts
+index c21d49f..28e797b 100644
+--- a/prebuilts/api/28.0/private/seapp_contexts
++++ b/prebuilts/api/28.0/private/seapp_contexts
+@@ -116,3 +116,4 @@ user=_app isPrivApp=true domain=priv_app type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 domain=untrusted_app type=app_data_file levelFrom=all
+ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file levelFrom=user
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
++user=system seinfo=coproservice name=com.android.coproservice domain=coproservice_app type=app_data_file
+diff --git a/prebuilts/api/28.0/private/service_contexts b/prebuilts/api/28.0/private/service_contexts
+index 5ec45a2..df3eb63 100644
+--- a/prebuilts/api/28.0/private/service_contexts
++++ b/prebuilts/api/28.0/private/service_contexts
+@@ -185,4 +185,6 @@ wificond                                  u:object_r:wificond_service:s0
+ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
++#coproservice
++android.copro.ICoproService               u:object_r:copro_service:s0
+ *                                         u:object_r:default_android_service:s0
+diff --git a/prebuilts/api/28.0/public/attributes b/prebuilts/api/28.0/public/attributes
+index 0c7ca2e..ab73bd7 100644
+--- a/prebuilts/api/28.0/public/attributes
++++ b/prebuilts/api/28.0/public/attributes
+@@ -299,6 +299,7 @@ hal_attribute(wifi);
+ hal_attribute(wifi_hostapd);
+ hal_attribute(wifi_offload);
+ hal_attribute(wifi_supplicant);
++hal_attribute(copro);
+ 
+ # HwBinder services offered across the core-vendor boundary
+ #
+diff --git a/prebuilts/api/28.0/public/service.te b/prebuilts/api/28.0/public/service.te
+index 3526049..dbc5084 100644
+--- a/prebuilts/api/28.0/public/service.te
++++ b/prebuilts/api/28.0/public/service.te
+@@ -159,3 +159,6 @@ type wificond_service, service_manager_type;
+ type wifiaware_service, app_api_service, system_server_service, service_manager_type;
+ type window_service, system_api_service, system_server_service, service_manager_type;
+ type wpantund_service, system_api_service, service_manager_type;
++
++#coproservice
++type copro_service, app_api_service, service_manager_type;
+diff --git a/private/compat/26.0/26.0.ignore.cil b/private/compat/26.0/26.0.ignore.cil
+index 4e0aae2..29a0822 100644
+--- a/private/compat/26.0/26.0.ignore.cil
++++ b/private/compat/26.0/26.0.ignore.cil
+@@ -146,7 +146,8 @@
+     wpantund_exec
+     wpantund_service
+     wpantund_tmpfs
+-    wm_trace_data_file))
++    wm_trace_data_file
++    copro_service))
+ 
+ ;; private_objects - a collection of types that were labeled differently in
+ ;;     older policy, but that should not remain accessible to vendor policy.
+diff --git a/private/compat/27.0/27.0.ignore.cil b/private/compat/27.0/27.0.ignore.cil
+index 747478c..48d2314 100644
+--- a/private/compat/27.0/27.0.ignore.cil
++++ b/private/compat/27.0/27.0.ignore.cil
+@@ -124,7 +124,8 @@
+     wpantund
+     wpantund_exec
+     wpantund_service
+-    wpantund_tmpfs))
++    wpantund_tmpfs
++    copro_service))
+ 
+ ;; private_objects - a collection of types that were labeled differently in
+ ;;     older policy, but that should not remain accessible to vendor policy.
+diff --git a/private/seapp_contexts b/private/seapp_contexts
+index c21d49f..28e797b 100644
+--- a/private/seapp_contexts
++++ b/private/seapp_contexts
+@@ -116,3 +116,4 @@ user=_app isPrivApp=true domain=priv_app type=app_data_file levelFrom=user
+ user=_app minTargetSdkVersion=28 domain=untrusted_app type=app_data_file levelFrom=all
+ user=_app minTargetSdkVersion=26 domain=untrusted_app_27 type=app_data_file levelFrom=user
+ user=_app domain=untrusted_app_25 type=app_data_file levelFrom=user
++user=system seinfo=coproservice name=com.android.coproservice domain=coproservice_app type=app_data_file
+diff --git a/private/service_contexts b/private/service_contexts
+index 5ec45a2..df3eb63 100644
+--- a/private/service_contexts
++++ b/private/service_contexts
+@@ -185,4 +185,6 @@ wificond                                  u:object_r:wificond_service:s0
+ wifiaware                                 u:object_r:wifiaware_service:s0
+ wifirtt                                   u:object_r:rttmanager_service:s0
+ window                                    u:object_r:window_service:s0
++#coproservice
++android.copro.ICoproService               u:object_r:copro_service:s0
+ *                                         u:object_r:default_android_service:s0
+diff --git a/public/attributes b/public/attributes
+index 0c7ca2e..ab73bd7 100644
+--- a/public/attributes
++++ b/public/attributes
+@@ -299,6 +299,7 @@ hal_attribute(wifi);
+ hal_attribute(wifi_hostapd);
+ hal_attribute(wifi_offload);
+ hal_attribute(wifi_supplicant);
++hal_attribute(copro);
+ 
+ # HwBinder services offered across the core-vendor boundary
+ #
+diff --git a/public/service.te b/public/service.te
+index 3526049..dbc5084 100644
+--- a/public/service.te
++++ b/public/service.te
+@@ -159,3 +159,6 @@ type wificond_service, service_manager_type;
+ type wifiaware_service, app_api_service, system_server_service, service_manager_type;
+ type window_service, system_api_service, system_server_service, service_manager_type;
+ type wpantund_service, system_api_service, service_manager_type;
++
++#coproservice
++type copro_service, app_api_service, service_manager_type;
+-- 
+2.7.4
+

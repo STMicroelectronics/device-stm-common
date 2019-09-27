@@ -1,0 +1,4 @@
+#============= mediaextractor ==============
+allow mediaextractor system_server:fifo_file { append write };
+allow mediaextractor sdcardfs:file { getattr read };
+allow mediaextractor vfat:file { getattr read };

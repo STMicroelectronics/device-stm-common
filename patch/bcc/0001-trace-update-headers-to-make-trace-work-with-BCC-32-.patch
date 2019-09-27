@@ -1,0 +1,27 @@
+From 50ba2f96cbe54f24bb8bf89992a968ca41f6797f Mon Sep 17 00:00:00 2001
+From: Christophe Guibout <christophe.guibout@st.com>
+Date: Tue, 27 Aug 2019 17:08:22 +0200
+Subject: [PATCH 2/2] trace: update headers to make trace work with BCC 32-bits
+
+---
+ tools/trace.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tools/trace.py b/tools/trace.py
+index f406f7ca..07da4d46 100755
+--- a/tools/trace.py
++++ b/tools/trace.py
+@@ -745,8 +745,8 @@ trace -I 'linux/fs_struct.h' 'mntns_install "users = %d", $task->fs->users'
+ 
+         def _generate_program(self):
+                 self.program = """
+-#include <linux/ptrace.h>
+-#include <linux/sched.h>        /* For TASK_COMM_LEN */
++#include <hostcompat/uapi/linux/ptrace.h>
++#include <hostcompat/linux/sched.h>        /* For TASK_COMM_LEN */
+ 
+ """
+                 for include in (self.args.include or []):
+-- 
+2.17.1
+

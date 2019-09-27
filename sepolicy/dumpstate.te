@@ -1,0 +1,8 @@
+allow dumpstate block_device:blk_file getattr;
+allow dumpstate mnt_expand_file:dir search;
+allow dumpstate self:netlink_xfrm_socket create;
+allow dumpstate self:netlink_xfrm_socket setopt;
+allow dumpstate system_block_device:blk_file getattr;
+allow dumpstate userdata_block_device:blk_file getattr;
+allow dumpstate console_device:chr_file { getattr ioctl read write };
+allow dumpstate proc_modules:file { getattr open read };

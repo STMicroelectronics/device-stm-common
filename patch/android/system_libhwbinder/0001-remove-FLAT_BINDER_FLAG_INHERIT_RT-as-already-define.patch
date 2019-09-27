@@ -1,0 +1,26 @@
+From 0e4d388b82456187597cdf41c5fb6382585c26a0 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Fri, 18 Jan 2019 10:35:03 +0100
+Subject: [PATCH] remove FLAT_BINDER_FLAG_INHERIT_RT as already defined in
+ header files
+
+Change-Id: I7805bf53af3074b6b0f0691c3fdd045c5f7956a1
+---
+ include/hwbinder/binder_kernel.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/include/hwbinder/binder_kernel.h b/include/hwbinder/binder_kernel.h
+index 27a0595..dd6e77a 100644
+--- a/include/hwbinder/binder_kernel.h
++++ b/include/hwbinder/binder_kernel.h
+@@ -33,7 +33,6 @@ enum {
+ enum {
+         FLAT_BINDER_FLAG_SCHEDPOLICY_MASK = 0x600,
+         FLAT_BINDER_FLAG_SCHEDPOLICY_SHIFT = 9,
+-        FLAT_BINDER_FLAG_INHERIT_RT = 0x800,
+         FLAT_BINDER_FLAG_TXN_SECURITY_CTX = 0x1000,
+ };
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,2 @@
+# audioserver read access to /proc/<pid>/net statistics
+r_dir_file(audioserver, proc_net)

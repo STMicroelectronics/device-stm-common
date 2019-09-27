@@ -1,0 +1,23 @@
+===== android_part.config =====
+
+MEMORY_MAX_SIZE for microSD card values should be reviewed by customer following microSD card material used.
+
+Under Linux environment, following steps will give the microSD card size:
+- insert microSD card in Linux PC
+- open shell terminal and execute command:  sgdisk -p /dev/mmcblk<x> (<x> is your local mmcblk id mounted for your microSD card, can check it with lsblk command)
+- it will list information below:
+
+		Disk /dev/mmcblk0: 15433728 sectors, 7.4 GiB
+		Logical sector size: 512 bytes
+		Disk identifier (GUID): 8EC673F7-3653-47C0-8B07-02E04B1DD0E6
+		Partition table holds up to 128 entries
+		First usable sector is 34, last usable sector is 15433694
+		Partitions will be aligned on 2-sector boundaries
+		Total free space is 0 sectors (0 bytes)
+
+- first line show the microSD card available size: here 15433728 sectors
+- to calculate the size in MiB: size = (NbSectors * SectorSize) / 1024 / 1024
+
+		In this example: (15433728 * 512) / 1024 / 1024 = 7536 MiB
+
+- report this value in android_layout.config for your configuration: i.e PART_8GiB_MEMORY_MAX_SIZE 7536M x1 sd

@@ -1,0 +1,9 @@
+# tee_supplicant service
+type tee_supplicant, domain;
+type tee_supplicant_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(tee_supplicant)
+
+allow tee_supplicant tee_device:chr_file { ioctl open read write };
+allow tee_supplicant vendor_data_file:dir { add_name create write };
+allow tee_supplicant system_data_file:dir getattr;

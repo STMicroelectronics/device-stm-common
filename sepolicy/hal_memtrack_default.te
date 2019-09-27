@@ -1,0 +1,2 @@
+allow hal_memtrack_default debugfs_gc:file { r_file_perms };
+allow hal_memtrack_default debugfs_gc:dir  { r_dir_perms };

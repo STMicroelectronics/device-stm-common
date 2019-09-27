@@ -1,0 +1,1 @@
+dontaudit lmkd self:capability dac_read_search;

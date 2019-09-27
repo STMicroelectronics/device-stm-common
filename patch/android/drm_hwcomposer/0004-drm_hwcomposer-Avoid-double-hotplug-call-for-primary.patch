@@ -1,0 +1,30 @@
+From d9402c443e8f03d671ef366baa81963ff058467b Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Tue, 23 Apr 2019 17:53:35 +0200
+Subject: [PATCH 4/4] drm_hwcomposer: Avoid double hotplug call for primary
+ display
+
+"hotplug" is automatically called for the primary display when the callback is registered.
+It's not required to call it again in HandleInitialHotplugState.
+
+Change-Id: I8bd087eef6338b9e7a6abf805db940bb618fb418
+---
+ drmhwctwo.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drmhwctwo.cpp b/drmhwctwo.cpp
+index 79ef2d4..00d5acc 100644
+--- a/drmhwctwo.cpp
++++ b/drmhwctwo.cpp
+@@ -921,7 +921,7 @@ void DrmHwcTwo::HandleDisplayHotplug(hwc2_display_t displayid, int state) {
+ 
+ void DrmHwcTwo::HandleInitialHotplugState(DrmDevice *drmDevice) {
+   for (auto &conn : drmDevice->connectors()) {
+-    if (conn->state() != DRM_MODE_CONNECTED)
++    if ((conn->state() != DRM_MODE_CONNECTED) || (conn->display() == HWC_DISPLAY_PRIMARY))
+       continue;
+     HandleDisplayHotplug(conn->display(), conn->state());
+   }
+-- 
+2.7.4
+

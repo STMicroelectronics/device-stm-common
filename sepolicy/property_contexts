@@ -1,0 +1,22 @@
+# list of camera properties
+ro.camera.req.fmq.size          u:object_r:camera_prop:s0
+ro.camera.res.fmq.size          u:object_r:camera_prop:s0
+
+# list of new properties used by the graphical library
+hwc.drm.device                  u:object_r:graphics_prop:s0
+hwc.drm.use_overlay_planes      u:object_r:graphics_prop:s0
+gralloc.drm.device              u:object_r:graphics_prop:s0
+gralloc.trace                   u:object_r:graphics_prop:s0
+
+# list of properties that can be set by the initprop executable
+persist.vendor.fw_config        u:object_r:vendor_initprop_prop:s0
+persist.vendor.blkcfg           u:object_r:vendor_initprop_prop:s0
+vendor.disable_bluetooth        u:object_r:vendor_initprop_prop:s0
+vendor.disable_audio            u:object_r:vendor_initprop_prop:s0
+vendor.disable_wifi             u:object_r:vendor_initprop_prop:s0
+
+# property set by initdriver when all kernel module have been loaded
+vendor.modules.ready            u:object_r:vendor_initdriver_prop:s0
+
+ro.vold.primary_physical        u:object_r:primary_physical_prop:s0
+

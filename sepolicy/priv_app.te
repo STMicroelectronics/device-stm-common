@@ -1,0 +1,2 @@
+allow priv_app render_device:chr_file { rw_file_perms };
+get_prop(priv_app, graphics_prop)

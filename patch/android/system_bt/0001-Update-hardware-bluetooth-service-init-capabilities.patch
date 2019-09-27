@@ -1,0 +1,26 @@
+From 884201ddfa71baeea3385152eccdacc32fa13f90 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Wed, 3 Oct 2018 11:34:47 +0200
+Subject: [PATCH] Update hardware bluetooth service init capabilities
+
+Change-Id: I1e3c18a4b76375f2b7666021f2d65cda616fcb0a
+---
+ .../interface/android.hardware.bluetooth@1.0-service.btlinux.rc      | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/vendor_libs/linux/interface/android.hardware.bluetooth@1.0-service.btlinux.rc b/vendor_libs/linux/interface/android.hardware.bluetooth@1.0-service.btlinux.rc
+index 36fbc2c..c8b6856 100644
+--- a/vendor_libs/linux/interface/android.hardware.bluetooth@1.0-service.btlinux.rc
++++ b/vendor_libs/linux/interface/android.hardware.bluetooth@1.0-service.btlinux.rc
+@@ -1,5 +1,6 @@
+ service btlinux-1.0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service.btlinux
+     class hal
+     user bluetooth
+-    group bluetooth net_admin net_bt_admin
+-    capabilities NET_ADMIN
++    group bluetooth
++    capabilities BLOCK_SUSPEND NET_ADMIN SYS_NICE
++    writepid /dev/stune/foreground/tasks
+-- 
+2.7.4
+

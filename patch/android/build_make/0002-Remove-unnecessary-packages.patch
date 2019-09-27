@@ -1,0 +1,53 @@
+From d8797fa12eb2dc3218de80297fae4ff401f64335 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Tue, 3 Sep 2019 10:12:12 +0200
+Subject: [PATCH 2/2] Remove unnecessary packages
+
+Change-Id: I0d3a6d4afee5960e84889c33465a639a275ca548
+---
+ target/product/core.mk                 | 5 -----
+ target/product/generic_no_telephony.mk | 5 -----
+ 2 files changed, 10 deletions(-)
+
+diff --git a/target/product/core.mk b/target/product/core.mk
+index c72bb2f..37b14b6 100644
+--- a/target/product/core.mk
++++ b/target/product/core.mk
+@@ -26,16 +26,11 @@ PRODUCT_PACKAGES += \
+     BookmarkProvider \
+     Browser2 \
+     BuiltInPrintService \
+-    Calendar \
+     CalendarProvider \
+     CaptivePortalLogin \
+     CertInstaller \
+-    Contacts \
+-    DeskClock \
+     DocumentsUI \
+     DownloadProviderUi \
+-    Email \
+-    ExactCalculator \
+     ExternalStorageProvider \
+     FusedLocation \
+     InputDevices \
+diff --git a/target/product/generic_no_telephony.mk b/target/product/generic_no_telephony.mk
+index 6a84c35..54fb4fa 100644
+--- a/target/product/generic_no_telephony.mk
++++ b/target/product/generic_no_telephony.mk
+@@ -18,13 +18,8 @@
+ # It includes the base Android platform.
+ 
+ PRODUCT_PACKAGES := \
+-    Bluetooth \
+-    BluetoothMidiService \
+-    Camera2 \
+     Gallery2 \
+     Music \
+-    MusicFX \
+-    NfcNci \
+     OneTimeInitializer \
+     Provision \
+     SystemUI \
+-- 
+2.7.4
+

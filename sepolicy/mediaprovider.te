@@ -1,0 +1,4 @@
+allow mediaprovider runtime_event_log_tags_file:file { map };
+
+allow mediaprovider render_device:chr_file { rw_file_perms };
+get_prop(mediaprovider, graphics_prop)

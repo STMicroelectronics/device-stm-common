@@ -1,0 +1,2 @@
+# default libbt-vendor connect to HCI socket
+allow hal_bluetooth_btlinux sysfs:file write;

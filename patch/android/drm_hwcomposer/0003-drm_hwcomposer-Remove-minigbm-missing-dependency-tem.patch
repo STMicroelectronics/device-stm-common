@@ -1,0 +1,35 @@
+From fed15fa6dee2abf47f1c960d4f5ac3016feee040 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Thu, 18 Apr 2019 11:02:59 +0200
+Subject: [PATCH 3/4] drm_hwcomposer: Remove minigbm (missing dependency) -
+ temporary
+
+---
+ Android.bp | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/Android.bp b/Android.bp
+index 2af4548..b7b75dd 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -91,17 +91,6 @@ cc_library_shared {
+     cppflags: ["-DUSE_DRM_GENERIC_IMPORTER"],
+ }
+ 
+-cc_library_shared {
+-    name: "hwcomposer.drm_minigbm",
+-    defaults: ["hwcomposer.drm_defaults"],
+-    whole_static_libs: ["drm_hwcomposer"],
+-    srcs: [
+-        "platformdrmgeneric.cpp",
+-        "platformminigbm.cpp",
+-    ],
+-    include_dirs: ["external/minigbm/cros_gralloc"],
+-}
+-
+ // Used by hwcomposer.drm_hikey and hwcomposer.drm_hikey960
+ filegroup {
+     name: "drm_hwcomposer_platformhisi",
+-- 
+2.7.4
+

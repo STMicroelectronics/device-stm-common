@@ -1,0 +1,6 @@
+# default libbt-vendor connect to HCI socket
+allow bluetooth self:socket { bind create read write getattr };
+allow bluetooth storage_stub_file:dir getattr;
+
+allow bluetooth render_device:chr_file { rw_file_perms };
+get_prop(bluetooth, graphics_prop)

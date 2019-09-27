@@ -1,0 +1,3 @@
+hal_server_domain(hal_usb_default, hal_usb_gadget)
+
+allow hal_usb_default configfs:file create_file_perms;

@@ -1,0 +1,36 @@
+From 89e796037bab4e4d05d5503ba5e07458c8436cd2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Julien=20Qu=C3=A9r=C3=A9?= <jquere@witekio.com>
+Date: Fri, 19 Jul 2019 10:51:38 +0200
+Subject: [PATCH] adapterState: increase the timeout values for the Bluetooth
+ initialization
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Change-Id: If4dfd490ad61dd08b16cf94366553f75cb4ed521
+Signed-off-by: Julien Quéré <jquere@witekio.com>
+---
+ src/com/android/bluetooth/btservice/AdapterState.java | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/com/android/bluetooth/btservice/AdapterState.java b/src/com/android/bluetooth/btservice/AdapterState.java
+index 94feef2..34be75d 100644
+--- a/src/com/android/bluetooth/btservice/AdapterState.java
++++ b/src/com/android/bluetooth/btservice/AdapterState.java
+@@ -70,10 +70,10 @@ final class AdapterState extends StateMachine {
+     static final int BLE_STOP_TIMEOUT = 11;
+     static final int BLE_START_TIMEOUT = 12;
+ 
+-    static final int BLE_START_TIMEOUT_DELAY = 4000;
++    static final int BLE_START_TIMEOUT_DELAY = 40000;
+     static final int BLE_STOP_TIMEOUT_DELAY = 1000;
+-    static final int BREDR_START_TIMEOUT_DELAY = 4000;
+-    static final int BREDR_STOP_TIMEOUT_DELAY = 4000;
++    static final int BREDR_START_TIMEOUT_DELAY = 40000;
++    static final int BREDR_STOP_TIMEOUT_DELAY = 40000;
+ 
+     private AdapterService mAdapterService;
+     private TurningOnState mTurningOnState = new TurningOnState();
+-- 
+2.7.4
+
