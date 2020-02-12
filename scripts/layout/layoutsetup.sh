@@ -258,6 +258,11 @@ while IFS='' read -r line || [[ -n $line ]]; do
        && [[ ${part_name} != "MEMORY_SIZE" ]] && [[ ${part_name} != "MEMORY_TYPE" ]]; then
       transform_part_size_in_bytes ${part_size}
       export ${SOC_FAMILY^^}_${part_name}_PART_SIZE=${part_size_bytes}
+      if [[ ${part_name} == "SUPER" ]]; then
+        # case dynamic partition (A/B included), consider 1MB margin for METADATA
+        dynamic_part_size=$(( ($part_size_bytes/2)-1048576 ))
+        export ${SOC_FAMILY^^}_DYNAMIC_PART_SIZE=${dynamic_part_size}
+      fi
       reserved_memory_size=$(( reserved_memory_size + (part_nb*part_size_bytes) ))
     else
       if [ ${part_name} == "MEMORY_SIZE" ]; then

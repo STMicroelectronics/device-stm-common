@@ -1,25 +1,38 @@
-From 5008b71e9517768c9296f0384bb07a4f7c260f19 Mon Sep 17 00:00:00 2001
-From: Arnaud Chevalier <achevalier@witekio.com>
-Date: Thu, 28 Mar 2019 10:10:59 +0100
-Subject: [PATCH 1/2] Integration of Copro
+From 09d06ea9cb95e470e1cabb82c1966fe277cf3758 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 14 Oct 2019 15:47:47 +0200
+Subject: [PATCH 1/4] Integration of Copro
 
-Change-Id: I982e8dc3331261707d728e9b7d4d79bc7f3c4113
+Change-Id: I2a3d4e4d0ca53a5fed029c1a59bf5148a6517bd6
 ---
- target/product/vndk/28.txt | 1 +
- 1 file changed, 1 insertion(+)
+ target/product/gsi/29.txt      | 1 +
+ target/product/gsi/current.txt | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/target/product/vndk/28.txt b/target/product/vndk/28.txt
-index 712e91c..46e59b0 100644
---- a/target/product/vndk/28.txt
-+++ b/target/product/vndk/28.txt
-@@ -86,6 +86,7 @@ VNDK-core: android.hardware.configstore@1.1.so
+diff --git a/target/product/gsi/29.txt b/target/product/gsi/29.txt
+index 14faba5..9269516 100644
+--- a/target/product/gsi/29.txt
++++ b/target/product/gsi/29.txt
+@@ -103,6 +103,7 @@ VNDK-core: android.hardware.configstore@1.1.so
  VNDK-core: android.hardware.confirmationui-support-lib.so
  VNDK-core: android.hardware.confirmationui@1.0.so
  VNDK-core: android.hardware.contexthub@1.0.so
 +VNDK-core: android.hardware.copro@1.0.so
  VNDK-core: android.hardware.drm@1.0.so
  VNDK-core: android.hardware.drm@1.1.so
- VNDK-core: android.hardware.dumpstate@1.0.so
+ VNDK-core: android.hardware.drm@1.2.so
+diff --git a/target/product/gsi/current.txt b/target/product/gsi/current.txt
+index 14faba5..9269516 100644
+--- a/target/product/gsi/current.txt
++++ b/target/product/gsi/current.txt
+@@ -103,6 +103,7 @@ VNDK-core: android.hardware.configstore@1.1.so
+ VNDK-core: android.hardware.confirmationui-support-lib.so
+ VNDK-core: android.hardware.confirmationui@1.0.so
+ VNDK-core: android.hardware.contexthub@1.0.so
++VNDK-core: android.hardware.copro@1.0.so
+ VNDK-core: android.hardware.drm@1.0.so
+ VNDK-core: android.hardware.drm@1.1.so
+ VNDK-core: android.hardware.drm@1.2.so
 -- 
 2.7.4
 

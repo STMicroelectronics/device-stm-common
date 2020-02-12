@@ -585,8 +585,7 @@ if [ ${starter_target_emmc} -eq 1 ]; then
     fi
     \cp ${OUTPUT_PATH_STARTER}/boot.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/dt.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/vendor.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/system.img ${emmc_starter_path}/
+    \cp ${OUTPUT_PATH_STARTER}/super.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/misc.img ${emmc_starter_path}/
 
     # F2FS format no more resizeable and sparsed by default (not possible to deactivate)
@@ -648,8 +647,7 @@ if [ ${starter_target_sd} -eq 1 ]; then
     fi
     \cp ${OUTPUT_PATH_STARTER}/boot.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/dt.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/vendor.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/system.img ${sd_starter_path}/
+    \cp ${OUTPUT_PATH_STARTER}/super.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/misc.img ${sd_starter_path}/
 
     # F2FS format no more resizeable and sparsed by default (not possible to deactivate)

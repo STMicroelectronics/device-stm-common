@@ -1,4 +1,4 @@
-From bae0af8d234a6294bc163c293d22900aabff15fb Mon Sep 17 00:00:00 2001
+From 68140737e2728d2684a6f4a656026eba68e67b72 Mon Sep 17 00:00:00 2001
 From: Christophe Guibout <christophe.guibout@st.com>
 Date: Tue, 12 Sep 2017 11:18:55 +0200
 Subject: [PATCH] Add libwifi-hal-stm (vendor-specific) library inclusion
@@ -9,13 +9,13 @@ Change-Id: Ia1247ad6995f9686a0db5ac2105ca0ae338932ca
  1 file changed, 2 insertions(+)
 
 diff --git a/libwifi_hal/Android.mk b/libwifi_hal/Android.mk
-index 58e81ff..a7655cc 100644
+index 4e2232f..5f8dbba 100644
 --- a/libwifi_hal/Android.mk
 +++ b/libwifi_hal/Android.mk
-@@ -99,6 +99,8 @@ else ifeq ($(BOARD_WLAN_DEVICE), mrvl)
- else ifeq ($(BOARD_WLAN_DEVICE), MediaTek)
-   # support MTK WIFI HAL
-   LIB_WIFI_HAL := libwifi-hal-mt66xx
+@@ -102,6 +102,8 @@ else ifeq ($(BOARD_WLAN_DEVICE), MediaTek)
+ else ifeq ($(BOARD_WLAN_DEVICE), rtl)
+   # support Realtek WIFI HAL
+   LIB_WIFI_HAL := libwifi-hal-rtl
 +else ifeq ($(BOARD_WLAN_DEVICE), stm)
 +  LIB_WIFI_HAL := libwifi-hal-stm
  else ifeq ($(BOARD_WLAN_DEVICE), emulator)

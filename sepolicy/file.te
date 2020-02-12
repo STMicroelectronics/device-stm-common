@@ -1,5 +1,4 @@
 type proc_cpu_alignment, fs_type, proc_type;
-type proc_slabinfo, fs_type, proc_type;
 type persist_sensors_file, file_type;
 
 # Default type for all /gc under debugfs. Used by memtrack
@@ -7,3 +6,9 @@ type debugfs_gc, fs_type, debugfs_type;
 
 # Type for /data/vendor/swapfile
 type swap_data_file, file_type, data_file_type;
+
+# Type useful for dumpstate
+type debugfs_gpio, fs_type, debugfs_type;
+type debugfs_clk, fs_type, debugfs_type;
+type debugfs_regulator, fs_type, debugfs_type;
+type debugfs_pinctrl, fs_type, debugfs_type;

@@ -1,33 +1,19 @@
-From e3137795942c436afd2e769f80e62f05da4ebb01 Mon Sep 17 00:00:00 2001
+From 3818c786ef1a6ecb32dd39b9879b6e36f406f30e Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
-Date: Wed, 27 Mar 2019 18:09:17 +0100
-Subject: [PATCH 2/4] temporary disable security requirements on compatibiliy
+Date: Mon, 14 Oct 2019 16:00:30 +0200
+Subject: [PATCH 2/4] temporary disable security requirements on compatibility
  matrix
 
-  Put following hardware interfaces as optional:
-  - @1.1::ICryptoFactory/.* AND @1.1::IDrmFactory/.*
-  - @1.0::IGatekeeper/default
-  - @3.0::IKeymasterDevice/default OR @4.0::IKeymasterDevice/default
-
-Change-Id: If612a03a061867eeb83038318fbf7eaee5bae90d
+Change-Id: I49abbfe62658ce5d877dde5cd8372c78ac9fb0b0
 ---
- compatibility_matrices/compatibility_matrix.3.xml | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ compatibility_matrices/compatibility_matrix.4.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/compatibility_matrices/compatibility_matrix.3.xml b/compatibility_matrices/compatibility_matrix.3.xml
-index 9c6b12a..aa91c83 100644
---- a/compatibility_matrices/compatibility_matrix.3.xml
-+++ b/compatibility_matrices/compatibility_matrix.3.xml
-@@ -147,7 +147,7 @@
-             <regex-instance>.*</regex-instance>
-         </interface>
-     </hal>
--    <hal format="hidl" optional="false">
-+    <hal format="hidl" optional="true">
-         <name>android.hardware.drm</name>
-         <version>1.1</version>
-         <interface>
-@@ -167,7 +167,7 @@
+diff --git a/compatibility_matrices/compatibility_matrix.4.xml b/compatibility_matrices/compatibility_matrix.4.xml
+index 01ec172..ffd9c97 100644
+--- a/compatibility_matrices/compatibility_matrix.4.xml
++++ b/compatibility_matrices/compatibility_matrix.4.xml
+@@ -171,7 +171,7 @@
              <instance>default</instance>
          </interface>
      </hal>
@@ -36,15 +22,6 @@ index 9c6b12a..aa91c83 100644
          <name>android.hardware.gatekeeper</name>
          <version>1.0</version>
          <interface>
-@@ -219,7 +219,7 @@
-         <name>android.hardware.ir</name>
-         <version>1.0</version>
-     </hal>
--    <hal format="hidl" optional="false">
-+    <hal format="hidl" optional="true">
-         <name>android.hardware.keymaster</name>
-         <version>3.0</version>
-         <version>4.0</version>
 -- 
 2.7.4
 

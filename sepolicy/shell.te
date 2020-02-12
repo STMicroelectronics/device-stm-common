@@ -4,8 +4,16 @@ allow shell safemode_prop:file { getattr open };
 allow shell postinstall_mnt_dir:dir getattr;
 allow shell rootfs:file getattr;
 allow shell init_exec:file getattr;
+allow shell init_exec:lnk_file { getattr read };
 allow shell self:udp_socket ioctl;
 allow shell dumpstate_exec:file { execute getattr };
 allow shell persistent_properties_ready_prop:file open;
 allow shell wifi_prop:file { getattr open };
 allow shell proc_tty_drivers:file { getattr open read };
+allow shell overlayfs_file:dir getattr;
+allow shell cache_file:lnk_file { getattr read };
+allow shell vendor_file:file getattr;
+
+allow shell debugfs:dir { open read };
+allow shell debugfs:file getattr;
+allow shell debugfs_wakeup_sources:file getattr;

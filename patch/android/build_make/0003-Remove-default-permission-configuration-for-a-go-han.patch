@@ -1,0 +1,26 @@
+From 8db08bbaa5e71cfe80057c9802d8e2dcbc8ad813 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Wed, 13 Nov 2019 15:26:52 +0100
+Subject: [PATCH 3/4] Remove default permission configuration for a go handheld
+ device
+
+Change-Id: Ic46d8ec6101d070113461fc87dc9e6d9f89e5c2a
+---
+ target/product/go_defaults_common.mk | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/target/product/go_defaults_common.mk b/target/product/go_defaults_common.mk
+index aee7f47..2a09594 100644
+--- a/target/product/go_defaults_common.mk
++++ b/target/product/go_defaults_common.mk
+@@ -55,5 +55,5 @@ TARGET_SYSTEM_PROP += \
+     build/make/target/board/go_defaults_common.prop
+ 
+ # use the go specific handheld_core_hardware.xml from frameworks
+-PRODUCT_COPY_FILES += \
+-    frameworks/native/data/etc/go_handheld_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/handheld_core_hardware.xml
++# PRODUCT_COPY_FILES += \
++#    frameworks/native/data/etc/go_handheld_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/handheld_core_hardware.xml
+-- 
+2.7.4
+

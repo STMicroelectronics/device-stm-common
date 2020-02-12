@@ -17,18 +17,18 @@ OPTEE_HEADER := $(TARGET_PREBUILT_TEE)/tee-header_v2-$(SOC_VERSION)-$(BOARD_FLAV
 OPTEE_PAGEABLE := $(TARGET_PREBUILT_TEE)/tee-pageable_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).stm32
 OPTEE_PAGER := $(TARGET_PREBUILT_TEE)/tee-pager_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).stm32
 
-.PHONY: $(PRODUCT_OUT)/teed.img $(PRODUCT_OUT)/teex.img $(PRODUCT_OUT)/teeh.img
+.PHONY: teed.img teex.img teeh.img
 
-$(PRODUCT_OUT)/teed.img:
-	$(ACP) -fp $(OPTEE_PAGEABLE) $@
+teed.img:
+	$(ACP) -fp $(OPTEE_PAGEABLE) $(PRODUCT_OUT)/$@
 
-$(PRODUCT_OUT)/teex.img:
-	$(ACP) -fp $(OPTEE_PAGER) $@
+teex.img:
+	$(ACP) -fp $(OPTEE_PAGER) $(PRODUCT_OUT)/$@
 
-$(PRODUCT_OUT)/teeh.img:
-	$(ACP) -fp $(OPTEE_HEADER) $@
+teeh.img:
+	$(ACP) -fp $(OPTEE_HEADER) $(PRODUCT_OUT)/$@
 
-droidcore: $(PRODUCT_OUT)/teed.img $(PRODUCT_OUT)/teex.img $(PRODUCT_OUT)/teeh.img
+droidcore: teed.img teex.img teeh.img
 
 endif
 endif

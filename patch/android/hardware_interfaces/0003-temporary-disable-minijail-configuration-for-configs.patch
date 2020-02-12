@@ -1,0 +1,27 @@
+From d58da2af9dbf3cece7ca8f42e6e7685cfc47db0e Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 14 Oct 2019 16:01:25 +0200
+Subject: [PATCH 3/4] temporary disable minijail configuration for configstore
+ (no seccomp policy available for ARM32)
+
+Change-Id: Ibc475ee9ec3e3c69da61b264800b41feb662b7d3
+---
+ configstore/1.1/default/service.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configstore/1.1/default/service.cpp b/configstore/1.1/default/service.cpp
+index e21de0b..af02ae8 100644
+--- a/configstore/1.1/default/service.cpp
++++ b/configstore/1.1/default/service.cpp
+@@ -34,7 +34,7 @@ using android::hardware::configstore::V1_1::implementation::SurfaceFlingerConfig
+ int main() {
+     configureRpcThreadpool(10, true);
+ 
+-    SetupMinijail("/vendor/etc/seccomp_policy/configstore@1.1.policy");
++    // SetupMinijail("/vendor/etc/seccomp_policy/configstore@1.1.policy");
+ 
+     sp<ISurfaceFlingerConfigs> surfaceFlingerConfigs = new SurfaceFlingerConfigs;
+     status_t status = surfaceFlingerConfigs->registerAsService();
+-- 
+2.7.4
+

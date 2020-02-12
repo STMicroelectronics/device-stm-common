@@ -21,14 +21,14 @@ SSBL_TRUSTED_BIN := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR
 SSBL_OPTEE_BIN := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-optee-fb$(BOARD_DISK_TYPE).stm32
 SSBL_PROG := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-programmer.stm32
 
-.PHONY: $(PRODUCT_OUT)/ssbl.img
+.PHONY: ssbl.img
 
-$(PRODUCT_OUT)/ssbl.img:
+ssbl.img:
 	$(ACP) -fp $(SSBL_TRUSTED_BIN) $(PRODUCT_OUT)/ssbl-trusted-fb$(BOARD_DISK_TYPE).img
 	$(ACP) -fp $(SSBL_OPTEE_BIN) $(PRODUCT_OUT)/ssbl-optee-fb$(BOARD_DISK_TYPE).img
 	$(ACP) -fp $(SSBL_PROG) $(PRODUCT_OUT)/ssbl-programmer.img
 
-droidcore: $(PRODUCT_OUT)/ssbl.img
+droidcore: ssbl.img
 
 endif
 endif

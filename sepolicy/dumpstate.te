@@ -6,3 +6,15 @@ allow dumpstate system_block_device:blk_file getattr;
 allow dumpstate userdata_block_device:blk_file getattr;
 allow dumpstate console_device:chr_file { getattr ioctl read write };
 allow dumpstate proc_modules:file { getattr open read };
+allow dumpstate debugfs_gpio:file read;
+allow dumpstate debugfs_clk:file read;
+allow dumpstate debugfs_regulator:file read;
+allow dumpstate debugfs_pinctrl:file read;
+allow dumpstate debugfs_mmc:dir search;
+allow dumpstate render_device:chr_file { ioctl open read write };
+allow dumpstate vold:binder call;
+allow dumpstate adbd:fd use;
+
+allow dumpstate {
+  sysfs_devices_system_cpu
+}:file r_file_perms;

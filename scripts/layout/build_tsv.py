@@ -28,7 +28,7 @@ usage = ("Convert Android layout config into STM32CubeProgrammer TSV layout file
 
 # List of supported Android partition : if you add a new partition, don't forget to also update tsv_dict
 android_allowed_part = ("PART_ATF", "PART_BL33", "PART_TEEH", "PART_TEED", "PART_TEEX", "PART_SPLASH", "PART_BOOT",
-                        "PART_DTB", "PART_VENDOR", "PART_MODULE", "PART_SYSTEM", "PART_MISC", "PART_LAST_USERDATA")
+                        "PART_DTB", "PART_SUPER", "PART_VENDOR", "PART_MODULE", "PART_SYSTEM", "PART_MISC", "PART_LAST_USERDATA")
 
 # fsbl partitions are going to boot1 and boot2 where size are not configurable
 tsv_part_type_dico = {"sd": {"name": "mmc0", "start_addr": 0x00004400},
@@ -51,6 +51,7 @@ tsv_dict = {"fsbl": {"opt": "P", "type": "Binary\t", "id": 0x4},
             "splash": {"opt": "P", "type": "Binary\t", "id": 0x10},
             "boot": {"opt": "PE", "type": "System\t", "id": 0x21},
             "dt": {"opt": "PE", "type": "System\t", "id": None},
+            "super": {"opt": "PE", "type": "Binary\t", "id": None},
             "vendor": {"opt": "PE", "type": "FileSystem", "id": None},
             "system": {"opt": "PE", "type": "FileSystem", "id": None},
             "misc": {"opt": "PE", "type": "FileSystem", "id": None},

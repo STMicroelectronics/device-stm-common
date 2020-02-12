@@ -5,10 +5,12 @@ ifeq ($(TARGET_PREBUILT_MISC),)
 $(error TARGET_PREBUILT_MISC not defined)
 endif
 
-$(PRODUCT_OUT)/misc.img:
-	$(ACP) -fp $(TARGET_PREBUILT_MISC) $@
+.PHONY: misc.img
 
-droidcore: $(PRODUCT_OUT)/misc.img
+misc.img:
+	$(ACP) -fp $(TARGET_PREBUILT_MISC) $(PRODUCT_OUT)/$@
+
+droidcore: misc.img
 
 endif
 endif

@@ -1,3 +1,6 @@
 # STM load module capability
 allow vold kernel:system module_request;
 dontaudit vold self:capability dac_read_search;
+
+allow vold dumpstate:fd use;
+allow vold dumpstate:fifo_file { getattr open read write };

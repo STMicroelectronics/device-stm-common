@@ -1,18 +1,19 @@
-From fed15fa6dee2abf47f1c960d4f5ac3016feee040 Mon Sep 17 00:00:00 2001
+From 806f572d4ac3764d2a2eb5aeeef27d0980d2978c Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
-Date: Thu, 18 Apr 2019 11:02:59 +0200
+Date: Thu, 16 Jan 2020 08:44:20 +0100
 Subject: [PATCH 3/4] drm_hwcomposer: Remove minigbm (missing dependency) -
  temporary
 
+Change-Id: I83b0e0fd23a4c45ce75e7b9faef770a48e9b6eba
 ---
  Android.bp | 11 -----------
  1 file changed, 11 deletions(-)
 
 diff --git a/Android.bp b/Android.bp
-index 2af4548..b7b75dd 100644
+index 85be0b5..c350550 100644
 --- a/Android.bp
 +++ b/Android.bp
-@@ -91,17 +91,6 @@ cc_library_shared {
+@@ -99,17 +99,6 @@ cc_library_shared {
      cppflags: ["-DUSE_DRM_GENERIC_IMPORTER"],
  }
  
@@ -21,15 +22,15 @@ index 2af4548..b7b75dd 100644
 -    defaults: ["hwcomposer.drm_defaults"],
 -    whole_static_libs: ["drm_hwcomposer"],
 -    srcs: [
--        "platformdrmgeneric.cpp",
--        "platformminigbm.cpp",
+-        "platform/platformdrmgeneric.cpp",
+-        "platform/platformminigbm.cpp",
 -    ],
 -    include_dirs: ["external/minigbm/cros_gralloc"],
 -}
 -
- // Used by hwcomposer.drm_hikey and hwcomposer.drm_hikey960
+ // Used by hwcomposer.drm_imagination
  filegroup {
-     name: "drm_hwcomposer_platformhisi",
+     name: "drm_hwcomposer_platformimagination",
 -- 
 2.7.4
 

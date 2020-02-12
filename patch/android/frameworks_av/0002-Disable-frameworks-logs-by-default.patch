@@ -1,0 +1,153 @@
+From 0599c0624736ac5d1cf9ba9f5c9cdaa265059254 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Thu, 16 Jan 2020 17:03:51 +0100
+Subject: [PATCH] Disable frameworks logs by default
+
+Change-Id: I2aaf0de3f4f82b1b7a3674237f9fb831c395a1ba
+---
+ cmds/stagefright/audioloop.cpp                            | 2 +-
+ drm/mediacas/plugins/mock/MockCasPlugin.cpp               | 2 +-
+ media/codec2/faultinjection/C2ComponentWrapper.cpp        | 2 +-
+ media/codec2/faultinjection/SimpleMethodState.cpp         | 2 +-
+ media/codec2/vndk/C2Store.cpp                             | 2 +-
+ media/libeffects/testlibs/EffectEqualizer.cpp             | 3 +--
+ media/libmedia/MediaProfiles.cpp                          | 2 +-
+ media/libmedia/MediaUtils.cpp                             | 2 +-
+ media/libstagefright/xmlparser/MediaCodecsXmlParser.cpp   | 2 +-
+ services/camera/libcameraservice/tests/NV12Compressor.cpp | 2 +-
+ 10 files changed, 10 insertions(+), 11 deletions(-)
+
+diff --git a/cmds/stagefright/audioloop.cpp b/cmds/stagefright/audioloop.cpp
+index d4f2e8d..1ada649 100644
+--- a/cmds/stagefright/audioloop.cpp
++++ b/cmds/stagefright/audioloop.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "audioloop"
+ #include <utils/Log.h>
+ 
+diff --git a/drm/mediacas/plugins/mock/MockCasPlugin.cpp b/drm/mediacas/plugins/mock/MockCasPlugin.cpp
+index 2964791..cd49dc0 100644
+--- a/drm/mediacas/plugins/mock/MockCasPlugin.cpp
++++ b/drm/mediacas/plugins/mock/MockCasPlugin.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "MockCasPlugin"
+ 
+ #include <media/stagefright/foundation/hexdump.h>
+diff --git a/media/codec2/faultinjection/C2ComponentWrapper.cpp b/media/codec2/faultinjection/C2ComponentWrapper.cpp
+index c45f8bf..6310366 100644
+--- a/media/codec2/faultinjection/C2ComponentWrapper.cpp
++++ b/media/codec2/faultinjection/C2ComponentWrapper.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "C2ComponentWrapper"
+ 
+ #include <chrono>
+diff --git a/media/codec2/faultinjection/SimpleMethodState.cpp b/media/codec2/faultinjection/SimpleMethodState.cpp
+index 179d64e..96bd740 100644
+--- a/media/codec2/faultinjection/SimpleMethodState.cpp
++++ b/media/codec2/faultinjection/SimpleMethodState.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "SimpleMethodState"
+ #include <log/log.h>
+ 
+diff --git a/media/codec2/vndk/C2Store.cpp b/media/codec2/vndk/C2Store.cpp
+index f8afa7c..a99cce5 100644
+--- a/media/codec2/vndk/C2Store.cpp
++++ b/media/codec2/vndk/C2Store.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "C2Store"
+-#define LOG_NDEBUG 0
++//#define LOG_NDEBUG 0
+ #include <utils/Log.h>
+ 
+ #include <C2AllocatorGralloc.h>
+diff --git a/media/libeffects/testlibs/EffectEqualizer.cpp b/media/libeffects/testlibs/EffectEqualizer.cpp
+index db4d009..02809dc 100644
+--- a/media/libeffects/testlibs/EffectEqualizer.cpp
++++ b/media/libeffects/testlibs/EffectEqualizer.cpp
+@@ -16,8 +16,7 @@
+ 
+ #define LOG_TAG "Equalizer"
+ #define ARRAY_SIZE(array) (sizeof array / sizeof array[0])
+-//
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include <assert.h>
+ #include <stdlib.h>
+diff --git a/media/libmedia/MediaProfiles.cpp b/media/libmedia/MediaProfiles.cpp
+index 98c5497..1aa42c9 100644
+--- a/media/libmedia/MediaProfiles.cpp
++++ b/media/libmedia/MediaProfiles.cpp
+@@ -16,7 +16,7 @@
+ */
+ 
+ 
+-//#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "MediaProfiles"
+ 
+ #include <stdlib.h>
+diff --git a/media/libmedia/MediaUtils.cpp b/media/libmedia/MediaUtils.cpp
+index 31972fa..7951a07 100644
+--- a/media/libmedia/MediaUtils.cpp
++++ b/media/libmedia/MediaUtils.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "MediaUtils"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #include <utils/Log.h>
+ 
+ #include <cutils/properties.h>
+diff --git a/media/libstagefright/xmlparser/MediaCodecsXmlParser.cpp b/media/libstagefright/xmlparser/MediaCodecsXmlParser.cpp
+index 9783e9b..d2502eb 100644
+--- a/media/libstagefright/xmlparser/MediaCodecsXmlParser.cpp
++++ b/media/libstagefright/xmlparser/MediaCodecsXmlParser.cpp
+@@ -1269,7 +1269,7 @@ status_t MediaCodecsXmlParser::Impl::Parser::addLimit(const char **attrs) {
+ void MediaCodecsXmlParser::Impl::State::addDetail(
+         const std::string &key, const std::string &value) {
+     CHECK(inType());
+-    ALOGI("limit: %s = %s", key.c_str(), value.c_str());
++    ALOGD("limit: %s = %s", key.c_str(), value.c_str());
+     const StringSet &variants = mVariantsStack.back();
+     if (variants.empty()) {
+         type()[key] = value;
+diff --git a/services/camera/libcameraservice/tests/NV12Compressor.cpp b/services/camera/libcameraservice/tests/NV12Compressor.cpp
+index 0a41a1f..170266b 100644
+--- a/services/camera/libcameraservice/tests/NV12Compressor.cpp
++++ b/services/camera/libcameraservice/tests/NV12Compressor.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "Test_NV12Compressor"
+ 
+ #include "NV12Compressor.h"
+-- 
+2.7.4
+

@@ -1,0 +1,35 @@
+From 279288ebab8d1f142a6eb0d3112eaa9917fd6dcb Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Wed, 6 Nov 2019 09:03:57 +0100
+Subject: [PATCH 04/12] Add image directory creation to avoid error to access
+ recents directory
+
+Change-Id: I3a02c8bf6f37a5d2ff40441dd0d4a8eb0708d5ce
+Trace: E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+---
+ services/core/java/com/android/server/wm/TaskPersister.java | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/services/core/java/com/android/server/wm/TaskPersister.java b/services/core/java/com/android/server/wm/TaskPersister.java
+index 06bdcc0..584878b 100644
+--- a/services/core/java/com/android/server/wm/TaskPersister.java
++++ b/services/core/java/com/android/server/wm/TaskPersister.java
+@@ -497,7 +497,14 @@ public class TaskPersister implements PersisterQueue.Listener {
+     }
+ 
+     static File getUserImagesDir(int userId) {
+-        return new File(Environment.getDataSystemCeDirectory(userId), IMAGES_DIRNAME);
++        File imageDir = new File(Environment.getDataSystemCeDirectory(userId), IMAGES_DIRNAME);
++
++        if (! imageDir.exists()) {
++            // create recent_images directory to avoid error logs
++            imageDir.mkdirs();
++        }
++
++        return imageDir;
+     }
+ 
+     private static boolean createParentDirectory(String filePath) {
+-- 
+2.7.4
+

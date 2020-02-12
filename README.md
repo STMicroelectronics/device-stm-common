@@ -3,7 +3,7 @@
 This module is used to configure the STM32MP1 distribution for Android.
 It is part of the STMicroelectronics delivery for Android (see the [delivery][] for more information).
 
-[delivery]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.0.0
+[delivery]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.1.0
 
 ## Description ##
 
@@ -16,7 +16,7 @@ Please see the release notes for more details.
 * The [release notes][] provide information on the release.
 * The [distribution package][] provides detailed information on how to use this delivery.
 
-[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.0.0
+[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.1.0
 [distribution package]: https://wiki.st.com/stm32mpu/wiki/STM32MP1_Distribution_Package_for_Android
 
 ## Dependencies ##
@@ -43,11 +43,11 @@ This module contains several files and directories used to compile and configure
 **Scripts**
 * `vendorsetup.sh`: script executed automatically when execute `source ./build/envsetup.sh`
 * `./scripts/cache/cachesetup.sh`: script used to setup git cache
-* `./scripts/ccache/ccachesetup.sh`: script used to setup compilation cache
 * `./scripts/eula/load_eula.sh`: script used to load End User License Agreement dependent library
 * `./scripts/layout/layoutsetup.sh`: script to set partition configuration based on android_layout.config
 * `./scripts/layout/format-device.sh`: script used to format SD card based on android_layout.config
 * `./scripts/layout/provision-device.sh`: script used to provision the device based on android_layout.config
+* `./scripts/layout/clear-device.sh`: script used to clear eMMC partitions (with DFU connection)
 * `./scripts/layout/flash-device.sh`: script to provision the device (with both DFU and FASTBOOT connections)
 * `./scripts/layout/build_tsv.py`: Python script to generate STM32CubeProgrammer layout files based on android_layout.config
 * `./scripts/prebuilt/update_prebuilt.sh`: script to update prebuilt images for kernel, bootloader and tee

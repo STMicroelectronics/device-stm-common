@@ -1,22 +1,22 @@
-From 8e438c5577c7bf111e8d4bbc9beb72ecf03b0234 Mon Sep 17 00:00:00 2001
+From ed2cbb82820dc05cf4969486f312bdbc79e212a2 Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
-Date: Fri, 19 Apr 2019 11:46:44 +0200
+Date: Thu, 16 Jan 2020 08:42:19 +0100
 Subject: [PATCH 1/4] drm_hwcomposer: Remove error log linked to layer import
  in case of tested composition
 
   The ImportBuffer function can return an error in test mode if a layer can't be composed (depending on usage).
   The log is then not required to avoid misunderstanding.
 
-Change-Id: I66309b65022cc83244c71eedce017ba6c626d1c2
+Change-Id: I0b805c1aa36378cbd2e34d556d09d292e2a2390a
 ---
  drmhwctwo.cpp | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drmhwctwo.cpp b/drmhwctwo.cpp
-index 3123b29..16550ad 100644
+index ffc5fcd..95370d5 100644
 --- a/drmhwctwo.cpp
 +++ b/drmhwctwo.cpp
-@@ -546,7 +546,8 @@ HWC2::Error DrmHwcTwo::HwcDisplay::CreateComposition(bool test) {
+@@ -604,7 +604,8 @@ HWC2::Error DrmHwcTwo::HwcDisplay::CreateComposition(bool test) {
      l.second->PopulateDrmLayer(&layer);
      int ret = layer.ImportBuffer(importer_.get());
      if (ret) {

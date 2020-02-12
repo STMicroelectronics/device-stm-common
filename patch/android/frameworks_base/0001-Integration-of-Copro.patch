@@ -1,0 +1,608 @@
+From 3bf9d48588aee48b186d180768c5e1fa17e41a67 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Thu, 23 Jan 2020 16:19:56 +0100
+Subject: [PATCH] Integration of Copro
+
+Change-Id: Ibb15eb62f5a206b287627c84b8e74902d8a27b73
+---
+ Android.bp                                    |   2 +
+ api/current.txt                               |  91 +++++++++++++++++++
+ core/java/android/copro/CoproManager.java     | 122 ++++++++++++++++++++++++++
+ core/java/android/copro/CoproSerialPort.java  | 104 ++++++++++++++++++++++
+ core/java/android/copro/FirmwareInfo.aidl     |  19 ++++
+ core/java/android/copro/FirmwareInfo.java     | 101 +++++++++++++++++++++
+ core/java/android/copro/ICoproSerialPort.aidl |  41 +++++++++
+ core/java/android/copro/ICoproService.aidl    |  44 ++++++++++
+ 8 files changed, 524 insertions(+)
+ create mode 100644 core/java/android/copro/CoproManager.java
+ create mode 100644 core/java/android/copro/CoproSerialPort.java
+ create mode 100644 core/java/android/copro/FirmwareInfo.aidl
+ create mode 100644 core/java/android/copro/FirmwareInfo.java
+ create mode 100644 core/java/android/copro/ICoproSerialPort.aidl
+ create mode 100644 core/java/android/copro/ICoproService.aidl
+
+diff --git a/Android.bp b/Android.bp
+index e3fa19c..0e91415 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -208,6 +208,8 @@ java_defaults {
+         "core/java/android/hardware/radio/ITuner.aidl",
+         "core/java/android/hardware/radio/ITunerCallback.aidl",
+         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
++        "core/java/android/copro/ICoproService.aidl",
++        "core/java/android/copro/ICoproSerialPort.aidl",
+         "core/java/android/hardware/usb/IUsbManager.aidl",
+         "core/java/android/hardware/usb/IUsbSerialReader.aidl",
+         "core/java/android/net/ICaptivePortal.aidl",
+diff --git a/api/current.txt b/api/current.txt
+index cd78602..ea1ef902 100644
+--- a/api/current.txt
++++ b/api/current.txt
+@@ -12427,6 +12427,97 @@ package android.content.res {
+ 
+ }
+ 
++package android.copro {
++
++  public class CoproManager {
++    method public android.copro.FirmwareInfo getFirmwareByName(String);
++    method public android.copro.FirmwareInfo[] getFirmwareList();
++    method public static android.copro.CoproManager getInstance();
++    method public android.copro.CoproSerialPort getSerialPort();
++    method public boolean isFirmwareRunning(int);
++    method public void startFirmware(int);
++    method public void stopFirmware();
++  }
++
++  public class CoproSerialPort {
++    ctor public CoproSerialPort(android.copro.ICoproSerialPort);
++    method public void close();
++    method public void open(int) throws android.os.RemoteException;
++    method public String read();
++    method public byte[] readB(int);
++    method public void write(String);
++    method public int writeB(byte[]);
++  }
++
++  public class FirmwareInfo implements android.os.Parcelable {
++    method public int describeContents();
++    method public int getId();
++    method public String getName();
++    method public boolean getState();
++    method public void writeToParcel(android.os.Parcel, int);
++    field public static final android.os.Parcelable.Creator<android.copro.FirmwareInfo> CREATOR;
++  }
++
++  public interface ICoproSerialPort extends android.os.IInterface {
++    method public void close() throws android.os.RemoteException;
++    method public boolean open(int) throws android.os.RemoteException;
++    method public String read() throws android.os.RemoteException;
++    method public byte[] readB(int) throws android.os.RemoteException;
++    method public void write(String) throws android.os.RemoteException;
++    method public int writeB(byte[]) throws android.os.RemoteException;
++  }
++
++  public static class ICoproSerialPort.Default implements android.copro.ICoproSerialPort {
++    ctor public ICoproSerialPort.Default();
++    method public android.os.IBinder asBinder();
++    method public void close() throws android.os.RemoteException;
++    method public boolean open(int) throws android.os.RemoteException;
++    method public String read() throws android.os.RemoteException;
++    method public byte[] readB(int) throws android.os.RemoteException;
++    method public void write(String) throws android.os.RemoteException;
++    method public int writeB(byte[]) throws android.os.RemoteException;
++  }
++
++  public abstract static class ICoproSerialPort.Stub extends android.os.Binder implements android.copro.ICoproSerialPort {
++    ctor public ICoproSerialPort.Stub();
++    method public android.os.IBinder asBinder();
++    method public static android.copro.ICoproSerialPort asInterface(android.os.IBinder);
++    method public static android.copro.ICoproSerialPort getDefaultImpl();
++    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
++    method public static boolean setDefaultImpl(android.copro.ICoproSerialPort);
++  }
++
++  public interface ICoproService extends android.os.IInterface {
++    method public android.copro.FirmwareInfo getFirmwareByName(String) throws android.os.RemoteException;
++    method public android.copro.FirmwareInfo[] getFirmwareList() throws android.os.RemoteException;
++    method public android.copro.ICoproSerialPort getSerialPort() throws android.os.RemoteException;
++    method public boolean isFirmwareRunning(int) throws android.os.RemoteException;
++    method public void startFirmware(int) throws android.os.RemoteException;
++    method public void stopFirmware() throws android.os.RemoteException;
++  }
++
++  public static class ICoproService.Default implements android.copro.ICoproService {
++    ctor public ICoproService.Default();
++    method public android.os.IBinder asBinder();
++    method public android.copro.FirmwareInfo getFirmwareByName(String) throws android.os.RemoteException;
++    method public android.copro.FirmwareInfo[] getFirmwareList() throws android.os.RemoteException;
++    method public android.copro.ICoproSerialPort getSerialPort() throws android.os.RemoteException;
++    method public boolean isFirmwareRunning(int) throws android.os.RemoteException;
++    method public void startFirmware(int) throws android.os.RemoteException;
++    method public void stopFirmware() throws android.os.RemoteException;
++  }
++
++  public abstract static class ICoproService.Stub extends android.os.Binder implements android.copro.ICoproService {
++    ctor public ICoproService.Stub();
++    method public android.os.IBinder asBinder();
++    method public static android.copro.ICoproService asInterface(android.os.IBinder);
++    method public static android.copro.ICoproService getDefaultImpl();
++    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
++    method public static boolean setDefaultImpl(android.copro.ICoproService);
++  }
++
++}
++
+ package android.database {
+ 
+   public abstract class AbstractCursor implements android.database.CrossProcessCursor {
+diff --git a/core/java/android/copro/CoproManager.java b/core/java/android/copro/CoproManager.java
+new file mode 100644
+index 0000000..5a5cb51
+--- /dev/null
++++ b/core/java/android/copro/CoproManager.java
+@@ -0,0 +1,122 @@
++/*
++ * Copyright (C) 2008 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++import android.copro.ICoproService;
++import android.copro.ICoproSerialPort;
++import android.copro.CoproSerialPort;
++
++import android.util.AndroidException;
++import android.util.Log;
++import android.util.Slog;
++import android.os.RemoteException;
++import android.os.ServiceManager;
++
++/**
++ * The Manager class;
++ * The public methods of this class will be part of the new system API
++ *
++ * Have a look at how decorators are used (eg. hide) to see how mwthods are
++ * exported or not in the SDK;
++ */
++public class CoproManager {
++    private final ICoproService mService;
++    private static CoproManager sInstance = null;
++
++    public static CoproManager getInstance() {
++        if(sInstance == null)
++        {
++            sInstance = new CoproManager();
++        }
++        return sInstance;
++    }
++    /**
++     * Initialize the remote service and execution context
++     * ContextImpl will build this manager object and provide the
++     * remote service stub as parameter
++     *
++     */
++    private CoproManager() {
++        mService = ICoproService.Stub.asInterface(ServiceManager.getService(ICoproService.class.getName()));             
++        if (mService == null) {
++            throw new IllegalStateException("Failed to find ICoproService by name [" + ICoproService.class.getName() + "]");
++        }
++    }
++
++    /* Get the firmware list*/
++    public FirmwareInfo[] getFirmwareList() {
++        FirmwareInfo[] res = {};
++        try{
++            res = mService.getFirmwareList();
++        } catch (RemoteException ex){
++            Slog.e("CoproManager", "Unable to contact the remote Copro Service");
++        }
++        return res;
++    }
++
++    /* Get the firmware info by name */
++    public FirmwareInfo getFirmwareByName(String name) {
++        FirmwareInfo res = null;
++        try{
++            res = mService.getFirmwareByName(name);
++        } catch (RemoteException ex){
++            Slog.e("CoproManager", "Unable to contact the remote Copro Service");
++        }
++        return res;
++    }
++
++    /* Return if the firmware is running */
++    public boolean isFirmwareRunning(int id) {
++        boolean res = false;
++        try{
++            res = mService.isFirmwareRunning(id);
++        } catch (RemoteException ex){
++            Slog.e("CoproService", "Unable to contact the remote Copro Service");
++        }
++        return res;
++    }
++
++    /* Start the firmware with the specific id */
++    public void startFirmware(int id) {
++        try{
++            mService.startFirmware(id);
++        } catch (RemoteException ex){
++            Slog.e("CoproManager", "Unable to contact the remote Copro Service");
++        }
++    }
++
++    /* Stop the firmware */
++    public void stopFirmware() {
++        try{
++            mService.stopFirmware();
++        } catch (RemoteException ex){
++            Slog.e("CoproManager", "Unable to contact the remote Copro Service");
++        }
++    }
++
++    /* Open the serial port */
++    public CoproSerialPort getSerialPort() {
++        CoproSerialPort res = null;
++        try{
++            ICoproSerialPort serialPort = mService.getSerialPort();
++            res = new CoproSerialPort(serialPort);
++        } catch (RemoteException ex){
++            Slog.e("CoproManager", "Unable to contact the remote Copro Service");
++        }
++        return res;
++    }
++}
+diff --git a/core/java/android/copro/CoproSerialPort.java b/core/java/android/copro/CoproSerialPort.java
+new file mode 100644
+index 0000000..db8a889
+--- /dev/null
++++ b/core/java/android/copro/CoproSerialPort.java
+@@ -0,0 +1,104 @@
++/*
++ * Copyright (C) 2008 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++import android.util.AndroidException;
++import android.util.Log;
++import android.util.Slog;
++import android.content.Context;
++import android.os.RemoteException;
++
++/**
++ * The Manager class;
++ * The public methods of this class will be part of the new system API
++ *
++ * Have a look at how decorators are used (eg. hide) to see how mwthods are
++ * exported or not in the SDK;
++ */
++public class CoproSerialPort {
++    private final ICoproSerialPort mService;
++
++    /**
++     * Initialize the remote service and execution context
++     * ContextImpl will build this manager object and provide the
++     * remote service stub as parameter
++     *
++     * @param service
++     */
++    public CoproSerialPort(ICoproSerialPort service) {
++        mService = service;
++    }
++
++    /* Open the tty port with the specific mode */
++    public void open(int mode) throws RemoteException {
++        if (! mService.open(mode)) {
++            Slog.e("CoproSerialPort", "Failed to open Copro serial port");
++            throw new RemoteException("Failed to open Copro serial port");
++        }
++    }
++
++    /* Close the tty port */
++    public void close() {
++        try{
++            mService.close();
++        } catch (RemoteException ex){
++            Slog.e("CoproSerialPort", "Unable to contact the remote Copro Service (close)");
++        }
++    }
++
++    /* Read data from tty */
++    public String read() {
++        String res = "";
++        try{
++            res = mService.read();
++        } catch (RemoteException ex){
++            Slog.e("CoproSerialPort", "Unable to contact the remote Copro Service (read)");
++        }
++        return res;
++    }
++
++    /* Read data from tty */
++    public byte[] readB(int size) {
++        byte[] res = "-1".getBytes();
++        try{
++            res = mService.readB(size);
++        } catch (RemoteException ex){
++            Slog.e("CoproSerialPort", "Unable to contact the remote Copro Service (readB)");
++        }
++        return res;
++    }
++
++    /* Write string to tty */
++    public void write(String command) {
++        try{
++            mService.write(command);
++        } catch (RemoteException ex){
++            Slog.e("CoproSerialPort", "Unable to contact the remote Copro Service (write)");
++        }
++    }
++
++    /* Write char sequence to tty */
++    public int writeB(byte[] command) {
++        int res = -1;
++        try{
++            res = mService.writeB(command);
++        } catch (RemoteException ex){
++            Slog.e("CoproSerialPort", "Unable to contact the remote Copro Service (writeB)");
++        }
++        return res;
++    }
++}
+diff --git a/core/java/android/copro/FirmwareInfo.aidl b/core/java/android/copro/FirmwareInfo.aidl
+new file mode 100644
+index 0000000..73d4bab
+--- /dev/null
++++ b/core/java/android/copro/FirmwareInfo.aidl
+@@ -0,0 +1,19 @@
++/*
++ * Copyright (C) 2014 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++parcelable FirmwareInfo;
+diff --git a/core/java/android/copro/FirmwareInfo.java b/core/java/android/copro/FirmwareInfo.java
+new file mode 100644
+index 0000000..b726d14
+--- /dev/null
++++ b/core/java/android/copro/FirmwareInfo.java
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (C) 2014 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++import android.os.Parcel;
++import android.os.Parcelable;
++
++public class FirmwareInfo implements Parcelable {
++    private final int id;
++    private final String name;
++    private final boolean state;
++
++    /** @hide */
++    public FirmwareInfo() {
++        id = -1;
++        name = "";
++        state = false;
++    }
++    /** @hide */
++    public FirmwareInfo(int _id, String _name, boolean _state) {
++        id = _id;
++        name = _name;
++        state = _state;
++    }
++
++    @Override
++    public boolean equals(Object obj) {
++        if(obj instanceof FirmwareInfo) {
++            FirmwareInfo fwinfo = (FirmwareInfo)obj;
++            return id == fwinfo.id && name.equals(fwinfo.name) && state == fwinfo.state;
++        }
++        return false;
++    }
++
++    @Override
++    public int hashCode() {
++        return id ^ name.hashCode() ^ (state ? 1: 0);
++    }
++
++    @Override
++    public String toString() {
++        return "FirmwareInfo{id=" + id + ", name=" + name + ", state=" + state + "}";
++    }
++
++    @Override
++    public int describeContents() {
++        return 0;
++    }
++
++    @Override
++    public void writeToParcel(Parcel out, int flags) {
++        out.writeInt(id);
++        out.writeString(name);
++        out.writeBoolean(state);
++    }
++
++    public static final Parcelable.Creator<FirmwareInfo> CREATOR
++            = new Parcelable.Creator<FirmwareInfo>() {
++        @Override
++        public FirmwareInfo createFromParcel(Parcel in) {
++            return new FirmwareInfo(in);
++        }
++
++        @Override
++        public FirmwareInfo[] newArray(int size) {
++            return new FirmwareInfo[size];
++        }
++    };
++
++    private FirmwareInfo(Parcel in) {
++        id = in.readInt();
++        name = in.readString();
++        state = in.readBoolean();
++    }
++
++    public int getId() {
++        return id;
++    }
++
++    public String getName() {
++        return name;
++    }
++
++    public boolean getState() {
++        return state;
++    }
++}
+diff --git a/core/java/android/copro/ICoproSerialPort.aidl b/core/java/android/copro/ICoproSerialPort.aidl
+new file mode 100644
+index 0000000..da88628
+--- /dev/null
++++ b/core/java/android/copro/ICoproSerialPort.aidl
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (C) 2014 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++/**
++ * Binder interface that clients running in application context
++ * can use to interface with remote service
++ */
++interface ICoproSerialPort {
++    /* Open the tty port with the specific mode */
++    boolean open(int mode);
++
++    /* Close the tty port */
++    void close();
++
++    /* Read data from tty */
++    String read();
++
++    /* Read data from tty */
++    byte[] readB(int size);
++
++    /* Write data to tty */
++    void write(String command);
++
++    /* Write data to tty */
++    int writeB(in byte[] command);
++}
+diff --git a/core/java/android/copro/ICoproService.aidl b/core/java/android/copro/ICoproService.aidl
+new file mode 100644
+index 0000000..7da7b06
+--- /dev/null
++++ b/core/java/android/copro/ICoproService.aidl
+@@ -0,0 +1,44 @@
++/*
++ * Copyright (C) 2014 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package android.copro;
++
++import android.copro.FirmwareInfo;
++import android.copro.ICoproSerialPort;
++
++/**
++ * Binder interface that clients running in application context
++ * can use to interface with remote service
++ */
++interface ICoproService {
++    /* Get the firmware list*/
++    FirmwareInfo[] getFirmwareList();
++
++    /* Get the firmware info by name */
++    FirmwareInfo getFirmwareByName(String name);
++
++    /* Return if the firmware is running */
++    boolean isFirmwareRunning(int id);
++
++    /* Start the firmware with the specific id */
++    void startFirmware(int id);
++
++    /* Stop the firmware */
++    void stopFirmware();
++
++    /* Open the serial port */
++    ICoproSerialPort getSerialPort();
++}
+-- 
+2.7.4
+

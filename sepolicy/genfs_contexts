@@ -1,4 +1,3 @@
 genfscon proc /cpu/alignment u:object_r:proc_cpu_alignment:s0
-genfscon proc /slabinfo      u:object_r:proc_slabinfo:s0
 
 genfscon debugfs /gc         u:object_r:debugfs_gc:s0

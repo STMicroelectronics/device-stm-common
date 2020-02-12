@@ -12,9 +12,6 @@ PE		0x21	boot_a		System		mmc1	0x00380000	boot.img
 PE		0x22	boot_b		System		mmc1	0x01380000	boot.img
 PE		0x23	dt_a		System		mmc1	0x02380000	dt.img
 PE		0x24	dt_b		System		mmc1	0x02400000	dt.img
-PE		0x25	vendor_a	FileSystem	mmc1	0x02480000	vendor.img
-PE		0x26	vendor_b	FileSystem	mmc1	0x06480000	vendor.img
-PE		0x27	system_a	FileSystem	mmc1	0x0a480000	system.img
-PE		0x28	system_b	FileSystem	mmc1	0x42480000	system.img
-PE		0x29	misc		FileSystem	mmc1	0x7a480000	misc.img
-PE		0x30	userdata	FileSystem	mmc1	0x7a500000	userdata.img
+PE		0x25	super		Binary		mmc1	0x02480000	super.img
+PE		0x26	misc		FileSystem	mmc1	0x82480000	misc.img
+PE		0x30	userdata	FileSystem	mmc1	0x82500000	userdata.img

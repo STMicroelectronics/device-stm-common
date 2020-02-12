@@ -323,15 +323,15 @@ setup_repo_cache()
             if [[ "$repo_config_version" == "" ]]; then
               empty_line
               \repo init -u ${repo_config_remote} --mirror >/dev/null 2>&1
-              \repo sync -f -q
+              \repo sync -q
             else
               empty_line
               \repo init -u ${repo_config_remote} -b ${repo_config_version} --mirror >/dev/null 2>&1
-              \repo sync -f -q
+              \repo sync -q
             fi
           else
             empty_line
-            \repo sync -f -q
+            \repo sync -q
           fi
           \popd >/dev/null 2>&1
         fi

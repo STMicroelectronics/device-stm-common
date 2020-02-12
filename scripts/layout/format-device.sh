@@ -291,7 +291,7 @@ get_disk_info()
   local l_device_size_sector
   local l_sector_size
 
-  \sgdisk -p ${target_device} > /tmp/disk_info
+  \sgdisk --print ${target_device} > /tmp/disk_info
   if [ $? -ne 0 ]; then
     error "Not possible to read device ${target_device} info"
     \popd >/dev/null 2>&1
@@ -451,8 +451,8 @@ total_free_space=$(( memory_req_size_bytes - (2*ADDITIONNAL_SIZE_BYTES) ))
 
 # start formating the device
 echo "[0] Reset disk partitions of device ${target_device}"
-\sgdisk -o ${target_device} &> /dev/null
-\sgdisk -eog ${target_device} &> /dev/null
+\sgdisk --clear ${target_device} &> /dev/null
+\sgdisk --move-second-header --mbrtogpt ${target_device} &> /dev/null
 
 while IFS='' read -r line || [[ -n $line ]]; do
 
@@ -498,14 +498,14 @@ while IFS='' read -r line || [[ -n $line ]]; do
           if [ ${part_nb} -eq 2 ]; then
             if [ ${part_value} -eq 1 ]; then
               echo "[${part_value}] Create one partition ${part_label}${part_suffix_1} of size ${part_size}"
-              \sgdisk -a 1 -n ${part_value}::+${part_size} -c ${part_value}:${part_label}${part_suffix_1} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_1}"
               fi
               part_value=$((part_value+1))
               echo "[${part_value}] Create one partition ${part_label}${part_suffix_2} of size ${part_size}"
-              \sgdisk -a 1 -n ${part_value}:+:+${part_size} -c ${part_value}:${part_label}${part_suffix_2} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_2}"
@@ -514,11 +514,11 @@ while IFS='' read -r line || [[ -n $line ]]; do
               # Set BOOT Partition as "legacy BIOS bootable"
               if [ ${part_name} == "BOOT" ]; then
                 echo "[${part_value}] Create one bootable partition ${part_label}${part_suffix_1} of size ${part_size}"
-                sgdisk_option="-A ${part_value}:set:2"
+                sgdisk_option="--attributes=${part_value}:set:2"
               else
                 echo "[${part_value}] Create one partition ${part_label}${part_suffix_1} of size ${part_size}"
               fi
-              \sgdisk -a 1 -n ${part_value}:+:+${part_size} -c ${part_value}:${part_label}${part_suffix_1} ${sgdisk_option} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_1}"
@@ -526,11 +526,11 @@ while IFS='' read -r line || [[ -n $line ]]; do
               part_value=$((part_value+1))
               if [ ${part_name} == "BOOT" ]; then
                 echo "[${part_value}] Create one bootable partition ${part_label}${part_suffix_2} of size ${part_size}"
-                sgdisk_option="-A ${part_value}:set:2"
+                sgdisk_option="--attributes=${part_value}:set:2"
               else
                 echo "[${part_value}] Create one partition ${part_label}${part_suffix_2} of size ${part_size}"
               fi
-              \sgdisk -a 1 -n ${part_value}:+:+${part_size} -c ${part_value}:${part_label}${part_suffix_2} ${sgdisk_option} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_2}"
@@ -539,13 +539,13 @@ while IFS='' read -r line || [[ -n $line ]]; do
           else
             echo "[${part_value}] Create one partition ${part_label} of size ${part_size}"
             if [ ${part_value} -eq 1 ]; then
-              \sgdisk -a 1 -n ${part_value}::+${part_size} -c ${part_value}:${part_label} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}"
               fi
             else
-              \sgdisk -a 1 -n ${part_value}:+:+${part_size} -c ${part_value}:${part_label} -t ${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}"
@@ -582,7 +582,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
             check_part_size ${last_part_size} ${last_part_nb}
 
             echo "[${part_value}] Create one partition ${last_part_label} on remaining area"
-            \sgdisk -a 1 -n ${part_value}:+: -c ${part_value}:${last_part_label} -t ${part_value}:8300 ${target_device} &> /dev/null
+            \sgdisk --set-alignment=1 --new=${part_value}:+: --change-name=${part_value}:${last_part_label} --typecode=${part_value}:8300 ${target_device} &> /dev/null
             if [ $? -ne 0 ]; then
               part_error=1
               part_error_list+=" ${last_part_label}"

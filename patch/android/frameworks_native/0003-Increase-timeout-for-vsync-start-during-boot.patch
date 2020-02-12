@@ -1,0 +1,26 @@
+From a98ce4197a1e1897185bdf919100aa3f85ba409d Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 9 Dec 2019 11:36:19 +0100
+Subject: [PATCH 3/3] Increase timeout for vsync start (during boot)
+
+Change-Id: I14da7ff09a265c3fae2a6bd944db01b99be2676d
+---
+ services/surfaceflinger/Scheduler/EventThread.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/services/surfaceflinger/Scheduler/EventThread.cpp b/services/surfaceflinger/Scheduler/EventThread.cpp
+index 9635d7e..d459bd9 100644
+--- a/services/surfaceflinger/Scheduler/EventThread.cpp
++++ b/services/surfaceflinger/Scheduler/EventThread.cpp
+@@ -381,7 +381,7 @@ void EventThread::threadMain(std::unique_lock<std::mutex>& lock) {
+         } else {
+             // Generate a fake VSYNC after a long timeout in case the driver stalls. When the
+             // display is off, keep feeding clients at 50 Hz.
+-            const auto timeout = mState == State::SyntheticVSync ? 20ms : 1000ms;
++            const auto timeout = mState == State::SyntheticVSync ? 20ms : 10000ms;
+             if (mCondition.wait_for(lock, timeout) == std::cv_status::timeout) {
+                 ALOGW_IF(mState == State::VSync, "Faking VSYNC due to driver stall");
+ 
+-- 
+2.7.4
+

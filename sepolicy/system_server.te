@@ -1,4 +1,7 @@
 #============= system_server ==============
+
+dontaudit system_server vendor_file:file { read open getattr execute map };
+
 # Needed for app
 allow system_server {
     platform_app
@@ -18,10 +21,9 @@ allow system_server {
 }:chr_file { rw_file_perms };
 
 allow system_server thermal_service:service_manager { find };
+allow system_server proc_cmdline:file { getattr open read };
 
 get_prop(system_server, graphics_prop)
-get_prop(system_server, primary_physical_prop)
 
 #For running CTS:
 allow system_server shell_data_file:file map;
-

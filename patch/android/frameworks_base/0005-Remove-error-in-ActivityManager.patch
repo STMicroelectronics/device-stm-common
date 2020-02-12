@@ -1,0 +1,27 @@
+From 0ec1d087eb0f80f4a845251027b1a9b87fe14c35 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Wed, 6 Nov 2019 09:08:46 +0100
+Subject: [PATCH 05/12] Remove error in ActivityManager
+
+Change-Id: I862a22b6fee5eb8a30eccd06fcb455e321b6fd65
+Trace: E ActivityManager: Sending non-protected broadcast com.android.systemui.demo from system
+---
+ packages/SystemUI/AndroidManifest.xml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/packages/SystemUI/AndroidManifest.xml b/packages/SystemUI/AndroidManifest.xml
+index 17274f4..406968e 100644
+--- a/packages/SystemUI/AndroidManifest.xml
++++ b/packages/SystemUI/AndroidManifest.xml
+@@ -246,6 +246,8 @@
+     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
+     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
+ 
++    <protected-broadcast android:name="com.android.systemui.demo" />
++
+     <application
+         android:name=".SystemUIApplication"
+         android:persistent="true"
+-- 
+2.7.4
+

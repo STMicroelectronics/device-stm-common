@@ -1,0 +1,92 @@
+From cc313daeb518dea51b32c57a61c676a4c1741311 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Thu, 16 Jan 2020 16:11:08 +0100
+Subject: [PATCH] Remove unnecessary packages
+
+Change-Id: If78d3679b3afe5c65970c8932b73a8daef1bddc9
+---
+ target/product/handheld_product.mk | 11 -----------
+ target/product/handheld_system.mk  | 14 +-------------
+ 2 files changed, 1 insertion(+), 24 deletions(-)
+
+diff --git a/target/product/handheld_product.mk b/target/product/handheld_product.mk
+index 0d100b2..7d52589 100644
+--- a/target/product/handheld_product.mk
++++ b/target/product/handheld_product.mk
+@@ -22,19 +22,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/media_product.mk)
+ 
+ # /product packages
+ PRODUCT_PACKAGES += \
+-    Browser2 \
+-    Calendar \
+-    Camera2 \
+-    Contacts \
+-    DeskClock \
+-    Email \
+-    Gallery2 \
+     LatinIME \
+-    Launcher3QuickStep \
+-    Music \
+-    OneTimeInitializer \
+     Provision \
+-    QuickSearchBox \
+     Settings \
+     SettingsIntelligence \
+     StorageManager \
+diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
+index 6463a54..277c102 100644
+--- a/target/product/handheld_system.mk
++++ b/target/product/handheld_system.mk
+@@ -25,7 +25,6 @@ $(call inherit-product-if-exists, external/google-fonts/carrois-gothic-sc/fonts.
+ $(call inherit-product-if-exists, external/google-fonts/coming-soon/fonts.mk)
+ $(call inherit-product-if-exists, external/google-fonts/cutive-mono/fonts.mk)
+ $(call inherit-product-if-exists, external/google-fonts/source-sans-pro/fonts.mk)
+-$(call inherit-product-if-exists, external/noto-fonts/fonts.mk)
+ $(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
+ $(call inherit-product-if-exists, external/hyphenation-patterns/patterns.mk)
+ $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
+@@ -33,9 +32,6 @@ $(call inherit-product-if-exists, frameworks/webview/chromium/chromium.mk)
+ 
+ PRODUCT_PACKAGES += \
+     BasicDreams \
+-    BlockedNumberProvider \
+-    Bluetooth \
+-    BluetoothMidiService \
+     BookmarkProvider \
+     BuiltInPrintService \
+     CalendarProvider \
+@@ -53,10 +49,7 @@ PRODUCT_PACKAGES += \
+     KeyChain \
+     librs_jni \
+     ManagedProvisioning \
+-    MmsService \
+     MtpDocumentsProvider \
+-    MusicFX \
+-    NfcNci \
+     OsuLogin \
+     PacProcessor \
+     PrintRecommendationService \
+@@ -65,10 +58,6 @@ PRODUCT_PACKAGES += \
+     screenrecord \
+     SecureElement \
+     SharedStorageBackup \
+-    SimAppDialog \
+-    Telecom \
+-    TelephonyProvider \
+-    TeleService \
+     Traceur \
+     UserDictionaryProvider \
+     VpnDialogs \
+@@ -78,8 +67,7 @@ PRODUCT_PACKAGES += \
+ PRODUCT_SYSTEM_SERVER_APPS += \
+     FusedLocation \
+     InputDevices \
+-    KeyChain \
+-    Telecom \
++    KeyChain
+ 
+ PRODUCT_COPY_FILES += \
+     frameworks/av/media/libeffects/data/audio_effects.conf:system/etc/audio_effects.conf
+-- 
+2.7.4
+

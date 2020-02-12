@@ -1,0 +1,33 @@
+From 310faee6e19360dc015a1770b0588d4d28fdcb94 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 9 Dec 2019 10:16:09 +0100
+Subject: [PATCH 1/2] Remove TelecomService dependency
+
+Change-Id: I6be0629ea7881e9a47f63ae395152a9d7fa17d8d
+---
+ src/com/android/settings/CryptKeeper.java | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/src/com/android/settings/CryptKeeper.java b/src/com/android/settings/CryptKeeper.java
+index 05054b4..0b633fa 100644
+--- a/src/com/android/settings/CryptKeeper.java
++++ b/src/com/android/settings/CryptKeeper.java
+@@ -953,14 +953,7 @@ public class CryptKeeper extends Activity implements TextView.OnEditorActionList
+             return;
+         }
+ 
+-        int textId;
+-        if (getTelecomManager().isInCall()) {
+-            // Show "return to call"
+-            textId = R.string.cryptkeeper_return_to_call;
+-        } else {
+-            textId = R.string.cryptkeeper_emergency_call;
+-        }
+-        emergencyCall.setText(textId);
++        emergencyCall.setText(R.string.cryptkeeper_emergency_call);
+     }
+ 
+     private boolean isEmergencyCallCapable() {
+-- 
+2.7.4
+

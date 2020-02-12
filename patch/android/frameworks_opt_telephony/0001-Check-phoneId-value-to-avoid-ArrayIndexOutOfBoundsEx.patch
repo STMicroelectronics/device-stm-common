@@ -1,0 +1,28 @@
+From 48ec5686038b316ec809f0d06ff07118936afc7d Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Tue, 15 Oct 2019 09:19:13 +0200
+Subject: [PATCH] Check phoneId value to avoid ArrayIndexOutOfBoundsException
+ (case no telephony)
+
+Change-Id: I9a9c5e6b6b3b3c963b378b08b95da8f648d7ff9f
+---
+ src/java/com/android/internal/telephony/PhoneSwitcher.java | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/java/com/android/internal/telephony/PhoneSwitcher.java b/src/java/com/android/internal/telephony/PhoneSwitcher.java
+index 638da48..bb4a689 100644
+--- a/src/java/com/android/internal/telephony/PhoneSwitcher.java
++++ b/src/java/com/android/internal/telephony/PhoneSwitcher.java
+@@ -873,6 +873,9 @@ public class PhoneSwitcher extends Handler {
+     }
+ 
+     private void switchPhone(int phoneId, boolean active) {
++        if (phoneId < 0 || phoneId >= mNumPhones) {
++            return;
++        }
+         PhoneState state = mPhoneStates[phoneId];
+         if (state.active == active) return;
+         state.active = active;
+-- 
+2.7.4
+

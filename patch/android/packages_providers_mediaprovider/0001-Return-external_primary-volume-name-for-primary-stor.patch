@@ -1,0 +1,33 @@
+From b0256fab75a0cf09642f54bc58b4233f3120cf7c Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 9 Dec 2019 10:22:57 +0100
+Subject: [PATCH] Return "external_primary" volume name for primary storage
+ (instead of uuid)
+
+Change-Id: Ic7d537fea2119c681b9b20f283c26a70c6f8e787
+---
+ src/com/android/providers/media/MediaProvider.java | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/providers/media/MediaProvider.java b/src/com/android/providers/media/MediaProvider.java
+index 8928999..78f73b9 100644
+--- a/src/com/android/providers/media/MediaProvider.java
++++ b/src/com/android/providers/media/MediaProvider.java
+@@ -2285,8 +2285,13 @@ public class MediaProvider extends ContentProvider {
+             if (volumeName.equals("emulated")) {
+                 return MediaStore.VOLUME_EXTERNAL_PRIMARY;
+             } else {
+-                return StorageVolume.normalizeUuid(volumeName);
++                for (String volumeNameAvailable : getExternalVolumeNames()) {
++                    if (volumeName.equals(volumeNameAvailable)) {
++                        return  StorageVolume.normalizeUuid(volumeName);
++                    }
++                }
+             }
++            return MediaStore.VOLUME_EXTERNAL_PRIMARY;
+         } else {
+             return MediaStore.VOLUME_INTERNAL;
+         }
+-- 
+2.7.4
+

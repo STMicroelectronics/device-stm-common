@@ -2,4 +2,3 @@ type camera_prop, property_type;
 type graphics_prop, property_type;
 type vendor_initprop_prop, property_type;
 type vendor_initdriver_prop, property_type;
-type primary_physical_prop, property_type;

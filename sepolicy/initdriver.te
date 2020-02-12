@@ -8,6 +8,7 @@ allow initdriver kmsg_device:chr_file { append open };
 allow initdriver self:capability sys_module;
 allow initdriver vendor_file:system module_load;
 allow initdriver vendor_toolbox_exec:file execute_no_trans;
+allow initdriver debugfs_regulator:dir search;
 
 # Set the sys.vendor.modules.ready property
 set_prop(initdriver, vendor_initdriver_prop)

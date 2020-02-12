@@ -219,7 +219,7 @@ get_boot_device()
   local l_boot_instance="5"
 
   # fastboot return values on stderr (not stdout as expected)
-  \fastboot -i 0x0483 getvar ${fastboot_instance_var} &> /tmp/bootinstance
+  \fastboot getvar ${fastboot_instance_var} &> /tmp/bootinstance
 
   while IFS='' read -r l_line || [[ -n ${l_line} ]]; do
     echo ${l_line} | grep "${fastboot_instance_var}:" &> /dev/null
@@ -256,7 +256,7 @@ get_boot_mode()
   local l_boot_mode="5"
 
   # fastboot return values on stderr (not stdout as expected)
-  \fastboot -i 0x0483 getvar ${fastboot_mode_var} &> /tmp/bootmode
+  \fastboot getvar ${fastboot_mode_var} &> /tmp/bootmode
 
   while IFS='' read -r l_line || [[ -n ${l_line} ]]; do
     echo ${l_line} | grep "${fastboot_mode_var}:" &> /dev/null
@@ -403,6 +403,7 @@ fi
 if [ -n "${STM32MP1_DISK_TYPE+1}" ]; then
   if [ "${target_disk_type}" != "${STM32MP1_DISK_TYPE}" ]; then
     error "Error, current disk configuration (${STM32MP1_DISK_TYPE}) not compatible with target (${target_disk_type})"
+    exit 1
   fi
 fi
 
@@ -481,7 +482,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               doit "[${part_value_a}] Loading ${part_label}${part_suffix_1} with the image ${part_image_path}/${part_filename}" || force_part=1
 
               if [ ${force_part} -eq 1 ]; then
-                \fastboot -i 0x0483 flash ${part_label}${part_suffix_1} ${part_image_path}/${part_filename}
+                \fastboot flash ${part_label}${part_suffix_1} ${part_image_path}/${part_filename}
                 if [ $? -ne 0 ]; then
                   provisioning_error=1
                   provisioning_error_msg+="${part_label}${part_suffix_1} "
@@ -493,7 +494,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               doit "[${part_value_b}] Loading ${part_label}${part_suffix_2} with the image ${part_image_path}/${part_filename}" || force_part=1
 
               if [ ${force_part} -eq 1 ]; then
-                \fastboot -i 0x0483 flash ${part_label}${part_suffix_2} ${part_image_path}/${part_filename}
+                \fastboot flash ${part_label}${part_suffix_2} ${part_image_path}/${part_filename}
                 if [ $? -ne 0 ]; then
                   provisioning_error=1
                   provisioning_error_msg+="${part_label}${part_suffix_2} "
@@ -503,7 +504,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
             else
               empty_line
               doit "[${part_value_a}] Loading ${part_label} with the image ${part_image_path}/${part_filename}" || {
-                \fastboot -i 0x0483 flash ${part_label} ${part_image_path}/${part_filename}
+                \fastboot flash ${part_label} ${part_image_path}/${part_filename}
               }
             fi
           else
@@ -656,6 +657,6 @@ fi
 if [ -n "${fastboot_cmd}" ]; then
   if [ ${fastboot_cmd} == "reboot" ]; then
     echo "Reboot target..."
-    \fastboot -i 0x0483 reboot
+    \fastboot reboot
   fi
 fi

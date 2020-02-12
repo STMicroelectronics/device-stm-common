@@ -43,9 +43,6 @@ warning_top()
 # Main
 #######################################
 
-echo "including device/stm/stm32mp1/scripts/ccache/ccachesetup.sh"
-source $(gettop)/device/stm/stm32mp1/scripts/ccache/ccachesetup.sh
-
 PATH_CONFIG_FILE_NAME="path.config"
 PATH_CONFIG_FILE=$(gettop)/device/stm/stm32mp1/configs/${PATH_CONFIG_FILE_NAME}
 
@@ -65,6 +62,7 @@ if [ ! -f ${PATH_CONFIG_FILE} ]; then
   \ln -s $(gettop)/device/stm/stm32mp1-openocd/source/build_openocd.sh $(gettop)/device/stm/scripts/build_openocd
 
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/flash-device.sh $(gettop)/device/stm/scripts/flash-device
+  \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/clear-device.sh $(gettop)/device/stm/scripts/clear-device
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/format-device.sh $(gettop)/device/stm/scripts/format-device
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/provision-device.sh $(gettop)/device/stm/scripts/provision-device
 
@@ -91,12 +89,6 @@ fi
 
 echo "including device/stm/stm32mp1/scripts/layout/layoutsetup.sh"
 source $(gettop)/device/stm/stm32mp1/scripts/layout/layoutsetup.sh
-
-for board_name in "${BOARD_NAME_LIST[@]}"
-do
-  echo "including device/stm/stm32mp1/${board_name}/boardsetup.sh"
-  source $(gettop)/device/stm/stm32mp1/${board_name}/boardsetup.sh
-done
 
 unset PATH_CONFIG_FILE
 unset PATH_CONFIG_FILE_NAME

@@ -1,0 +1,31 @@
+From 8c13a5fb6379b6f8cb3817b2338033bb681a3496 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Tue, 12 Nov 2019 18:20:29 +0100
+Subject: [PATCH 07/12] Set retriever only if not null value
+
+Change-Id: I33f2acdd88627c4b462f495ae5706aead2df9652
+---
+ media/jni/android_media_MediaMetadataRetriever.cpp | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/media/jni/android_media_MediaMetadataRetriever.cpp b/media/jni/android_media_MediaMetadataRetriever.cpp
+index a480784..d7183c3 100644
+--- a/media/jni/android_media_MediaMetadataRetriever.cpp
++++ b/media/jni/android_media_MediaMetadataRetriever.cpp
+@@ -94,8 +94,11 @@ static void setRetriever(JNIEnv* env, jobject thiz, const sp<MediaMetadataRetrie
+     if (old != NULL) {
+         old->decStrong(thiz);
+     }
+-
+-    env->SetLongField(thiz, fields.context, (jlong) retriever.get());
++    if (retriever == NULL) {
++        env->SetLongField(thiz, fields.context, 0);
++    } else {
++        env->SetLongField(thiz, fields.context, (jlong) retriever.get());
++    }
+ }
+ 
+ static void
+-- 
+2.7.4
+

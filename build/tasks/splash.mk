@@ -5,12 +5,12 @@ ifeq ($(TARGET_SPLASH_BMP),)
 $(error TARGET_SPLASH_BMP not defined)
 endif
 
-.PHONY: $(PRODUCT_OUT)/splash.img
+.PHONY: splash.img
 
-$(PRODUCT_OUT)/splash.img:
-	$(ACP) -fp $(TARGET_SPLASH_BMP) $@
+splash.img:
+	$(ACP) -fp $(TARGET_SPLASH_BMP) $(PRODUCT_OUT)/$@
 
-droidcore: $(PRODUCT_OUT)/splash.img
+droidcore: splash.img
 
 endif
 endif
