@@ -3,7 +3,7 @@ ifneq ($(TARGET_NO_DTIMAGE), true)
 
 MKDTIMG := prebuilts/misc/linux-x86/libufdt/mkdtimg
 
-DTB0 := $(TARGET_PREBUILT_KERNEL)/dts/stm32mp157c-ev1.dtb
+DTB0 := $(TARGET_PREBUILT_DTB_PATH)/${SOC_VERSION}-${BOARD_FLAVOUR}/${SOC_VERSION}-${BOARD_FLAVOUR}.dtb
 BOARDID0 := 0x1263
 BOARDREV0 := 0xC
 

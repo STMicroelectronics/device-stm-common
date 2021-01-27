@@ -27,7 +27,7 @@ usage = ("Convert Android layout config into STM32CubeProgrammer TSV layout file
          "[<android layout file path>] : build TSV files in the same folder as the one given for android layout")
 
 # List of supported Android partition : if you add a new partition, don't forget to also update tsv_dict
-android_allowed_part = ("PART_ATF", "PART_BL33", "PART_TEEH", "PART_TEED", "PART_TEEX", "PART_SPLASH", "PART_BOOT",
+android_allowed_part = ("PART_ATF", "PART_BL33", "PART_TEEH", "PART_TEED", "PART_TEEX", "PART_TEEFS", "PART_SPLASH", "PART_BOOT",
                         "PART_DTB", "PART_SUPER", "PART_VENDOR", "PART_MODULE", "PART_SYSTEM", "PART_MISC", "PART_LAST_USERDATA")
 
 # fsbl partitions are going to boot1 and boot2 where size are not configurable
@@ -48,6 +48,7 @@ tsv_dict = {"fsbl": {"opt": "P", "type": "Binary\t", "id": 0x4},
             "teeh": {"opt": "P", "type": "Binary\t", "id": 0xA},
             "teed": {"opt": "P", "type": "Binary\t", "id": None},
             "teex": {"opt": "P", "type": "Binary\t", "id": None},
+            "teefs": {"opt": "P", "type": "FileSystem", "id": None},
             "splash": {"opt": "P", "type": "Binary\t", "id": 0x10},
             "boot": {"opt": "PE", "type": "System\t", "id": 0x21},
             "dt": {"opt": "PE", "type": "System\t", "id": None},
@@ -101,7 +102,7 @@ def build_tsv(part_list, boot_mode: str = "trusted", memory_type: str = "sd"):
         if dict["part_name"] == "fsbl":
             filename = "%s-%s.img" % (dict["part_name"], boot_mode)
         elif dict["part_name"] == "ssbl":
-            filename = "%s-%s-fb%s.img" % (dict["part_name"], boot_mode, memory_type)
+            filename = "%s-%s-fb%s.img" % (dict["part_name"], "trusted", memory_type)
         else:
             filename = "%s.img" % dict["part_name"]
 
@@ -232,18 +233,8 @@ except FileNotFoundError:
     print("%s not found" % android_layout_file_path, file=sys.stderr)
     exit(1)  # error code : 1 : file note found
 
-with open("%s/FlashLayout_sd_trusted.tsv" % tsv_dir_path, "wt") as tsv_file:
-    tsv_partition_list = build_tsv(partition_list)
-    print('\n'.join(tsv_header_file), file=tsv_file)
-    print('\n'.join(tsv_partition_list), file=tsv_file)
-
 with open("%s/FlashLayout_sd_optee.tsv" % tsv_dir_path, "wt") as tsv_file:
     tsv_partition_list = build_tsv(partition_list, boot_mode="optee")
-    print('\n'.join(tsv_header_file), file=tsv_file)
-    print('\n'.join(tsv_partition_list), file=tsv_file)
-
-with open("%s/FlashLayout_emmc_trusted.tsv" % tsv_dir_path, "wt") as tsv_file:
-    tsv_partition_list = build_tsv(partition_list, memory_type="emmc")
     print('\n'.join(tsv_header_file), file=tsv_file)
     print('\n'.join(tsv_partition_list), file=tsv_file)
 

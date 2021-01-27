@@ -19,11 +19,11 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.3"
 
 SOC_FAMILY="stm32mp1"
 
-BOARD_NAME_LIST=( "disco" "eval" )
+BOARD_NAME_LIST=( "eval" "disco" )
 BOARD_FLAVOUR_LIST=( "ev1" "dk2" )
 BOARD_OPTION_LIST=( "default" "normal" "demo" "empty" )
 
@@ -47,9 +47,9 @@ STARTER_CONFIG_FILE_NAME="starter.config"
 STARTER_CONFIG_FILE_DEFAULT_RELATIVE="${RELATIVE_DEVICE_PATH_STARTER}/scripts/starter/${STARTER_CONFIG_FILE_NAME}"
 STARTER_CONFIG_FILE_DEFAULT="${TOP_PATH}/${STARTER_CONFIG_FILE_DEFAULT_RELATIVE}"
 
-STARTER_NAME="android-9.0.0"
+STARTER_NAME="st-android-11.0.0"
 STARTER_BUILD="userdebug"
-STARTER_OUT="starter-out"
+STARTER_OUT="out-starter"
 
 DEFAULT_BOARD_OPTION="normal"
 
@@ -64,7 +64,8 @@ nb_states_starter=0
 starter_target_emmc=0
 starter_target_sd=0
 
-board_option="normal"
+starter_board_option="normal"
+starter_soc_version="stm32mp157f"
 
 starter_build_mode="optee"
 starter_no_teeimage="false"
@@ -183,6 +184,7 @@ usage_starter()
   echo "Options:"
   echo "  -h/--help: get current help"
   echo "  -v/--version: get script version"
+  echo "  -s/--soc <soc version> = stm32mp157c or stm32mp157f options (default = stm32mp157f)"
   echo "  -o/--opt <board option> = normal, empty or demo options (default = normal)"
   echo "  -c/--config  <starter_config>  = starter config file (default = ${STARTER_CONFIG_FILE_DEFAULT_RELATIVE})"
   echo "  -k/--kit  <starter_version>  = starterpackage version (default = current date)"
@@ -489,10 +491,15 @@ while test "$1" != ""; do
       shift
       ;;
 
+    "-s"|"--soc" )
+      starter_soc_version=$2
+      shift
+      ;;
+
     "-o"|"--opt" )
-      board_option=$2
-      if [ "${board_option}" = "default" ]; then
-        board_option=${DEFAULT_BOARD_OPTION}
+      starter_board_option=$2
+      if [ "${starter_board_option}" = "default" ]; then
+        starter_board_option=${DEFAULT_BOARD_OPTION}
       fi
       shift
       ;;
@@ -564,10 +571,10 @@ if [ ${starter_target_emmc} -eq 1 ]; then
     fi
 
     # build distribution
-    BOARD_OPTION=${board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=emmc TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
+    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=emmc TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
-    emmc_starter_dir=${STARTER_NAME}-${starter_board_config}-${starter_board_name}-emmc-${board_flavour}-${starter_version}
+    emmc_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-emmc-starter
     state_starter "create starter in ${STARTER_OUT}/${starter_board_name}/${emmc_starter_dir}"
 
     emmc_starter_path=${STARTER_OUT}/${starter_board_name}/${emmc_starter_dir}
@@ -575,13 +582,14 @@ if [ ${starter_target_emmc} -eq 1 ]; then
 
     \cp ${OUTPUT_PATH_STARTER}/fsbl-${starter_build_mode}.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/fsbl-programmer.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-${starter_build_mode}-fbemmc.img ${emmc_starter_path}/
+    \cp ${OUTPUT_PATH_STARTER}/ssbl-trusted-fbemmc.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/ssbl-programmer.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/splash.img ${emmc_starter_path}/
     if [ "${starter_build_mode}" == "optee" ]; then
       \cp ${OUTPUT_PATH_STARTER}/teed.img ${emmc_starter_path}/
       \cp ${OUTPUT_PATH_STARTER}/teeh.img ${emmc_starter_path}/
       \cp ${OUTPUT_PATH_STARTER}/teex.img ${emmc_starter_path}/
+      \cp ${OUTPUT_PATH_STARTER}/teefs.img ${emmc_starter_path}/
     fi
     \cp ${OUTPUT_PATH_STARTER}/boot.img ${emmc_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/dt.img ${emmc_starter_path}/
@@ -614,6 +622,7 @@ if [ ${starter_target_sd} -eq 1 ]; then
   state_starter "set environment configuration for SD card"
 
   source ./build/envsetup.sh &> /dev/null
+  source ./device/stm/${SOC_FAMILY}/scripts/layout/layoutsetup.sh -d emmc ${starter_target_sd_size}
   lunch ${starter_board_config}_${starter_board_name}-${STARTER_BUILD} >/dev/null 2>&1
 
   for board_flavour in ${starter_board_flavour}
@@ -626,10 +635,10 @@ if [ ${starter_target_sd} -eq 1 ]; then
     fi
 
     # build distribution
-    BOARD_OPTION=${board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=sd TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
+    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=sd TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
-    sd_starter_dir=${STARTER_NAME}-${starter_board_config}-${starter_board_name}-sd-${board_flavour}-${starter_version}
+    sd_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-sd-starter
     state_starter "create starter in ${STARTER_OUT}/${starter_board_name}/${sd_starter_dir}"
 
     sd_starter_path=${STARTER_OUT}/${starter_board_name}/${sd_starter_dir}
@@ -637,13 +646,14 @@ if [ ${starter_target_sd} -eq 1 ]; then
 
     \cp ${OUTPUT_PATH_STARTER}/fsbl-${starter_build_mode}.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/fsbl-programmer.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-${starter_build_mode}-fbsd.img ${sd_starter_path}/
+    \cp ${OUTPUT_PATH_STARTER}/ssbl-trusted-fbsd.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/ssbl-programmer.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/splash.img ${sd_starter_path}/
     if [ "${starter_build_mode}" == "optee" ]; then
       \cp ${OUTPUT_PATH_STARTER}/teed.img ${sd_starter_path}/
       \cp ${OUTPUT_PATH_STARTER}/teeh.img ${sd_starter_path}/
       \cp ${OUTPUT_PATH_STARTER}/teex.img ${sd_starter_path}/
+      \cp ${OUTPUT_PATH_STARTER}/teefs.img ${sd_starter_path}/
     fi
     \cp ${OUTPUT_PATH_STARTER}/boot.img ${sd_starter_path}/
     \cp ${OUTPUT_PATH_STARTER}/dt.img ${sd_starter_path}/

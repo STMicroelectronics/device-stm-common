@@ -17,9 +17,10 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
-BOARD_NAME_LIST=( "eval" )
+# Check default version: grep ClangDefaultVersion build/soong/cc/config/global.go
+CLANG_VERSION=r383902b
 
 #######################################
 # Functions
@@ -65,6 +66,7 @@ if [ ! -f ${PATH_CONFIG_FILE} ]; then
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/clear-device.sh $(gettop)/device/stm/scripts/clear-device
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/format-device.sh $(gettop)/device/stm/scripts/format-device
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/provision-device.sh $(gettop)/device/stm/scripts/provision-device
+  \ln -s $(gettop)/device/stm/stm32mp1/scripts/layout/create-disk.sh $(gettop)/device/stm/scripts/create-disk
 
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/setup/stm32mp1setup.sh $(gettop)/device/stm/scripts/stm32mp1setup
   \ln -s $(gettop)/device/stm/stm32mp1/scripts/setup/stm32mp1clear.sh $(gettop)/device/stm/scripts/stm32mp1clear
@@ -87,8 +89,19 @@ if [[ ${PATH} != *"$(gettop)/device/stm/scripts:"* ]]; then
   export PATH="$(gettop)/device/stm/scripts:$PATH"
 fi
 
+if [[ ${PATH} != *"$(gettop)/prebuilts/clang/host/linux-x86/clang-${CLANG_VERSION}/bin:"* ]]; then
+  export PATH="$(gettop)/prebuilts/clang/host/linux-x86/clang-${CLANG_VERSION}/bin:$PATH"
+fi
+
+# initialize auto-completion (TODO: replace with smart auto-completion through function)
+complete -W 'dtb gpu defaultconfig menuconfig modules modules_install mrproper vmlinux' build_kernel
+complete -W 'clean' build_tee
+complete -W 'clean distclean' build_openocd
+
 echo "including device/stm/stm32mp1/scripts/layout/layoutsetup.sh"
 source $(gettop)/device/stm/stm32mp1/scripts/layout/layoutsetup.sh
 
 unset PATH_CONFIG_FILE
 unset PATH_CONFIG_FILE_NAME
+unset CLANG_VERSION
+unset SCRIPT_VERSION

@@ -19,11 +19,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
 SOC_FAMILY="stm32mp1"
-
-TEE_VERSION=3.3.0
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -97,14 +95,14 @@ usage()
   echo "Usage: $(basename $BASH_SOURCE) [Options] [Exclusive Options]"
   empty_line
   echo "Clear fully or partially the ${SOC_FAMILY} setup for Android"
+  echo "By default, the complete stm32mp1 setup is cleared"
   empty_line
   echo "Options:"
-  echo "  -h/--help: get current help"
-  echo "  -v/--version: get script version"
-  echo "Exclusive Options (by default, the full setup clear is executed):"
-  echo "  -e/--eula: clear EULA setup (graphics libraries)"
-  echo "  -p/--patch: clear patches performed on Android distribution"
-  echo "  -t/--tee: clear OP-TEE user modules (client and test)"
+  echo "  -h / --help: get current help"
+  echo "  -v / --version: get script version"
+  echo "  -e / --eula: clear EULA setup (graphics libraries)"
+  echo "  -p / --patch: clear patches performed on Android distribution"
+  echo "  -t / --tee: clear OP-TEE user modules"
   empty_line
 }
 
@@ -164,51 +162,79 @@ if [[ "$0" != "$BASH_SOURCE" ]]; then
   return 1
 fi
 
-# Check the current usage
-if [ $# -gt 2 ]; then
-  usage
-  \popd >/dev/null 2>&1
-  exit 1
-fi
-
-while test "$1" != ""; do
-  arg=$1
-  case $arg in
-    "-h"|"--help" )
+# check the options
+while getopts "hvept-:" option; do
+  case "${option}" in
+    -)
+      # Treat long options
+      case "${OPTARG}" in
+        help)
+          usage
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        version)
+          echo "`basename $0` version ${SCRIPT_VERSION}"
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        eula)
+          clear_eula=1
+          nb_states=$((nb_states+1))
+          ;;
+        patch)
+          clear_patches=1
+          nb_states=$((nb_states+1))
+          ;;
+        tee)
+          clear_tee=1
+          nb_states=$((nb_states+1))
+          ;;
+        *)
+          usage
+          \popd >/dev/null 2>&1
+          exit 1
+          ;;
+      esac;;
+    # Treat short options
+    h)
       usage
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-v"|"--version" )
-      echo "$(basename $BASH_SOURCE) version ${SCRIPT_VERSION}"
+    v)
+      echo "`basename $0` version ${SCRIPT_VERSION}"
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-e"|"--eula" )
+    e)
       clear_eula=1
       nb_states=$((nb_states+1))
       ;;
-
-    "-p"|"--patch" )
+    p)
       clear_patches=1
       nb_states=$((nb_states+1))
       ;;
-
-    "-t"|"--tee" )
+    t)
       clear_tee=1
       nb_states=$((nb_states+1))
       ;;
-
-    ** )
+    *)
       usage
       \popd >/dev/null 2>&1
       exit 1
       ;;
   esac
-  shift
 done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 0 ]; then
+  error "Unknown command : $*"
+  usage
+  popd >/dev/null 2>&1
+  exit 1
+fi
 
 if [[ ${clear_patches} == 0 ]] && [[ ${clear_eula} == 0 ]] && [[ ${clear_tee} == 0 ]]; then
   clear_patches=1
@@ -274,10 +300,23 @@ if [[ $clear_tee == 1 ]]; then
         \rm -rf ${local_path}
       fi
     done < ${OPTEE_CONFIG_PATH}
+  fi
+
+  OPTEE_CONFIG_PATH=${COMMON_PATH}-tee/source/patch/kmgk/android_kmgk.config
+
+  if [ -f "${OPTEE_CONFIG_PATH}" ]; then
+    while IFS='' read -r line || [[ -n $line ]]; do
+      echo $line | grep '^TEE_FILE_PATH' >/dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        local_path=($(echo $line | awk '{ print $2 }'))
+        \rm -rf ${local_path}
+      fi
+    done < ${OPTEE_CONFIG_PATH}
+  fi
 
     # Remove OP-TEE dependent config file
     \rm -f ${COMMON_PATH}/configs/teeuser.config
-  fi
+
 fi
 
 \popd >/dev/null 2>&1

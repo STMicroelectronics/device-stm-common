@@ -1,3 +1,15 @@
-genfscon proc /cpu/alignment u:object_r:proc_cpu_alignment:s0
+genfscon proc    /cpu/alignment                  u:object_r:proc_cpu_alignment:s0
+genfscon proc    /sys/vm/swappiness              u:object_r:proc_swappiness:s0
+genfscon proc    /sys/dev/scsi                   u:object_r:proc_dev_scsi:s0
+genfscon proc    /sys/dev/tty                    u:object_r:proc_dev_tty:s0
+genfscon proc    /sys/fs/aio-max-nr              u:object_r:proc_fs_aio:s0
+genfscon proc    /sys/fs/aio-nr                  u:object_r:proc_fs_aio:s0
+genfscon proc    /sys/fs/dentry-state            u:object_r:proc_fs_dentry_state:s0
+genfscon proc    /sys/fs/dir-notify-enable       u:object_r:proc_fs_dir_notify_enable:s0
+genfscon proc    /sys/fs/epoll/max_user_watches  u:object_r:proc_fs_epoll:s0
+genfscon proc    /sys/fs/file-max                u:object_r:proc_fs_file_max:s0
 
-genfscon debugfs /gc         u:object_r:debugfs_gc:s0
+genfscon proc    /fb                             u:object_r:proc_fb:s0
+genfscon proc    /mtd                            u:object_r:proc_mtd:s0
+genfscon proc    /locks                          u:object_r:proc_locks:s0
+genfscon debugfs /gc                             u:object_r:debugfs_gc:s0

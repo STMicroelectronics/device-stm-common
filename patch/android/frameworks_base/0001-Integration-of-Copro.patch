@@ -1,19 +1,21 @@
-From 3bf9d48588aee48b186d180768c5e1fa17e41a67 Mon Sep 17 00:00:00 2001
+From 1e82cc16d4a1c2c88883b29710271a64a795670e Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
 Date: Thu, 23 Jan 2020 16:19:56 +0100
-Subject: [PATCH] Integration of Copro
+Subject: [PATCH 1/5] Integration of Copro
 
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 Change-Id: Ibb15eb62f5a206b287627c84b8e74902d8a27b73
 ---
- Android.bp                                    |   2 +
- api/current.txt                               |  91 +++++++++++++++++++
- core/java/android/copro/CoproManager.java     | 122 ++++++++++++++++++++++++++
- core/java/android/copro/CoproSerialPort.java  | 104 ++++++++++++++++++++++
- core/java/android/copro/FirmwareInfo.aidl     |  19 ++++
- core/java/android/copro/FirmwareInfo.java     | 101 +++++++++++++++++++++
- core/java/android/copro/ICoproSerialPort.aidl |  41 +++++++++
- core/java/android/copro/ICoproService.aidl    |  44 ++++++++++
- 8 files changed, 524 insertions(+)
+ api/current.txt                               |  32 ++++
+ api/lint-baseline.txt                         | 178 ++++++++++++++++++
+ core/java/android/copro/CoproManager.java     | 149 +++++++++++++++
+ core/java/android/copro/CoproSerialPort.java  | 135 +++++++++++++
+ core/java/android/copro/FirmwareInfo.aidl     |  19 ++
+ core/java/android/copro/FirmwareInfo.java     | 103 ++++++++++
+ core/java/android/copro/ICoproSerialPort.aidl |  43 +++++
+ core/java/android/copro/ICoproService.aidl    |  46 +++++
+ non-updatable-api/current.txt                 |  32 ++++
+ 9 files changed, 737 insertions(+)
  create mode 100644 core/java/android/copro/CoproManager.java
  create mode 100644 core/java/android/copro/CoproSerialPort.java
  create mode 100644 core/java/android/copro/FirmwareInfo.aidl
@@ -21,114 +23,42 @@ Change-Id: Ibb15eb62f5a206b287627c84b8e74902d8a27b73
  create mode 100644 core/java/android/copro/ICoproSerialPort.aidl
  create mode 100644 core/java/android/copro/ICoproService.aidl
 
-diff --git a/Android.bp b/Android.bp
-index e3fa19c..0e91415 100644
---- a/Android.bp
-+++ b/Android.bp
-@@ -208,6 +208,8 @@ java_defaults {
-         "core/java/android/hardware/radio/ITuner.aidl",
-         "core/java/android/hardware/radio/ITunerCallback.aidl",
-         "core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl",
-+        "core/java/android/copro/ICoproService.aidl",
-+        "core/java/android/copro/ICoproSerialPort.aidl",
-         "core/java/android/hardware/usb/IUsbManager.aidl",
-         "core/java/android/hardware/usb/IUsbSerialReader.aidl",
-         "core/java/android/net/ICaptivePortal.aidl",
 diff --git a/api/current.txt b/api/current.txt
-index cd78602..ea1ef902 100644
+index 952ccdad992..b71fb3a86c6 100644
 --- a/api/current.txt
 +++ b/api/current.txt
-@@ -12427,6 +12427,97 @@ package android.content.res {
+@@ -12883,6 +12883,38 @@ package android.content.res.loader {
  
  }
  
 +package android.copro {
 +
 +  public class CoproManager {
-+    method public android.copro.FirmwareInfo getFirmwareByName(String);
-+    method public android.copro.FirmwareInfo[] getFirmwareList();
-+    method public static android.copro.CoproManager getInstance();
-+    method public android.copro.CoproSerialPort getSerialPort();
++    method @Nullable public android.copro.FirmwareInfo getFirmwareByName(@NonNull String);
++    method @Nullable public android.copro.FirmwareInfo[] getFirmwareList();
++    method @Nullable public static android.copro.CoproManager getInstance();
++    method @Nullable public android.copro.CoproSerialPort getSerialPort();
 +    method public boolean isFirmwareRunning(int);
 +    method public void startFirmware(int);
 +    method public void stopFirmware();
 +  }
 +
 +  public class CoproSerialPort {
-+    ctor public CoproSerialPort(android.copro.ICoproSerialPort);
 +    method public void close();
-+    method public void open(int) throws android.os.RemoteException;
-+    method public String read();
-+    method public byte[] readB(int);
-+    method public void write(String);
-+    method public int writeB(byte[]);
++    method public void open(int);
++    method @Nullable public String read();
++    method @Nullable public byte[] readB(int);
++    method public void write(@NonNull String);
++    method public int writeB(@NonNull byte[]);
 +  }
 +
-+  public class FirmwareInfo implements android.os.Parcelable {
++  public final class FirmwareInfo implements android.os.Parcelable {
 +    method public int describeContents();
 +    method public int getId();
-+    method public String getName();
++    method @NonNull public String getName();
 +    method public boolean getState();
-+    method public void writeToParcel(android.os.Parcel, int);
-+    field public static final android.os.Parcelable.Creator<android.copro.FirmwareInfo> CREATOR;
-+  }
-+
-+  public interface ICoproSerialPort extends android.os.IInterface {
-+    method public void close() throws android.os.RemoteException;
-+    method public boolean open(int) throws android.os.RemoteException;
-+    method public String read() throws android.os.RemoteException;
-+    method public byte[] readB(int) throws android.os.RemoteException;
-+    method public void write(String) throws android.os.RemoteException;
-+    method public int writeB(byte[]) throws android.os.RemoteException;
-+  }
-+
-+  public static class ICoproSerialPort.Default implements android.copro.ICoproSerialPort {
-+    ctor public ICoproSerialPort.Default();
-+    method public android.os.IBinder asBinder();
-+    method public void close() throws android.os.RemoteException;
-+    method public boolean open(int) throws android.os.RemoteException;
-+    method public String read() throws android.os.RemoteException;
-+    method public byte[] readB(int) throws android.os.RemoteException;
-+    method public void write(String) throws android.os.RemoteException;
-+    method public int writeB(byte[]) throws android.os.RemoteException;
-+  }
-+
-+  public abstract static class ICoproSerialPort.Stub extends android.os.Binder implements android.copro.ICoproSerialPort {
-+    ctor public ICoproSerialPort.Stub();
-+    method public android.os.IBinder asBinder();
-+    method public static android.copro.ICoproSerialPort asInterface(android.os.IBinder);
-+    method public static android.copro.ICoproSerialPort getDefaultImpl();
-+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
-+    method public static boolean setDefaultImpl(android.copro.ICoproSerialPort);
-+  }
-+
-+  public interface ICoproService extends android.os.IInterface {
-+    method public android.copro.FirmwareInfo getFirmwareByName(String) throws android.os.RemoteException;
-+    method public android.copro.FirmwareInfo[] getFirmwareList() throws android.os.RemoteException;
-+    method public android.copro.ICoproSerialPort getSerialPort() throws android.os.RemoteException;
-+    method public boolean isFirmwareRunning(int) throws android.os.RemoteException;
-+    method public void startFirmware(int) throws android.os.RemoteException;
-+    method public void stopFirmware() throws android.os.RemoteException;
-+  }
-+
-+  public static class ICoproService.Default implements android.copro.ICoproService {
-+    ctor public ICoproService.Default();
-+    method public android.os.IBinder asBinder();
-+    method public android.copro.FirmwareInfo getFirmwareByName(String) throws android.os.RemoteException;
-+    method public android.copro.FirmwareInfo[] getFirmwareList() throws android.os.RemoteException;
-+    method public android.copro.ICoproSerialPort getSerialPort() throws android.os.RemoteException;
-+    method public boolean isFirmwareRunning(int) throws android.os.RemoteException;
-+    method public void startFirmware(int) throws android.os.RemoteException;
-+    method public void stopFirmware() throws android.os.RemoteException;
-+  }
-+
-+  public abstract static class ICoproService.Stub extends android.os.Binder implements android.copro.ICoproService {
-+    ctor public ICoproService.Stub();
-+    method public android.os.IBinder asBinder();
-+    method public static android.copro.ICoproService asInterface(android.os.IBinder);
-+    method public static android.copro.ICoproService getDefaultImpl();
-+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
-+    method public static boolean setDefaultImpl(android.copro.ICoproService);
++    method public void writeToParcel(@NonNull android.os.Parcel, int);
++    field @NonNull public static final android.os.Parcelable.Creator<android.copro.FirmwareInfo> CREATOR;
 +  }
 +
 +}
@@ -136,12 +66,236 @@ index cd78602..ea1ef902 100644
  package android.database {
  
    public abstract class AbstractCursor implements android.database.CrossProcessCursor {
+diff --git a/api/lint-baseline.txt b/api/lint-baseline.txt
+index 83c78fe9578..009150d85b6 100644
+--- a/api/lint-baseline.txt
++++ b/api/lint-baseline.txt
+@@ -15,6 +15,14 @@ ArrayReturn: android.app.Notification.MessagingStyle.Message#getMessagesFromBund
+     
+ ArrayReturn: android.content.ContentProviderOperation#resolveExtrasBackReferences(android.content.ContentProviderResult[], int) parameter #0:
+     
++ArrayReturn: android.copro.CoproManager#getFirmwareList():
++    Method should return Collection<FirmwareInfo> (or subclass) instead of raw array; was `android.copro.FirmwareInfo[]`
++ArrayReturn: android.copro.ICoproService#getFirmwareList():
++    Method should return Collection<FirmwareInfo> (or subclass) instead of raw array; was `android.copro.FirmwareInfo[]`
++ArrayReturn: android.copro.ICoproService.Default#getFirmwareList():
++    Method should return Collection<FirmwareInfo> (or subclass) instead of raw array; was `android.copro.FirmwareInfo[]`
++ArrayReturn: android.database.sqlite.SQLiteDatabase#execPerConnectionSQL(String, Object[]) parameter #1:
++    Method parameter should be Collection<Object> (or subclass) instead of raw array; was `java.lang.Object[]`
+ ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #0:
+     Method parameter should be Collection<> (or subclass) instead of raw array; was `double[][]`
+ ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #1:
+@@ -523,6 +531,10 @@ KotlinOperator: android.media.AudioMetadata.ReadMap#get(android.media.AudioMetad
+     Method can be invoked with an indexing operator from Kotlin: `get` (this is usually desirable; just make sure it makes sense for this type of object)
+ 
+ 
++ManagerLookup: android.copro.CoproManager#getInstance():
++    Managers must always be obtained from Context (`getInstance`)
++
++
+ MethodNameUnits: android.media.MediaParser.SeekMap#getDurationMicros():
+     Returned time values are strongly encouraged to be in milliseconds unless you need the extra precision, was `getDurationMicros`
+ 
+@@ -543,6 +555,96 @@ MissingNullability: android.app.AsyncNotedAppOp#writeToParcel(android.os.Parcel,
+     
+ MissingNullability: android.app.SyncNotedAppOp#equals(Object) parameter #0:
+     
++MissingNullability: android.copro.CoproManager#getFirmwareByName(String):
++    Missing nullability on method `getFirmwareByName` return
++MissingNullability: android.copro.CoproManager#getFirmwareByName(String) parameter #0:
++    Missing nullability on parameter `name` in method `getFirmwareByName`
++MissingNullability: android.copro.CoproManager#getFirmwareList():
++    Missing nullability on method `getFirmwareList` return
++MissingNullability: android.copro.CoproManager#getInstance():
++    Missing nullability on method `getInstance` return
++MissingNullability: android.copro.CoproManager#getSerialPort():
++    Missing nullability on method `getSerialPort` return
++MissingNullability: android.copro.CoproSerialPort#CoproSerialPort(android.copro.ICoproSerialPort) parameter #0:
++    Missing nullability on parameter `service` in method `CoproSerialPort`
++MissingNullability: android.copro.CoproSerialPort#read():
++    Missing nullability on method `read` return
++MissingNullability: android.copro.CoproSerialPort#readB(int):
++    Missing nullability on method `readB` return
++MissingNullability: android.copro.CoproSerialPort#write(String) parameter #0:
++    Missing nullability on parameter `command` in method `write`
++MissingNullability: android.copro.CoproSerialPort#writeB(byte[]) parameter #0:
++    Missing nullability on parameter `command` in method `writeB`
++MissingNullability: android.copro.FirmwareInfo#CREATOR:
++    Missing nullability on field `CREATOR` in class `class android.copro.FirmwareInfo`
++MissingNullability: android.copro.FirmwareInfo#getName():
++    Missing nullability on method `getName` return
++MissingNullability: android.copro.FirmwareInfo#writeToParcel(android.os.Parcel, int) parameter #0:
++    Missing nullability on parameter `out` in method `writeToParcel`
++MissingNullability: android.copro.ICoproSerialPort#read():
++    Missing nullability on method `read` return
++MissingNullability: android.copro.ICoproSerialPort#readB(int):
++    Missing nullability on method `readB` return
++MissingNullability: android.copro.ICoproSerialPort#write(String) parameter #0:
++    Missing nullability on parameter `command` in method `write`
++MissingNullability: android.copro.ICoproSerialPort#writeB(byte[]) parameter #0:
++    Missing nullability on parameter `command` in method `writeB`
++MissingNullability: android.copro.ICoproSerialPort.Default#asBinder():
++    Missing nullability on method `asBinder` return
++MissingNullability: android.copro.ICoproSerialPort.Default#read():
++    Missing nullability on method `read` return
++MissingNullability: android.copro.ICoproSerialPort.Default#readB(int):
++    Missing nullability on method `readB` return
++MissingNullability: android.copro.ICoproSerialPort.Default#write(String) parameter #0:
++    Missing nullability on parameter `command` in method `write`
++MissingNullability: android.copro.ICoproSerialPort.Default#writeB(byte[]) parameter #0:
++    Missing nullability on parameter `command` in method `writeB`
++MissingNullability: android.copro.ICoproSerialPort.Stub#asBinder():
++    Missing nullability on method `asBinder` return
++MissingNullability: android.copro.ICoproSerialPort.Stub#asInterface(android.os.IBinder):
++    Missing nullability on method `asInterface` return
++MissingNullability: android.copro.ICoproSerialPort.Stub#asInterface(android.os.IBinder) parameter #0:
++    Missing nullability on parameter `obj` in method `asInterface`
++MissingNullability: android.copro.ICoproSerialPort.Stub#getDefaultImpl():
++    Missing nullability on method `getDefaultImpl` return
++MissingNullability: android.copro.ICoproSerialPort.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int) parameter #1:
++    Missing nullability on parameter `data` in method `onTransact`
++MissingNullability: android.copro.ICoproSerialPort.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int) parameter #2:
++    Missing nullability on parameter `reply` in method `onTransact`
++MissingNullability: android.copro.ICoproSerialPort.Stub#setDefaultImpl(android.copro.ICoproSerialPort) parameter #0:
++    Missing nullability on parameter `impl` in method `setDefaultImpl`
++MissingNullability: android.copro.ICoproService#getFirmwareByName(String):
++    Missing nullability on method `getFirmwareByName` return
++MissingNullability: android.copro.ICoproService#getFirmwareByName(String) parameter #0:
++    Missing nullability on parameter `name` in method `getFirmwareByName`
++MissingNullability: android.copro.ICoproService#getFirmwareList():
++    Missing nullability on method `getFirmwareList` return
++MissingNullability: android.copro.ICoproService#getSerialPort():
++    Missing nullability on method `getSerialPort` return
++MissingNullability: android.copro.ICoproService.Default#asBinder():
++    Missing nullability on method `asBinder` return
++MissingNullability: android.copro.ICoproService.Default#getFirmwareByName(String):
++    Missing nullability on method `getFirmwareByName` return
++MissingNullability: android.copro.ICoproService.Default#getFirmwareByName(String) parameter #0:
++    Missing nullability on parameter `name` in method `getFirmwareByName`
++MissingNullability: android.copro.ICoproService.Default#getFirmwareList():
++    Missing nullability on method `getFirmwareList` return
++MissingNullability: android.copro.ICoproService.Default#getSerialPort():
++    Missing nullability on method `getSerialPort` return
++MissingNullability: android.copro.ICoproService.Stub#asBinder():
++    Missing nullability on method `asBinder` return
++MissingNullability: android.copro.ICoproService.Stub#asInterface(android.os.IBinder):
++    Missing nullability on method `asInterface` return
++MissingNullability: android.copro.ICoproService.Stub#asInterface(android.os.IBinder) parameter #0:
++    Missing nullability on parameter `obj` in method `asInterface`
++MissingNullability: android.copro.ICoproService.Stub#getDefaultImpl():
++    Missing nullability on method `getDefaultImpl` return
++MissingNullability: android.copro.ICoproService.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int) parameter #1:
++    Missing nullability on parameter `data` in method `onTransact`
++MissingNullability: android.copro.ICoproService.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int) parameter #2:
++    Missing nullability on parameter `reply` in method `onTransact`
++MissingNullability: android.copro.ICoproService.Stub#setDefaultImpl(android.copro.ICoproService) parameter #0:
++    Missing nullability on parameter `impl` in method `setDefaultImpl`
+ MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CHORASMIAN:
+     
+ MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G:
+@@ -603,6 +705,12 @@ MissingNullability: java.time.chrono.JapaneseEra#REIWA:
+     
+ 
+ 
++NotCloseable: android.copro.CoproSerialPort:
++    Classes that release resources (close()) should implement AutoClosable and CloseGuard: class android.copro.CoproSerialPort
++NotCloseable: android.copro.ICoproSerialPort:
++    Classes that release resources (close()) should implement AutoClosable and CloseGuard: class android.copro.ICoproSerialPort
++NotCloseable: android.copro.ICoproSerialPort.Default:
++    Classes that release resources (close()) should implement AutoClosable and CloseGuard: class android.copro.ICoproSerialPort.Default
+ NotCloseable: android.media.MediaCodec.GraphicBlock:
+     Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.media.MediaCodec.GraphicBlock
+ NotCloseable: android.media.MediaCodec.LinearBlock:
+@@ -629,6 +737,20 @@ OnNameExpected: android.service.controls.ControlsProviderService#performControlA
+     Methods implemented by developers should follow the on<Something> style, was `performControlAction`
+ 
+ 
++ParcelNotFinal: android.copro.FirmwareInfo:
++    Parcelable classes must be final: android.copro.FirmwareInfo is not final
++
++
++ParcelableList: android.copro.CoproManager#getFirmwareList():
++    Methods should return `List<? extends Parcelable>` instead of `Parcelable[]` to support `ParceledListSlice` under the hood: method android.copro.CoproManager.getFirmwareList()
++
++
++RawAidl: android.copro.ICoproSerialPort.Stub:
++    Raw AIDL interfaces must not be exposed: Stub extends Binder
++RawAidl: android.copro.ICoproService.Stub:
++    Raw AIDL interfaces must not be exposed: Stub extends Binder
++
++
+ RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
+     
+ RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+@@ -1243,6 +1365,62 @@ RequiresPermission: android.webkit.WebSettings#setGeolocationEnabled(boolean):
+     
+ 
+ 
++RethrowRemoteException: android.copro.CoproSerialPort#open(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#close():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#open(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#read():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#readB(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#write(String):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort#writeB(byte[]):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#close():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#open(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#read():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#readB(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#write(String):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Default#writeB(byte[]):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproSerialPort.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#getFirmwareByName(String):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#getFirmwareList():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#getSerialPort():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#isFirmwareRunning(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#startFirmware(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService#stopFirmware():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#getFirmwareByName(String):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#getFirmwareList():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#getSerialPort():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#isFirmwareRunning(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#startFirmware(int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Default#stopFirmware():
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++RethrowRemoteException: android.copro.ICoproService.Stub#onTransact(int, android.os.Parcel, android.os.Parcel, int):
++    Methods calling system APIs should rethrow `RemoteException` as `RuntimeException` (but do not list it in the throws clause)
++
++
+ SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+     
+ SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
 diff --git a/core/java/android/copro/CoproManager.java b/core/java/android/copro/CoproManager.java
 new file mode 100644
-index 0000000..5a5cb51
+index 00000000000..0cfeca933b5
 --- /dev/null
 +++ b/core/java/android/copro/CoproManager.java
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,149 @@
 +/*
 + * Copyright (C) 2008 The Android Open Source Project
 + *
@@ -170,18 +324,21 @@ index 0000000..5a5cb51
 +import android.os.RemoteException;
 +import android.os.ServiceManager;
 +
++import android.annotation.SuppressLint;
++import android.annotation.NonNull;
++import android.annotation.Nullable;
++
 +/**
 + * The Manager class;
 + * The public methods of this class will be part of the new system API
-+ *
-+ * Have a look at how decorators are used (eg. hide) to see how mwthods are
-+ * exported or not in the SDK;
 + */
++@SuppressLint("ManagerLookup")
 +public class CoproManager {
 +    private final ICoproService mService;
 +    private static CoproManager sInstance = null;
 +
-+    public static CoproManager getInstance() {
++    @SuppressLint("ManagerLookup")
++    public static @Nullable CoproManager getInstance() {
 +        if(sInstance == null)
 +        {
 +            sInstance = new CoproManager();
@@ -201,8 +358,13 @@ index 0000000..5a5cb51
 +        }
 +    }
 +
-+    /* Get the firmware list*/
-+    public FirmwareInfo[] getFirmwareList() {
++    /**
++     * Get the firmware list
++     *
++     * @return firmware info list
++     */
++    @SuppressLint({"ParcelableList", "ArrayReturn"})
++    public @Nullable FirmwareInfo[] getFirmwareList() {
 +        FirmwareInfo[] res = {};
 +        try{
 +            res = mService.getFirmwareList();
@@ -212,8 +374,13 @@ index 0000000..5a5cb51
 +        return res;
 +    }
 +
-+    /* Get the firmware info by name */
-+    public FirmwareInfo getFirmwareByName(String name) {
++    /**
++     * Get the firmware info by name
++     *
++     * @param name firmware binary name
++     * @return firmware info (associated to the firmware name)
++     */
++    public @Nullable FirmwareInfo getFirmwareByName(@NonNull String name) {
 +        FirmwareInfo res = null;
 +        try{
 +            res = mService.getFirmwareByName(name);
@@ -223,7 +390,11 @@ index 0000000..5a5cb51
 +        return res;
 +    }
 +
-+    /* Return if the firmware is running */
++    /** Return if the firmware is running
++     *
++     * @param id firmware unique identifier
++     * @return true if the firmware is running, false otherwise
++     * */
 +    public boolean isFirmwareRunning(int id) {
 +        boolean res = false;
 +        try{
@@ -234,7 +405,11 @@ index 0000000..5a5cb51
 +        return res;
 +    }
 +
-+    /* Start the firmware with the specific id */
++    /**
++     * Start the firmware with the specific id
++     *
++     * @param id firmware unique identifier
++     */
 +    public void startFirmware(int id) {
 +        try{
 +            mService.startFirmware(id);
@@ -243,7 +418,9 @@ index 0000000..5a5cb51
 +        }
 +    }
 +
-+    /* Stop the firmware */
++    /**
++     * Stop the firmware
++     */
 +    public void stopFirmware() {
 +        try{
 +            mService.stopFirmware();
@@ -252,8 +429,12 @@ index 0000000..5a5cb51
 +        }
 +    }
 +
-+    /* Open the serial port */
-+    public CoproSerialPort getSerialPort() {
++    /**
++     * Open the serial port
++     *
++     * @return CoproSerialPort instance
++     */
++    public @Nullable CoproSerialPort getSerialPort() {
 +        CoproSerialPort res = null;
 +        try{
 +            ICoproSerialPort serialPort = mService.getSerialPort();
@@ -266,10 +447,10 @@ index 0000000..5a5cb51
 +}
 diff --git a/core/java/android/copro/CoproSerialPort.java b/core/java/android/copro/CoproSerialPort.java
 new file mode 100644
-index 0000000..db8a889
+index 00000000000..bb145c85591
 --- /dev/null
 +++ b/core/java/android/copro/CoproSerialPort.java
-@@ -0,0 +1,104 @@
+@@ -0,0 +1,135 @@
 +/*
 + * Copyright (C) 2008 The Android Open Source Project
 + *
@@ -294,36 +475,50 @@ index 0000000..db8a889
 +import android.content.Context;
 +import android.os.RemoteException;
 +
++import android.annotation.SuppressLint;
++import android.annotation.NonNull;
++import android.annotation.Nullable;
++
 +/**
-+ * The Manager class;
++ * The Serial Port class;
 + * The public methods of this class will be part of the new system API
-+ *
-+ * Have a look at how decorators are used (eg. hide) to see how mwthods are
-+ * exported or not in the SDK;
 + */
++@SuppressLint("NotCloseable")
 +public class CoproSerialPort {
 +    private final ICoproSerialPort mService;
 +
 +    /**
-+     * Initialize the remote service and execution context
++     * {@hide} Initialize the remote service and execution context
 +     * ContextImpl will build this manager object and provide the
 +     * remote service stub as parameter
 +     *
 +     * @param service
 +     */
-+    public CoproSerialPort(ICoproSerialPort service) {
++    public CoproSerialPort(@NonNull ICoproSerialPort service) {
 +        mService = service;
 +    }
 +
-+    /* Open the tty port with the specific mode */
-+    public void open(int mode) throws RemoteException {
-+        if (! mService.open(mode)) {
++    /**
++     * Open the tty port with the specified mode
++     *
++     * @param mode
++     */
++    public void open(int mode) {
++        try{
++            if (! mService.open(mode)) {
++                Slog.e("CoproSerialPort", "Failed to open Copro serial port");
++                RemoteException ex = new RemoteException("Failed to open Copro serial port");
++                throw ex.rethrowAsRuntimeException();
++            }
++        } catch (RemoteException ex){
 +            Slog.e("CoproSerialPort", "Failed to open Copro serial port");
-+            throw new RemoteException("Failed to open Copro serial port");
++            throw ex.rethrowAsRuntimeException();
 +        }
 +    }
 +
-+    /* Close the tty port */
++    /**
++     * Close the tty port
++     */
 +    public void close() {
 +        try{
 +            mService.close();
@@ -332,8 +527,12 @@ index 0000000..db8a889
 +        }
 +    }
 +
-+    /* Read data from tty */
-+    public String read() {
++    /**
++     * Read data from tty
++     *
++     * @return data (String format)
++     */
++    public @Nullable String read() {
 +        String res = "";
 +        try{
 +            res = mService.read();
@@ -343,8 +542,13 @@ index 0000000..db8a889
 +        return res;
 +    }
 +
-+    /* Read data from tty */
-+    public byte[] readB(int size) {
++    /**
++     * Read data from tty
++     *
++     * @param size
++     * @return data (raw format)
++     */
++    public @Nullable byte[] readB(int size) {
 +        byte[] res = "-1".getBytes();
 +        try{
 +            res = mService.readB(size);
@@ -354,8 +558,12 @@ index 0000000..db8a889
 +        return res;
 +    }
 +
-+    /* Write string to tty */
-+    public void write(String command) {
++    /**
++     * Write string to tty
++     *
++     * @param command (String format)
++     */
++    public void write(@NonNull String command) {
 +        try{
 +            mService.write(command);
 +        } catch (RemoteException ex){
@@ -363,8 +571,12 @@ index 0000000..db8a889
 +        }
 +    }
 +
-+    /* Write char sequence to tty */
-+    public int writeB(byte[] command) {
++    /**
++     * Write char sequence to tty
++     *
++     * @param command (raw format)
++     */
++    public int writeB(@NonNull byte[] command) {
 +        int res = -1;
 +        try{
 +            res = mService.writeB(command);
@@ -376,7 +588,7 @@ index 0000000..db8a889
 +}
 diff --git a/core/java/android/copro/FirmwareInfo.aidl b/core/java/android/copro/FirmwareInfo.aidl
 new file mode 100644
-index 0000000..73d4bab
+index 00000000000..73d4bab8f50
 --- /dev/null
 +++ b/core/java/android/copro/FirmwareInfo.aidl
 @@ -0,0 +1,19 @@
@@ -401,10 +613,10 @@ index 0000000..73d4bab
 +parcelable FirmwareInfo;
 diff --git a/core/java/android/copro/FirmwareInfo.java b/core/java/android/copro/FirmwareInfo.java
 new file mode 100644
-index 0000000..b726d14
+index 00000000000..db085768862
 --- /dev/null
 +++ b/core/java/android/copro/FirmwareInfo.java
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,103 @@
 +/*
 + * Copyright (C) 2014 The Android Open Source Project
 + *
@@ -426,7 +638,9 @@ index 0000000..b726d14
 +import android.os.Parcel;
 +import android.os.Parcelable;
 +
-+public class FirmwareInfo implements Parcelable {
++import android.annotation.NonNull;
++
++public final class FirmwareInfo implements Parcelable {
 +    private final int id;
 +    private final String name;
 +    private final boolean state;
@@ -469,13 +683,13 @@ index 0000000..b726d14
 +    }
 +
 +    @Override
-+    public void writeToParcel(Parcel out, int flags) {
++    public void writeToParcel(@NonNull Parcel out, int flags) {
 +        out.writeInt(id);
 +        out.writeString(name);
 +        out.writeBoolean(state);
 +    }
 +
-+    public static final Parcelable.Creator<FirmwareInfo> CREATOR
++    public static final @NonNull Parcelable.Creator<FirmwareInfo> CREATOR
 +            = new Parcelable.Creator<FirmwareInfo>() {
 +        @Override
 +        public FirmwareInfo createFromParcel(Parcel in) {
@@ -498,7 +712,7 @@ index 0000000..b726d14
 +        return id;
 +    }
 +
-+    public String getName() {
++    public @NonNull String getName() {
 +        return name;
 +    }
 +
@@ -508,10 +722,10 @@ index 0000000..b726d14
 +}
 diff --git a/core/java/android/copro/ICoproSerialPort.aidl b/core/java/android/copro/ICoproSerialPort.aidl
 new file mode 100644
-index 0000000..da88628
+index 00000000000..75f4a281887
 --- /dev/null
 +++ b/core/java/android/copro/ICoproSerialPort.aidl
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,43 @@
 +/*
 + * Copyright (C) 2014 The Android Open Source Project
 + *
@@ -533,6 +747,8 @@ index 0000000..da88628
 +/**
 + * Binder interface that clients running in application context
 + * can use to interface with remote service
++ *
++ * @hide
 + */
 +interface ICoproSerialPort {
 +    /* Open the tty port with the specific mode */
@@ -555,10 +771,10 @@ index 0000000..da88628
 +}
 diff --git a/core/java/android/copro/ICoproService.aidl b/core/java/android/copro/ICoproService.aidl
 new file mode 100644
-index 0000000..7da7b06
+index 00000000000..39b39169403
 --- /dev/null
 +++ b/core/java/android/copro/ICoproService.aidl
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,46 @@
 +/*
 + * Copyright (C) 2014 The Android Open Source Project
 + *
@@ -583,6 +799,8 @@ index 0000000..7da7b06
 +/**
 + * Binder interface that clients running in application context
 + * can use to interface with remote service
++ *
++ * @hide
 + */
 +interface ICoproService {
 +    /* Get the firmware list*/
@@ -603,6 +821,49 @@ index 0000000..7da7b06
 +    /* Open the serial port */
 +    ICoproSerialPort getSerialPort();
 +}
+diff --git a/non-updatable-api/current.txt b/non-updatable-api/current.txt
+index 5f15216e840..d506cf65d42 100644
+--- a/non-updatable-api/current.txt
++++ b/non-updatable-api/current.txt
+@@ -12883,6 +12883,38 @@ package android.content.res.loader {
+ 
+ }
+ 
++package android.copro {
++
++  public class CoproManager {
++    method @Nullable public android.copro.FirmwareInfo getFirmwareByName(@NonNull String);
++    method @Nullable public android.copro.FirmwareInfo[] getFirmwareList();
++    method @Nullable public static android.copro.CoproManager getInstance();
++    method @Nullable public android.copro.CoproSerialPort getSerialPort();
++    method public boolean isFirmwareRunning(int);
++    method public void startFirmware(int);
++    method public void stopFirmware();
++  }
++
++  public class CoproSerialPort {
++    method public void close();
++    method public void open(int);
++    method @Nullable public String read();
++    method @Nullable public byte[] readB(int);
++    method public void write(@NonNull String);
++    method public int writeB(@NonNull byte[]);
++  }
++
++  public final class FirmwareInfo implements android.os.Parcelable {
++    method public int describeContents();
++    method public int getId();
++    method @NonNull public String getName();
++    method public boolean getState();
++    method public void writeToParcel(@NonNull android.os.Parcel, int);
++    field @NonNull public static final android.os.Parcelable.Creator<android.copro.FirmwareInfo> CREATOR;
++  }
++
++}
++
+ package android.database {
+ 
+   public abstract class AbstractCursor implements android.database.CrossProcessCursor {
 -- 
-2.7.4
+2.17.1
 

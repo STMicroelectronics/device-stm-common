@@ -1,0 +1,15 @@
+allow tee vendor_data_file:dir { add_name create write };
+allow tee vendor_data_file:file { create open read write };
+allow tee system_data_file:dir getattr;
+allow tee mnt_vendor_file:dir { getattr search add_name create write };
+allow tee mnt_vendor_file:file { create open read write };
+allow tee teefs_file:dir { getattr search };
+
+allow tee self:capability sys_rawio;
+allow tee sysfs_blockinfo:dir search;
+allow tee sysfs_blockinfo:file { open read };
+allow tee block_device:dir search;
+allow tee root_block_device:dir search;
+allow tee root_block_device:blk_file rw_file_perms;
+allowxperm tee root_block_device:blk_file ioctl 0xb300;
+allow tee rpmb_block_device:chr_file { ioctl open read write };

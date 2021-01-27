@@ -1,0 +1,10 @@
+dontaudit untrusted_app_27 {
+  linkerconfig_file
+  mirror_data_file
+  user_profile_data_file
+}:dir getattr;
+
+dontaudit untrusted_app_27 {
+  block_device
+  mnt_vendor_file
+}:dir search;

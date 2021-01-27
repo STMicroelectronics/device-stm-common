@@ -1,0 +1,14 @@
+type hal_keymaster_optee, domain;
+type hal_keymaster_optee_exec, exec_type, vendor_file_type, file_type;
+
+vndbinder_use(hal_keymaster_optee)
+hal_server_domain(hal_keymaster_optee, hal_keymaster)
+
+init_daemon_domain(hal_keymaster_optee)
+
+# Allow access to vendor.keymaster.optee properties
+get_prop(hal_keymaster_optee, vendor_km_optee_prop)
+set_prop(hal_keymaster_optee, vendor_km_optee_prop)
+
+allow hal_keymaster_optee tee_device:chr_file rw_file_perms;
+allow hal_keymaster_optee ion_device:chr_file r_file_perms;

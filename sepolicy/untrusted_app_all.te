@@ -1,8 +1,5 @@
-# Needed by the graphical library to display content
-
-allow untrusted_app_all render_device:chr_file { rw_file_perms };
-get_prop(untrusted_app_all, graphics_prop)
-
+allow untrusted_app_all gpu_device:chr_file { rw_file_perms };
+get_prop(untrusted_app_all, vendor_allocator_prop);
 allow untrusted_app_all proc_vmstat:file { getattr };
 
 dontaudit untrusted_app_all sysfs_zram:dir search;

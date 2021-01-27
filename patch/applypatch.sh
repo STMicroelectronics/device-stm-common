@@ -17,7 +17,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
 SOC_FAMILY="stm32mp1"
 
@@ -35,7 +35,7 @@ fi
 COMMON_PATH="${TOP_PATH}/device/stm/${SOC_FAMILY}"
 
 PATCH_CONFIG_PATH=${COMMON_PATH}/patch/android/android_patch.config
-PATCH_FILES_PATH=${COMMON_PATH}/patch/android/
+PATCH_FILES_PATH=${COMMON_PATH}/patch/android
 PATCH_STATUS_FILE="${COMMON_PATH}/configs/patch.config"
 
 #######################################
@@ -80,9 +80,10 @@ usage()
   echo "Apply patches based on patch configuration file"
   empty_line
   echo "Options:"
-  echo "  -h/--help: get current help"
-  echo "  -f/--force: force applying patches"
-  echo "  -c/--config <patch config file>: get patch configuration file path [default = ${PATCH_CONFIG_PATH}]"
+  echo "  -h / --help: get current help"
+  echo "  -v / --version: get script version"
+  echo "  -f / --force: force applying patches"
+  echo "  -c <patch config file> / --config=<patch config file>: get patch configuration file path [default = ${PATCH_CONFIG_PATH}]"
   empty_line
 }
 
@@ -158,7 +159,9 @@ apply_patch()
 
   loc_patch_path=${PATCH_FILES_PATH}/
   loc_patch_path+=$1
-  loc_patch_path+=".patch"
+  if [ "${1##*.}" != "patch" ];then
+    loc_patch_path+=".patch"
+  fi
 
   \git am ${loc_patch_path} >/dev/null 2>&1
   if [ $? -ne 0 ]; then
@@ -213,35 +216,67 @@ if [[ "$0" != "$BASH_SOURCE" ]]; then
   return
 fi
 
-if [ $# -gt 5 ]
-then
+# check the options
+while getopts "hvfc:-:" option; do
+    case "${option}" in
+        -)
+            # Treat long options
+            case "${OPTARG}" in
+                help)
+                    usage
+                    \popd >/dev/null 2>&1
+                    exit 0
+                    ;;
+                version)
+                    echo "`basename $0` version ${SCRIPT_VERSION}"
+                    \popd >/dev/null 2>&1
+                    exit 0
+                    ;;
+                force)
+                    force_apply=1
+                    ;;
+                config=*)
+                    PATCH_CONFIG_PATH=${OPTARG#*=}
+                    ;;
+                *)
+                    usage
+                    \popd >/dev/null 2>&1
+                    exit 1
+                    ;;
+            esac;;
+        # Treat short options
+        h)
+            usage
+            \popd >/dev/null 2>&1
+            exit 0
+            ;;
+        v)
+            echo "`basename $0` version ${SCRIPT_VERSION}"
+            \popd >/dev/null 2>&1
+            exit 0
+            ;;
+        f)
+            force_apply=1
+            ;;
+        c)
+            PATCH_CONFIG_PATH=${OPTARG}
+            ;;
+        *)
+            usage
+            \popd >/dev/null 2>&1
+            exit 1
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 0 ]; then
+  error "Unknown command : $*"
   usage
-  \popd >/dev/null 2>&1
+  popd >/dev/null 2>&1
   exit 1
 fi
-
-while test "$1" != ""; do
-  arg=$1
-  case $arg in
-    "-h"|"--help" )
-    usage
-    exit 1
-    ;;
-
-    "-f"|"--force" )
-    force_apply=1
-    ;;
-
-    "-c"|"--config" )
-    PATCH_CONFIG_PATH=$2
-    shift
-    ;;
-
-    ** )
-    ;;
-  esac
-  shift
-done
 
 if [[ ! -f ${PATCH_CONFIG_PATH} ]]; then
   error "patch configuration file ${PATCH_CONFIG_PATH} not found"

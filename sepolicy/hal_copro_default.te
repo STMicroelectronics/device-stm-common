@@ -13,4 +13,4 @@ add_hwservice(hal_copro_server, hal_coproserial_hwservice)
 
 allow hal_copro_default rpmsg_device:chr_file { open read write ioctl getattr };
 allow hal_copro_default sysfs:file { read write open };
-
+allow hal_copro_default debugfs_regulator:dir search;

@@ -3,23 +3,32 @@
 /dev/block/platform/soc/58005000.sdmmc/by-name/misc         u:object_r:misc_block_device:s0
 /dev/block/platform/soc/58005000.sdmmc/by-name/boot_[ab]    u:object_r:boot_block_device:s0
 /dev/block/platform/soc/58005000.sdmmc/by-name/dt_[ab]      u:object_r:boot_block_device:s0
-/dev/block/platform/soc/58005000.sdmmc/by-name/system_[ab]  u:object_r:system_block_device:s0
-/dev/block/platform/soc/58005000.sdmmc/by-name/vendor_[ab]  u:object_r:system_block_device:s0
+/dev/block/platform/soc/58005000.sdmmc/by-name/super        u:object_r:super_block_device:s0
 /dev/block/platform/soc/58005000.sdmmc/by-name/userdata     u:object_r:userdata_block_device:s0
+/dev/block/platform/soc/58005000.sdmmc/by-name/teefs        u:object_r:teefs_block_device:s0
 
 /dev/block/platform/soc/58007000.sdmmc/by-name/misc         u:object_r:misc_block_device:s0
 /dev/block/platform/soc/58007000.sdmmc/by-name/boot_[ab]    u:object_r:boot_block_device:s0
 /dev/block/platform/soc/58007000.sdmmc/by-name/dt_[ab]      u:object_r:boot_block_device:s0
-/dev/block/platform/soc/58007000.sdmmc/by-name/system_[ab]  u:object_r:system_block_device:s0
-/dev/block/platform/soc/58007000.sdmmc/by-name/vendor_[ab]  u:object_r:system_block_device:s0
+/dev/block/platform/soc/58007000.sdmmc/by-name/super        u:object_r:super_block_device:s0
 /dev/block/platform/soc/58007000.sdmmc/by-name/userdata     u:object_r:userdata_block_device:s0
+/dev/block/platform/soc/58007000.sdmmc/by-name/teefs        u:object_r:teefs_block_device:s0
 
 /dev/block/platform/soc/by-name/boot_[ab]                   u:object_r:boot_block_device:s0
 /dev/block/platform/soc/by-name/dt_[ab]                     u:object_r:boot_block_device:s0
-/dev/block/platform/soc/by-name/system_[ab]                 u:object_r:system_block_device:s0
-/dev/block/platform/soc/by-name/vendor_[ab]                 u:object_r:system_block_device:s0
 /dev/block/platform/soc/by-name/userdata                    u:object_r:userdata_block_device:s0
+/dev/block/platform/soc/by-name/teefs                       u:object_r:teefs_block_device:s0
 /dev/block/platform/soc/by-name/misc                        u:object_r:misc_block_device:s0
+
+/dev/block/by-name/boot_[ab]                                u:object_r:boot_block_device:s0
+/dev/block/by-name/dt_[ab]                                  u:object_r:boot_block_device:s0
+/dev/block/by-name/super                                    u:object_r:super_block_device:s0
+/dev/block/by-name/userdata                                 u:object_r:userdata_block_device:s0
+/dev/block/by-name/teefs                                    u:object_r:teefs_block_device:s0
+/dev/block/by-name/misc                                     u:object_r:misc_block_device:s0
+
+/dev/block/mmcblk1                                          u:object_r:root_block_device:s0
+/dev/mmcblk1rpmb                                            u:object_r:rpmb_block_device:s0
 
 /dev/block/zram0                                            u:object_r:swap_block_device:s0
 
@@ -29,7 +38,7 @@
 /dev/graphics/galcore                                       u:object_r:gpu_device:s0
 /dev/galcore                                                u:object_r:gpu_device:s0
 
-/dev/dri/renderD[0-9]*                                      u:object_r:render_device:s0
+/dev/dri/renderD[0-9]*                                      u:object_r:gpu_device:s0
 /dev/dri/card[0-9]                                          u:object_r:graphics_device:s0
 
 /dev/tee0                                                   u:object_r:tee_device:s0
@@ -38,6 +47,11 @@
 /dev/ttyRPMSG0                                              u:object_r:rpmsg_device:s0
 
 /dev/ttySTM0                                                u:object_r:tty_device:s0
+
+/dev/stune(/.*)*                                            u:object_r:cgroup:s0
+/dev/cpuset(/.*)*                                           u:object_r:cgroup:s0
+
+/sys/devices/platform/soc/59000000\.gpu(/.*)*                             u:object_r:sysfs_gc:s0
 
 /sys/devices/platform/charger-0/power_supply/dummy-battery/technology     u:object_r:sysfs_batteryinfo:s0
 /sys/devices/platform/charger-0/power_supply/dummy-battery/capacity       u:object_r:sysfs_batteryinfo:s0
@@ -59,12 +73,32 @@
 /sys/devices/platform/charger-0/power_supply/dummy-charger-usb_c/online   u:object_r:sysfs_batteryinfo:s0
 /sys/devices/platform/charger-0/power_supply/dummy-charger-usb_c/type     u:object_r:sysfs_batteryinfo:s0
 /sys/devices/platform/charger-0/power_supply/status                       u:object_r:sysfs_batteryinfo:s0
-/sys/block/mmcblk0/stat                                                   u:object_r:sysfs_batteryinfo:s0
+
+/sys/devices/platform/charger-0/power_supply/dummy-charger-usb_c/wakeup[0-9](/.*)*         u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/charger-0/power_supply/dummy-charger-ac/wakeup[0-9](/.*)*            u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/charger-0/power_supply/dummy-battery/wakeup[0-9](/.*)*               u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/soc/5c002000.i2c/i2c-1/1-0033/5c002000.i2c\:stpmic@33\:onkey/wakeup/wakeup[0-9](/.*)* u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/soc/5c004000.rtc/rtc/rtc[0-9]/wakeup[0-9](/.*)*                      u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/soc/5c004000.rtc/wakeup/wakeup[0-9](/.*)*                            u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/mlahb/mlahb:m4@10000000/wakeup/wakeup[0-9](/.*)*                     u:object_r:sysfs_wakeup:s0
+
+/sys/devices/platform/soc/58005000.sdmmc/mmc_host(/.*)?                   u:object_r:sysfs_blockinfo:s0
+/sys/devices/platform/soc/58007000.sdmmc/mmc_host(/.*)?                   u:object_r:sysfs_blockinfo:s0
+/sys/devices/platform/soc/5800d000\.usbh-ehci(/.*)?                       u:object_r:sysfs_blockinfo:s0
+/sys/block/mmcblk0/stat                                                   u:object_r:sysfs_blockinfo:s0
+/sys/block/mmcblk1/stat                                                   u:object_r:sysfs_blockinfo:s0
+
+/sys/block/mmcblk0/queue(/.*)*                                            u:object_r:sysfs_blocktuning:s0
+/sys/block/mmcblk1/queue(/.*)*                                            u:object_r:sysfs_blocktuning:s0
 
 /sys/devices/platform/soc/5c004000.rtc/rtc/rtc0/hctosys                   u:object_r:sysfs_rtc:s0
 
 /sys/devices/platform/led/leds(/.*)*                                      u:object_r:sysfs_leds:s0
 /sys/class/leds(/.*)*                                                     u:object_r:sysfs_leds:s0
+/sys/class/backlight(/.*)*                                                u:object_r:sysfs_leds:s0
+
+/sys/devices/virtual/thermal(/.*)*                                        u:object_r:sysfs_thermal:s0
+/sys/class/thermal(/.*)*                                                  u:object_r:sysfs_thermal:s0
 
 /sys/kernel/debug/gpio(/.*)*                                              u:object_r:debugfs_gpio:s0
 /sys/kernel/debug/clk(/.*)*                                               u:object_r:debugfs_clk:s0
@@ -75,15 +109,22 @@
 /sys/devices/platform/soc/5800d000.usbh-ehci/usb2/2-1/2-1.[0-9]/2-1.[0-9]:1.0/net/wlan0(/.*)* u:object_r:sysfs_net:s0
 /sys/class/net(/.*)*                                                                          u:object_r:sysfs_net:s0
 
-# initprop and initdriver processes to init proprietary properties and load kernel module
-/(vendor|system/vendor)/bin/initprop                        u:object_r:initprop_exec:s0
+# initdriver binary to load kernel module
 /(vendor|system/vendor)/bin/initdriver                      u:object_r:initdriver_exec:s0
 
-# tee-supplicant
-/(vendor|system/vendor)/bin/tee-supplicant                  u:object_r:tee_supplicant_exec:s0
+# clean_scratch_files
+/system/bin/clean_scratch_files                             u:object_r:clean_scratch_files_exec:s0
+
+# tee
+/(vendor|system/vendor)/bin/tee-supplicant                  u:object_r:tee_exec:s0
+/(vendor|system/vendor)/bin/xtest                           u:object_r:tee_exec:s0
+/(vendor|system/vendor)/bin/hw/wait_for_keymaster_optee     u:object_r:wait_for_keymaster_optee_exec:s0
+/mnt/vendor/teefs(/.*)?                                     u:object_r:teefs_file:s0
+/teefs(/.*)?                                                u:object_r:teefs_file:s0
+/mnt/vendor/teefs/optee(/.*)?                               u:object_r:tee_data_file:s0
+/data/vendor/tee(/.*)?                                      u:object_r:tee_data_file:s0
 
 # Graphical libraries are same_process_hal_file
-/(vendor|system/vendor)/lib(64)?/hw/android\.hardware\.graphics\.mapper@2\.0-impl-2\.1\.so u:object_r:same_process_hal_file:s0
 /(vendor|system/vendor)/lib(64)?/libVSC\.so                                                u:object_r:same_process_hal_file:s0
 /(vendor|system/vendor)/lib(64)?/libGAL\.so                                                u:object_r:same_process_hal_file:s0
 /(vendor|system/vendor)/lib(64)?/hw/gralloc\.stm\.so                                       u:object_r:same_process_hal_file:s0
@@ -92,12 +133,15 @@
 /(vendor|system/vendor)/lib(64)?/libGLSLC\.so                                              u:object_r:same_process_hal_file:s0
 
 # Vendor HAL implementation
+/(vendor|system/vendor)/bin/hw/android\.hardware\.keymaster@3\.0-service\.optee            u:object_r:hal_keymaster_optee_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.gatekeeper@1\.0-service\.optee           u:object_r:hal_gatekeeper_optee_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.health@2\.0-service\.stm32mp1\.emmc      u:object_r:hal_health_default_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.health@2\.0-service\.stm32mp1\.sd        u:object_r:hal_health_default_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.usb@1\.1-service\.stm32mp1(-c)?          u:object_r:hal_usb_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.lights-service\.stm32mp1                 u:object_r:hal_light_default_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.camera\.provider@2\.4-service\.stm32mp1  u:object_r:hal_camera_default_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.copro@1\.0-service\.stm32mp1             u:object_r:hal_copro_default_exec:s0
-/(vendor|system/vendor)/bin/hw/android\.hardware\.thermal@1\.1-service\.stm32mp1           u:object_r:hal_thermal_default_exec:s0
+/(vendor|system/vendor)/bin/hw/android\.hardware\.thermal@2\.0-service\.stm32mp1           u:object_r:hal_thermal_default_exec:s0
 /(vendor|system/vendor)/bin/hw/android\.hardware\.oemlock@1.0-service.stm32mp1             u:object_r:hal_oemlock_default_exec:s0
 
 # Swap file

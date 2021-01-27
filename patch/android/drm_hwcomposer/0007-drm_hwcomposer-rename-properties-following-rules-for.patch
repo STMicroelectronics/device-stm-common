@@ -1,0 +1,44 @@
+From 1455f982a080f79f50132a4a60fee7ddd3dee9fe Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 10 Aug 2020 16:17:33 +0200
+Subject: [PATCH 7/7] drm_hwcomposer: rename properties following rules for
+ vendor
+
+hwc.drm.primary_display_order replaced by vendor.hwc.drm.primary_display_order
+hwc.drm.exclude_non_hwfb_imports replaced by vendor.hwc.drm.exclude_non_hwfb_imports
+
+Change-Id: I26d1cee36b47192ed4acc04b0ea624d000699da7
+---
+ drm/drmdevice.cpp               | 2 +-
+ platform/platformdrmgeneric.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drm/drmdevice.cpp b/drm/drmdevice.cpp
+index bcb9ddd..c541541 100644
+--- a/drm/drmdevice.cpp
++++ b/drm/drmdevice.cpp
+@@ -59,7 +59,7 @@ namespace android {
+ 
+ static std::vector<std::string> read_primary_display_order_prop() {
+   std::array<char, PROPERTY_VALUE_MAX> display_order_buf;
+-  property_get("hwc.drm.primary_display_order", display_order_buf.data(),
++  property_get("vendor.hwc.drm.primary_display_order", display_order_buf.data(),
+                "...");
+ 
+   std::vector<std::string> display_order;
+diff --git a/platform/platformdrmgeneric.cpp b/platform/platformdrmgeneric.cpp
+index 1aa8160..caf549d 100644
+--- a/platform/platformdrmgeneric.cpp
++++ b/platform/platformdrmgeneric.cpp
+@@ -66,7 +66,7 @@ int DrmGenericImporter::Init() {
+         gralloc_->common.author);
+ 
+   char exclude_non_hwfb_prop[PROPERTY_VALUE_MAX];
+-  property_get("hwc.drm.exclude_non_hwfb_imports", exclude_non_hwfb_prop, "0");
++  property_get("vendor.hwc.drm.exclude_non_hwfb_imports", exclude_non_hwfb_prop, "0");
+   exclude_non_hwfb_ = static_cast<bool>(strncmp(exclude_non_hwfb_prop, "0", 1));
+ 
+   return 0;
+-- 
+2.17.1
+

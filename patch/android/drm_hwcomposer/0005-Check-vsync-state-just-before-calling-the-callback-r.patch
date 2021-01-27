@@ -1,0 +1,39 @@
+From 18c24741966c8948754df8a2ff5d8fadc9a5f545 Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 3 Feb 2020 18:23:12 +0100
+Subject: [PATCH 5/7] Check vsync state just before calling the callback (race)
+ to avoid invalid vsync
+
+Change-Id: I62c67abd52264cab4564586b3f3a6af4b12e079b
+---
+ drm/vsyncworker.cpp | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drm/vsyncworker.cpp b/drm/vsyncworker.cpp
+index 08ab301..b367287 100644
+--- a/drm/vsyncworker.cpp
++++ b/drm/vsyncworker.cpp
+@@ -127,7 +127,6 @@ void VSyncWorker::Routine() {
+   }
+ 
+   int display = display_;
+-  std::shared_ptr<VsyncCallback> callback(callback_);
+   Unlock();
+ 
+   DrmCrtc *crtc = drm_->GetCrtcForDisplay(display);
+@@ -185,6 +184,12 @@ void VSyncWorker::Routine() {
+    * the hook. However, in practice, callback_ is only updated once, so it's not
+    * worth the overhead.
+    */
++
++  // race played including the enable state to avoid invalid vsync
++  Lock();
++  std::shared_ptr<VsyncCallback> callback(callback_);
++  Unlock();
++
+   if (callback)
+     callback->Callback(display, timestamp);
+   last_timestamp_ = timestamp;
+-- 
+2.17.1
+

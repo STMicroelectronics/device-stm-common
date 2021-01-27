@@ -13,14 +13,12 @@ ifeq ($(BOARD_FLAVOUR),)
 $(error BOARD_FLAVOUR not defined)
 endif
 
-FSBL_TRUSTED_BIN := $(TARGET_PREBUILT_PBL)/tf-a-$(SOC_VERSION)-$(BOARD_FLAVOUR)-trusted.stm32
 FSBL_OPTEE_BIN := $(TARGET_PREBUILT_PBL)/tf-a-$(SOC_VERSION)-$(BOARD_FLAVOUR)-optee.stm32
 FSBL_PROG := $(TARGET_PREBUILT_PBL)/tf-a-$(SOC_VERSION)-$(BOARD_FLAVOUR)-programmer.stm32
 
 .PHONY: fsbl.img
 
 fsbl.img:
-	$(ACP) -fp $(FSBL_TRUSTED_BIN) $(PRODUCT_OUT)/fsbl-trusted.img
 	$(ACP) -fp $(FSBL_OPTEE_BIN) $(PRODUCT_OUT)/fsbl-optee.img
 	$(ACP) -fp $(FSBL_PROG) $(PRODUCT_OUT)/fsbl-programmer.img
 

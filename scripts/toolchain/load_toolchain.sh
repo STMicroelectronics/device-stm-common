@@ -35,11 +35,11 @@ fi
 \pushd ${TOP_PATH} >/dev/null 2>&1
 
 TOOLCHAIN_PATH="${TOP_PATH}/prebuilts/gcc/linux-x86/arm/"
-TOOLCHAIN_FAMILY_VERSION="8.2-2019.01"
+TOOLCHAIN_FAMILY_VERSION="9.2-2019.12"
+TOOLCHAIN_MACHINE=`uname -i`
 TOOLCHAIN_VERSION=${TOOLCHAIN_FAMILY_VERSION}
-TOOLCHAIN_NAME="gcc-arm-${TOOLCHAIN_VERSION}-x86_64-arm-eabi"
+TOOLCHAIN_NAME="gcc-arm-${TOOLCHAIN_VERSION}-${TOOLCHAIN_MACHINE}-arm-none-eabi"
 TOOLCHAIN_FILE_NAME="${TOOLCHAIN_NAME}.tar.xz"
-
 
 #######################################
 # Variables
@@ -181,7 +181,7 @@ if [[ ${toolchain_mirror} == 1 ]]; then
   else
     \mkdir -p ${toolchain_mirror_path} >/dev/null 2>&1
     \pushd ${toolchain_mirror_path} >/dev/null 2>&1
-    \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/${TOOLCHAIN_FILE_NAME}
+    \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
     \popd >/dev/null 2>&1
 
     echo "The toolchain has been loaded in mirror directory ${toolchain_mirror_path}"
@@ -192,7 +192,7 @@ if [[ ${toolchain_mirror} == 1 ]]; then
   fi
 else
 
-  if test -x ${TOOLCHAIN_PATH}/${TOOLCHAIN_NAME}/bin/arm-eabi-gcc
+  if test -x ${TOOLCHAIN_PATH}/${TOOLCHAIN_NAME}/bin/arm-none-eabi-gcc
   then
     green "The toolchain has been already installed successfully"
   else
@@ -203,7 +203,7 @@ else
       \cp ${TOOLCHAIN_MIRROR}/${TOOLCHAIN_FILE_NAME} .
     else
       warning "The toolchain mirror directory is not defined, it's recommended to create it"
-      \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/${TOOLCHAIN_FILE_NAME}
+      \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
     fi
 
     echo "Uncompressing toochain archive.... "

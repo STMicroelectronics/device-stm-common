@@ -144,14 +144,19 @@ fi
 
 #Get tsv list for the current memory type configuration
 tsv_list=$(find ${COMMON_PATH}/layout/programmer -name "*.tsv" | grep "_clear" | awk -F"/" '{print $NF}')
-
-PS3='Which layout do you want to flash ?'
 options=($tsv_list)
-select opt in "${options[@]}"
-do
-  selected_tsv=$opt
-  break
-done
+
+if [[ ${#options[@]} -eq 1 ]];then
+  echo "Layout config ${options[0]} selected"
+  selected_tsv=${options[0]}
+else
+  PS3='Which layout do you want to flash ?'
+  select opt in "${options[@]}"
+  do
+    selected_tsv=$opt
+    break
+  done
+fi
 
 STM32_Programmer_CLI -c port=${usb_dfu} -w ${COMMON_PATH}/layout/programmer/${selected_tsv}
 

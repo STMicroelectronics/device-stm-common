@@ -1,1 +1,4 @@
+allow update_engine dumpstate:fd use;
+allow update_engine dumpstate:fifo_file write;
+
 dontaudit update_engine runtime_event_log_tags_file:file map;

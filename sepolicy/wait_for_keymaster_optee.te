@@ -1,0 +1,9 @@
+# wait_for_keymaster_optee service
+type wait_for_keymaster_optee, domain;
+type wait_for_keymaster_optee_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(wait_for_keymaster_optee)
+
+hal_client_domain(wait_for_keymaster_optee, hal_keymaster)
+
+allow wait_for_keymaster_optee kmsg_device:chr_file w_file_perms;

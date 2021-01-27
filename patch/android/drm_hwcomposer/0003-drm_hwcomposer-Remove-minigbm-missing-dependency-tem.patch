@@ -1,7 +1,7 @@
-From 806f572d4ac3764d2a2eb5aeeef27d0980d2978c Mon Sep 17 00:00:00 2001
+From f19819700b72f650cb286a2211f867580ceba919 Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
 Date: Thu, 16 Jan 2020 08:44:20 +0100
-Subject: [PATCH 3/4] drm_hwcomposer: Remove minigbm (missing dependency) -
+Subject: [PATCH 3/7] drm_hwcomposer: Remove minigbm (missing dependency) -
  temporary
 
 Change-Id: I83b0e0fd23a4c45ce75e7b9faef770a48e9b6eba
@@ -32,5 +32,5 @@ index 85be0b5..c350550 100644
  filegroup {
      name: "drm_hwcomposer_platformimagination",
 -- 
-2.7.4
+2.17.1
 

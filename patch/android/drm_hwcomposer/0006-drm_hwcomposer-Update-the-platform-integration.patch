@@ -1,0 +1,31 @@
+From b638adc6bfb492340a64bcdb907cb54de6239c80 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 27 Jul 2020 15:28:53 +0200
+Subject: [PATCH 6/7] drm_hwcomposer: Update the platform integration
+
+Change-Id: I1a38e9b4f8fc57a9d4c0f77a9796acc0802b476a
+---
+ Android.bp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/Android.bp b/Android.bp
+index c350550..1172172 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -99,6 +99,13 @@ cc_library_shared {
+     cppflags: ["-DUSE_DRM_GENERIC_IMPORTER"],
+ }
+ 
++filegroup {
++    name: "drm_hwcomposer_platformgeneric",
++    srcs: [
++        "platform/platformdrmgeneric.cpp",
++    ],
++}
++
+ // Used by hwcomposer.drm_imagination
+ filegroup {
+     name: "drm_hwcomposer_platformimagination",
+-- 
+2.17.1
+

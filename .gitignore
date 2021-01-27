@@ -6,6 +6,8 @@ configs/patch.config
 configs/tee.config
 configs/teeuser.config
 configs/openocd.config
+core/devmem
+core/miscgen
 peripheral/allocator
 peripheral/bootctrl
 peripheral/camera
@@ -20,8 +22,9 @@ peripheral/thermal
 peripheral/usb
 peripheral/wifi
 peripheral/gcnano-userland
+tee/kmgk
 tee/optee_client
 tee/optee_test
-graphics/*
+graphics
 disco
 eval

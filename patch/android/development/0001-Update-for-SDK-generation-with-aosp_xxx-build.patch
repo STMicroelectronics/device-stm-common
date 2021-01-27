@@ -1,50 +1,29 @@
-From b599c7ea7c41ce44f31bd8aac0da8e2d782a3280 Mon Sep 17 00:00:00 2001
-From: Christophe Guibout <christophe.guibout@st.com>
-Date: Tue, 4 Feb 2020 15:16:24 +0100
+From 7bce2cbcb3e070b95cef50029c6784f07cd2d324 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Thu, 10 Sep 2020 11:39:51 +0200
 Subject: [PATCH] Update for SDK generation with aosp_xxx build
 
-Change-Id: I9c74c996eb0c34c1ea469d6aa3ce47ad1e6ba14e
+Change-Id: Iad3536ddd2fce66ad93863df045cb0c8f97c0dc9
 ---
- build/product_sdk.mk |  1 -
- build/sdk.atree      | 12 ++++++------
- 2 files changed, 6 insertions(+), 7 deletions(-)
+ build/sdk.atree | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/build/product_sdk.mk b/build/product_sdk.mk
-index 40cf9aa..c6545f7 100644
---- a/build/product_sdk.mk
-+++ b/build/product_sdk.mk
-@@ -42,7 +42,6 @@ PRODUCT_HOST_PACKAGES += \
- 	dx \
- 	etc1tool \
- 	hprof-conv \
--	layoutlib-legacy \
- 	libaapt2_jni \
- 	llvm-rs-cc \
- 	sqlite3 \
 diff --git a/build/sdk.atree b/build/sdk.atree
-index e637e8f..1513bb3 100644
+index cf96ed5db..ef9c186b4 100644
 --- a/build/sdk.atree
 +++ b/build/sdk.atree
-@@ -217,7 +217,7 @@ prebuilts/sdk/sdk-annotations/annotations.zip platforms/${PLATFORM_NAME}/data/an
- ${OUT_DIR}/target/common/obj/PACKAGING/api-stubs-docs_annotations.zip platforms/${PLATFORM_NAME}/data/annotations.zip
- 
- # Eclipse Editors support
--framework/layoutlib-legacy.jar            platforms/${PLATFORM_NAME}/data/layoutlib.jar
-+# framework/layoutlib-legacy.jar            platforms/${PLATFORM_NAME}/data/layoutlib.jar
- frameworks/base/core/res/res              platforms/${PLATFORM_NAME}/data/res
- docs/offline-sdk/activity_actions.txt                 platforms/${PLATFORM_NAME}/data/activity_actions.txt
- docs/offline-sdk/broadcast_actions.txt                platforms/${PLATFORM_NAME}/data/broadcast_actions.txt
-@@ -243,13 +243,13 @@ development/sdk/sdk_files_NOTICE.txt      platforms/${PLATFORM_NAME}/skins/NOTIC
+@@ -234,13 +234,13 @@ development/sdk/sdk_files_NOTICE.txt      platforms/${PLATFORM_NAME}/skins/NOTIC
  ##############################################################################
  
  # System images + Kernel
 -system-qemu.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/system.img
 -vendor-qemu.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/vendor.img
-+system.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/system.img
-+vendor.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/vendor.img
- ramdisk.img                                system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/ramdisk.img
+-ramdisk-qemu.img                                system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/ramdisk.img
 -device/generic/goldfish/data/etc/userdata.img    system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/userdata.img
 -data/misc                                        system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/data/misc
++system.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/system.img
++vendor.img                                 system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/vendor.img
++ramdisk.img                                system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/ramdisk.img
 +userdata.img                               system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/userdata.img
 +misc.img                                   system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/misc.img
  system/build.prop                          system-images/${PLATFORM_NAME}/${TARGET_CPU_ABI}/build.prop
@@ -54,5 +33,5 @@ index e637e8f..1513bb3 100644
  # Note: the kernel image is handled by sdk-android-<abi>.atree now.
  
 -- 
-2.7.4
+2.17.1
 

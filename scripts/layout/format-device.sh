@@ -19,7 +19,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.3"
 
 SOC_FAMILY="stm32mp1"
 
@@ -45,7 +45,7 @@ PART_LAYOUT_START=34
 PART_LAYOUT_START_BYTES=$(( ${PART_LAYOUT_START} * 512 ))
 ADDITIONNAL_SIZE_BYTES=${PART_LAYOUT_START_BYTES}
 
-BOOT_MODE_LIST=( "optee" "trusted" )
+BOOT_MODE_LIST=( "optee" )
 
 #######################################
 # Variables
@@ -74,6 +74,12 @@ memory_req_size=0
 memory_req_size_bytes=0
 
 total_free_space=0
+
+do_raw_image=0
+part_image_path=${ANDROID_PRODUCT_OUT}
+
+# By default redirect stdout and stderr to /dev/null
+redirect_out="/dev/null"
 
 #######################################
 # Functions
@@ -150,6 +156,32 @@ blue()
 }
 
 #######################################
+# Check if item is available in list
+# Globals:
+#   None
+# Arguments:
+#   $1 = list of possible items
+#   $2 = item which shall be tested
+# Returns:
+#   0 if item found in list
+#   1 if item not found in list
+#######################################
+in_list()
+{
+  local list="$1"
+  local checked_item="$2"
+
+  for item in ${list}
+  do
+    if [[ "$item" == "$checked_item" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+#######################################
 # Print script usage on stdout
 # Globals:
 #   None
@@ -161,16 +193,22 @@ blue()
 usage()
 {
   echo "Usage: `basename $0` [Options] <device_path>"
+  echo "  <device_path>: /dev/sdX (sd connected through usb), /dev/mmcblkX (sd connected through reader)"
   empty_line
-  echo "  This script allows formating memory device to create required partition before provisioning"
+  echo "  This script allows formating memory device to create required partitions before provisioning"
+  empty_line
+  echo "Second Usage: `basename $0` [Options] -r/--raw <disk image name> <boot mode>"
+  echo "  <disk image name>: name of the disk image file created"
+  echo "  <boot mode>: required boot mode (optee or trusted)"
+  empty_line
+  echo "  This script allows creating disk image with required partitions before provisioning"
   empty_line
   echo "Options:"
   echo "  -h/--help: print this message"
   echo "  -v/--version: get script version"
   echo "  -s/--size <disk-size>: set requested disk size [4GiB or 8GiB] (default: 4GiB)"
   echo "  -c/--config <config-file-path>: set used partition configuration file (default: ${PART_LAYOUT_CONFIG})"
-  empty_line
-  echo "<device_path>: /dev/sdX (sd connected through usb), /dev/mmcblkX (sd connected through reader)"
+  echo "  --verbose: enable verbosity (debug purpose)"
   empty_line
 }
 
@@ -203,6 +241,31 @@ transform_part_size_in_bytes()
       ;;
   esac
   part_size_bytes=$l_part_size_bytes
+}
+
+#######################################
+# create empty raw image (case SD card only)
+# Globals:
+#   I memory_req_size
+#   I raw_name
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+generate_empty_raw_image()
+{
+  local raw_size=$(echo $memory_req_size|tr -cd [:digit:])
+  local kmg=${memory_req_size: -1}
+
+  if [ ${kmg} == "M" ]; then
+    echo "Start creating the empty disk image ${target_device} of ${raw_size}M"
+    \rm -f ${target_device}
+    \dd if=/dev/zero of=${target_device} bs=1024 count=0 seek=${raw_size}K >/dev/null 2>&1
+  else
+    error "Failed to create the empty disk image, please review the layout config file (manage only MEMORY_MAX_SIZE in M)"
+    exit 1
+  fi
 }
 
 #######################################
@@ -307,7 +370,7 @@ get_disk_info()
       if [ $? -eq 0 ]; then
         l_sector_size=($(echo ${l_line} | awk '{ print $4 }'))
       else
-        echo ${l_line} | grep '^Sector size (logical/physical)' &> /dev/null
+        echo ${l_line} | grep '^Sector size' &> /dev/null
         if [ $? -eq 0 ]; then
           l_sector_size=($(echo ${l_line} | awk '{ print $4 }' | awk -F"/" '{ print $1 }'))
         fi
@@ -358,6 +421,30 @@ while test "$1" != ""; do
       shift # past argument
       ;;
 
+    "-r"|"--raw" )
+      do_raw_image=1
+      target_device=$2
+      if [ ! -n "$target_device" ]; then
+        usage
+        popd >/dev/null 2>&1
+        exit 1
+      fi
+      if in_list "${BOOT_MODE_LIST[*]}" "$3"; then
+        target_boot_mode=$3
+      else
+        error "unknown boot mode $3"
+        usage
+        popd >/dev/null 2>&1
+        exit 1
+      fi
+      shift
+      shift
+      ;;
+
+    "--verbose" )
+      redirect_out="/dev/stdout"
+      ;;
+
     /dev/* )
       target_device=$1
       ;;
@@ -378,6 +465,8 @@ if [ ! -f ${PART_LAYOUT_CONFIG} ]; then
   \popd >/dev/null 2>&1
   exit 1
 fi
+
+if [ ${do_raw_image} -eq 0 ]; then
 
 # check availability of required device
 if [ ! -n "${target_device}" ]; then
@@ -417,13 +506,19 @@ else
 fi
 
 # get back required boot mode
-PS3='Which boot option do you want to use ?'
 options=(${BOOT_MODE_LIST[*]})
-select opt in "${options[@]}"
-do
-  target_boot_mode=${opt}
-  break
-done
+if [[ ${#options[@]} -eq 1 ]];then
+  target_boot_mode=${options[0]}
+else
+  PS3='Which boot option do you want to use ?'
+  select opt in "${options[@]}"
+  do
+    target_boot_mode=${opt}
+    break
+  done
+fi
+
+fi
 
 # get back required configuration
 get_required_size
@@ -433,6 +528,11 @@ if [ ${memory_req_size_bytes} == 0 ]; then
   error "No compatible configuration available for ${target_disk_type} and {target_size} in ${PART_LAYOUT_CONFIG}"
   \popd >/dev/null 2>&1
   exit 1
+fi
+
+if [ ${do_raw_image} -eq 1 ]; then
+  \pushd ${part_image_path} >/dev/null 2>&1
+  generate_empty_raw_image
 fi
 
 # get back disk information
@@ -450,9 +550,11 @@ fi
 total_free_space=$(( memory_req_size_bytes - (2*ADDITIONNAL_SIZE_BYTES) ))
 
 # start formating the device
+if [ ${do_raw_image} -eq 0 ]; then
 echo "[0] Reset disk partitions of device ${target_device}"
-\sgdisk --clear ${target_device} &> /dev/null
-\sgdisk --move-second-header --mbrtogpt ${target_device} &> /dev/null
+fi
+\sgdisk --clear ${target_device} &>${redirect_out}
+\sgdisk --move-second-header --mbrtogpt ${target_device} &>${redirect_out}
 
 while IFS='' read -r line || [[ -n $line ]]; do
 
@@ -498,14 +600,14 @@ while IFS='' read -r line || [[ -n $line ]]; do
           if [ ${part_nb} -eq 2 ]; then
             if [ ${part_value} -eq 1 ]; then
               echo "[${part_value}] Create one partition ${part_label}${part_suffix_1} of size ${part_size}"
-              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_1}"
               fi
               part_value=$((part_value+1))
               echo "[${part_value}] Create one partition ${part_label}${part_suffix_2} of size ${part_size}"
-              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_2}"
@@ -518,7 +620,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               else
                 echo "[${part_value}] Create one partition ${part_label}${part_suffix_1} of size ${part_size}"
               fi
-              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_1} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_1}"
@@ -530,7 +632,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               else
                 echo "[${part_value}] Create one partition ${part_label}${part_suffix_2} of size ${part_size}"
               fi
-              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label}${part_suffix_2} ${sgdisk_option} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}${part_suffix_2}"
@@ -539,13 +641,13 @@ while IFS='' read -r line || [[ -n $line ]]; do
           else
             echo "[${part_value}] Create one partition ${part_label} of size ${part_size}"
             if [ ${part_value} -eq 1 ]; then
-              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}::+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}"
               fi
             else
-              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &> /dev/null
+              \sgdisk --set-alignment=1 --new=${part_value}:+:+${part_size} --change-name=${part_value}:${part_label} --typecode=${part_value}:8300 ${target_device}  &>${redirect_out}
               if [ $? -ne 0 ]; then
                 part_error=1
                 part_error_list+=" ${part_label}"
@@ -582,7 +684,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
             check_part_size ${last_part_size} ${last_part_nb}
 
             echo "[${part_value}] Create one partition ${last_part_label} on remaining area"
-            \sgdisk --set-alignment=1 --new=${part_value}:+: --change-name=${part_value}:${last_part_label} --typecode=${part_value}:8300 ${target_device} &> /dev/null
+            \sgdisk --set-alignment=1 --new=${part_value}:+: --change-name=${part_value}:${last_part_label} --typecode=${part_value}:8300 ${target_device} &>${redirect_out}
             if [ $? -ne 0 ]; then
               part_error=1
               part_error_list+=" ${last_part_label}"
@@ -596,16 +698,31 @@ while IFS='' read -r line || [[ -n $line ]]; do
 
 done < ${PART_LAYOUT_CONFIG}
 
-\popd >/dev/null 2>&1
-
 empty_line
 
-if [ ${part_error} -eq 1 ]; then
-  error "Format of the device ${target_device} not finalized correctly: ${part_error_list}."
-  exit 1
+if [ ${do_raw_image} -eq 1 ]; then
+  if [ ${part_error} -eq 1 ]; then
+    error "Failed to create the empty disk image ${target_device} (errors while creating following partitions: ${part_error_list})"
+    \rm -rf ${target_device}
+    \popd >/dev/null 2>&1
+    \popd >/dev/null 2>&1
+    exit 1
+  else
+    green "The empty disk image ${target_device} has been successfully created"
+    \popd >/dev/null 2>&1
+    \popd >/dev/null 2>&1
+    exit 0
+  fi
 else
-  green "Format of the device ${target_device} successfully finalized."
-  empty_line
-  warning "Please unplug and replug your device before provisioning."
-  exit 0
+  if [ ${part_error} -eq 1 ]; then
+    error "Failed to format the device ${target_device} (errors while creating following partitions: ${part_error_list})"
+    \popd >/dev/null 2>&1
+    exit 1
+  else
+    green "The device ${target_device} format has been successfully finalized"
+    empty_line
+    warning "Please unplug and replug your device before start provisioning"
+    \popd >/dev/null 2>&1
+    exit 0
+  fi
 fi

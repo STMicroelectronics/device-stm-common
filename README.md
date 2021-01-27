@@ -3,12 +3,11 @@
 This module is used to configure the STM32MP1 distribution for Android.
 It is part of the STMicroelectronics delivery for Android (see the [delivery][] for more information).
 
-[delivery]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.1.0
+[delivery]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v2.0.0
 
 ## Description ##
 
-This module version is the first version for STM32MP1
-
+This module version is the updated version for STM32MP15 distribution for Android V2.0
 Please see the release notes for more details.
 
 ## Documentation ##
@@ -16,7 +15,7 @@ Please see the release notes for more details.
 * The [release notes][] provide information on the release.
 * The [distribution package][] provides detailed information on how to use this delivery.
 
-[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v1.1.0
+[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v2.0.0
 [distribution package]: https://wiki.st.com/stm32mpu/wiki/STM32MP1_Distribution_Package_for_Android
 
 ## Dependencies ##
@@ -38,6 +37,7 @@ This module contains several files and directories used to compile and configure
 * `./build/misc.mk`: makefile used to generate misc partition image (built using bootcontrol dedicated tool)
 * `./build/splash.mk`: makefile used to generate splash partition image (including spash screen bitmap)
 * `./build/tee.mk`: makefile used to generate tee partitions images (including the tee OS)
+* `./build/teefs.mk`: makefile used to generate an empty F2FS partition image (tee secure storage usage)
 * `./kernel.mk`: makefile used to includes kernel modules in vendor partition image
 
 **Scripts**
@@ -48,6 +48,7 @@ This module contains several files and directories used to compile and configure
 * `./scripts/layout/format-device.sh`: script used to format SD card based on android_layout.config
 * `./scripts/layout/provision-device.sh`: script used to provision the device based on android_layout.config
 * `./scripts/layout/clear-device.sh`: script used to clear eMMC partitions (with DFU connection)
+* `./scripts/layout/create-disk.sh`: script used to generate an micro SD card disk image
 * `./scripts/layout/flash-device.sh`: script to provision the device (with both DFU and FASTBOOT connections)
 * `./scripts/layout/build_tsv.py`: Python script to generate STM32CubeProgrammer layout files based on android_layout.config
 * `./scripts/prebuilt/update_prebuilt.sh`: script to update prebuilt images for kernel, bootloader and tee
@@ -69,12 +70,13 @@ This module contains several files and directories used to compile and configure
 
 **Core**
 * `./core/initprop`: initprop source code (used to initialize proprietary properties)
+* `./core/miscgen`: miscgen source code (used to generate misc raw partition image)
+* `./core/devmem`: devmem source code (used for debug purpose)
 * `./splash/stmicroelectronics.bmp`: splash screen bitmap
 
 **Periherals**
 * `./peripheral/allocator`: allocator HAL header files (read following [README](./peripheral/allocator/README.md) file for more details)
 * `./peripheral/audio`: audio primary HAL source code (read following [README](./peripheral/audio/README.md) file for more details)
-* `./peripheral/bootctrl`: bootctrl HAL source code (read following [README](./peripheral/bootctrl/README.md) file for more details)
 * `./peripheral/camera`: camera HAL source code (read following [README](./peripheral/camera/README.md) file for more details)
 * `./peripheral/composer`: composer HAL source code (read following [README](./peripheral/composer/README.md) file for more details)
 * `./peripheral/copro`: proprietary copro hardware service source code (read following [README](./peripheral/copro/README.md) file for more details)
@@ -88,6 +90,11 @@ This module contains several files and directories used to compile and configure
 
 **Sepolicy**
 * `./sepolicy`: sepolicy for STM32MP1
+
+**Tee**
+* `./kmgk`: keymaster and gatekeeper source code (including OP-TEE Trust Applications)
+* `./optee_client`: OP-TEE libraries source code
+* `./optee_test`: OP-TEE test source code
 
 ## License ##
 

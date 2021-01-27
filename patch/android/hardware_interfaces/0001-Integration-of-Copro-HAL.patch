@@ -1,16 +1,17 @@
-From 0a77f3816c900bf21d83b87ee533429df5f5acfe Mon Sep 17 00:00:00 2001
+From 55ce00b554d511b4bf9864958b14647e46757474 Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
 Date: Thu, 23 Jan 2020 16:16:17 +0100
-Subject: [PATCH] Integration of Copro HAL
+Subject: [PATCH 1/3] Integration of Copro HAL
 
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 Change-Id: I4c37708e0f790ff8061cf83f9e5ce477813bea50
 ---
- copro/1.0/Android.bp              | 23 +++++++++++++++
- copro/1.0/ICopro.hal              | 62 +++++++++++++++++++++++++++++++++++++++
- copro/1.0/ICoproSerialPortHal.hal | 52 ++++++++++++++++++++++++++++++++
- copro/1.0/types.hal               | 53 +++++++++++++++++++++++++++++++++
- current.txt                       |  5 ++++
- 5 files changed, 195 insertions(+)
+ copro/1.0/Android.bp              | 23 ++++++++++
+ copro/1.0/ICopro.hal              | 62 +++++++++++++++++++++++++++
+ copro/1.0/ICoproSerialPortHal.hal | 70 +++++++++++++++++++++++++++++++
+ copro/1.0/types.hal               | 53 +++++++++++++++++++++++
+ current.txt                       |  5 +++
+ 5 files changed, 213 insertions(+)
  create mode 100644 copro/1.0/Android.bp
  create mode 100644 copro/1.0/ICopro.hal
  create mode 100644 copro/1.0/ICoproSerialPortHal.hal
@@ -18,7 +19,7 @@ Change-Id: I4c37708e0f790ff8061cf83f9e5ce477813bea50
 
 diff --git a/copro/1.0/Android.bp b/copro/1.0/Android.bp
 new file mode 100644
-index 0000000..582b95f
+index 000000000..582b95fbe
 --- /dev/null
 +++ b/copro/1.0/Android.bp
 @@ -0,0 +1,23 @@
@@ -47,7 +48,7 @@ index 0000000..582b95f
 +}
 diff --git a/copro/1.0/ICopro.hal b/copro/1.0/ICopro.hal
 new file mode 100644
-index 0000000..c336ae3
+index 000000000..c336ae3d5
 --- /dev/null
 +++ b/copro/1.0/ICopro.hal
 @@ -0,0 +1,62 @@
@@ -115,10 +116,10 @@ index 0000000..c336ae3
 +};
 diff --git a/copro/1.0/ICoproSerialPortHal.hal b/copro/1.0/ICoproSerialPortHal.hal
 new file mode 100644
-index 0000000..a74de06
+index 000000000..d8aae9a08
 --- /dev/null
 +++ b/copro/1.0/ICoproSerialPortHal.hal
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,70 @@
 +/*
 + * Copyright (C) 2016 The Android Open Source Project
 + *
@@ -155,7 +156,7 @@ index 0000000..a74de06
 +    close() generates (RequestStatus debugErrno);
 +
 +    /**
-+     * Read the content of the tty connection.
++     * Read the string content of the tty connection.
 +     *
 +     * @param   void
 +     * @return  debugErrno
@@ -164,16 +165,34 @@ index 0000000..a74de06
 +    read() generates (RequestStatus debugErrno, string result);
 +
 +    /**
-+     * Wrtie data to the tty.
++     * Read the byte content of the tty connection.
++     *
++     * @param   size
++     * @return  debugErrno
++     * @return  result
++     */
++    readB(uint32_t size) generates (RequestStatus debugErrno, vec<uint8_t> result);
++
++    /**
++     * Write string data to the tty.
 +     *
 +     * @param   command
 +     * @return  debugErrno
 +     */
 +    write(string command) generates (RequestStatus debugErrno);
++
++    /**
++     * Write byte data to the tty.
++     *
++     * @param   command
++     * @return  debugErrno
++     * @return  lenght
++     */
++    writeB(vec<uint8_t> command) generates (RequestStatus debugErrno, uint32_t lenght);
 +};
 diff --git a/copro/1.0/types.hal b/copro/1.0/types.hal
 new file mode 100644
-index 0000000..c1c85bd
+index 000000000..c1c85bd3c
 --- /dev/null
 +++ b/copro/1.0/types.hal
 @@ -0,0 +1,53 @@
@@ -231,18 +250,21 @@ index 0000000..c1c85bd
 +    bool ret; /* Voir si besoin de plus de précision sur le retour */
 +};
 diff --git a/current.txt b/current.txt
-index 47e7d72..da0b661 100644
+index 669651625..ddc6fd426 100644
 --- a/current.txt
 +++ b/current.txt
-@@ -570,3 +570,8 @@ f3dbd8dd0d6333c005610288a4785d0ef79a72a7bbe6d0a46d46fa89fc886f1e android.hardwar
- 09e08b5d12b109562ecdd8882532fd1f2c4639588e07769d5c7396b7c5b9f34f android.hardware.wifi.supplicant@1.2::ISupplicantStaIfaceCallback
- efbb061c969fa9553d243da6ee23b83fe5d4aa663a7b8896adc52e2b015bc2f3 android.hardware.wifi.supplicant@1.2::ISupplicantStaNetwork
- cfa81f229b69f9011c58f48264fcb552447430fe68610eac514e811e65bc306a android.hardware.wifi.supplicant@1.2::types
-+
+@@ -394,6 +394,11 @@ e362203b941f18bd4cba29a62adfa02453ed00d6be5b72cdb6c4d7e0bf394a40 android.hardwar
+ cd4330c3196bda1d642a32abfe23a7d64ebfbda721940643af6867af3b3f0aa9 android.hardware.wifi.supplicant@1.1::ISupplicantStaIfaceCallback
+ 10ff2fae516346b86121368ce5790d5accdfcb73983246b813f3d488b66db45a android.hardware.wifi.supplicant@1.1::ISupplicantStaNetwork
+ 
 +# Add Copro HALs
-+fe093bf4dacfd048c1be7b233ac6bd678f0f33bbeb812fd4364bcc82f12d0de4 android.hardware.copro@1.0::types
-+ad7e5475dd5de5e956bd0d781bb9d29891e88639c7327f4ae4d3e2dc96cdd64a android.hardware.copro@1.0::ICopro
-+62d7af09e29f78070dc5bd9d711a345cf7e1427ba70fc1636715e829d51f96d7 android.hardware.copro@1.0::ICoproSerialPortHal
++c2aa62be97e499be9b9cf10fef841e1da9b80524b3accfa3f73c1b5eea649178 android.hardware.copro@1.0::types
++842e6428ca2851977d306fa18c6db359c9b8133567684a37acceeb92a17c2d6b android.hardware.copro@1.0::ICopro
++df111f3bd9a752ead6cdd91a97e1ab61eceee8e7ce5976e2bf8809939adcf2e7 android.hardware.copro@1.0::ICoproSerialPortHal
++
+ # ABI preserving changes to HALs during Android Q
+ 2a55e224aa9bc62c0387cd85ad3c97e33f0c33a4e1489cbae86b2523e6f9df35 android.hardware.camera.device@3.2::ICameraDevice
+ 17e878cb11ea602c08af04a09182e6265498be16edf26605058383b9a7628261 android.hardware.camera.device@3.2::ICameraDeviceCallback
 -- 
-2.7.4
+2.17.1
 

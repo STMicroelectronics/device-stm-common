@@ -1,22 +1,22 @@
-From 0e2d07bdd3bc9daed1002ed4a2a6f8e0cfb7e808 Mon Sep 17 00:00:00 2001
+From c454f17b10d70125786a58294534ac46235776b4 Mon Sep 17 00:00:00 2001
 From: frq09432 <nicolas.louboutin@st.com>
-Date: Thu, 16 Jan 2020 08:43:43 +0100
-Subject: [PATCH 2/4] drm_hwcomposer: Insure that the layer is compatible with
+Date: Wed, 20 May 2020 11:52:09 +0200
+Subject: [PATCH 2/7] drm_hwcomposer: Insure that the layer is compatible with
  the plan capability
 
   By default, consider that the plan is not compatible
   TODO: manage the compatibility dynamically
 
-Change-Id: I864e213b4cdfaf2b91dacb00f94fd7671dd80672
+Change-Id: I6e5f4fc383bc5ba9c835c113be9e8dbf4e6d2b6d
 ---
  drmhwctwo.cpp | 6 ++++++
  1 file changed, 6 insertions(+)
 
 diff --git a/drmhwctwo.cpp b/drmhwctwo.cpp
-index 95370d5..1fb6ef1 100644
+index c9d50a2..4a2f84e 100644
 --- a/drmhwctwo.cpp
 +++ b/drmhwctwo.cpp
-@@ -800,6 +800,12 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
+@@ -893,6 +893,12 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
    if (avail_planes < layers_.size())
      avail_planes--;
  
@@ -26,9 +26,9 @@ index 95370d5..1fb6ef1 100644
 +  if (layers_.size() == 1)
 +    avail_planes--;
 +
-   std::map<uint32_t, DrmHwcTwo::HwcLayer *, std::greater<int>> z_map;
+   std::map<uint32_t, DrmHwcTwo::HwcLayer *> z_map;
    for (std::pair<const hwc2_layer_t, DrmHwcTwo::HwcLayer> &l : layers_)
      z_map.emplace(std::make_pair(l.second.z_order(), &l.second));
 -- 
-2.7.4
+2.17.1
 

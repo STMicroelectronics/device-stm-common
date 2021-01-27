@@ -4,3 +4,7 @@ dontaudit vold self:capability dac_read_search;
 
 allow vold dumpstate:fd use;
 allow vold dumpstate:fifo_file { getattr open read write };
+allow vold sysfs_blockinfo:file write;
+
+# allow vold to trim /mnt/vendor/teefs by sending ioctl FITRIM
+allow vold teefs_file:dir { ioctl open read };

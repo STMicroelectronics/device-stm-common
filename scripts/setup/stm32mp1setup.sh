@@ -19,7 +19,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
 SOC_FAMILY="stm32mp1"
 
@@ -81,6 +81,20 @@ state()
 }
 
 #######################################
+# Print error message in red on stderr
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+error()
+{
+  echo "$(tput setaf 1)ERROR: $1$(tput sgr0)" >&2
+}
+
+#######################################
 # Add empty line in stdout
 # Globals:
 #   None
@@ -111,14 +125,14 @@ usage()
   echo "  [1] patch required modules and/or select specific version"
   echo "  [2] load graphics libraries (associated to End User License Agreement)"
   echo "  [3] load op-tee user modules"
+  echo "By default, the full setup is executed"
   empty_line
   echo "Options:"
-  echo "  -h/--help: get current help"
-  echo "  -v/--version: get script version"
-  echo "By default, the full setup is executed, it's possible to select one or several states:"
-  echo "  -e/--eula: clear EULA setup (graphics libraries)"
-  echo "  -p/--patch: clear patches performed on Android distribution"
-  echo "  -t/--tee: clear OP-TEE user modules (client and test)"
+  echo "  -h / --help: get current help"
+  echo "  -v / --version: get script version"
+  echo "  -e / --eula: clear EULA setup (graphics libraries)"
+  echo "  -p / --patch: clear patches performed on Android distribution"
+  echo "  -t / --tee: clear OP-TEE user modules (client and test)"
   empty_line
 }
 
@@ -136,52 +150,79 @@ if [[ "$0" != "$BASH_SOURCE" ]]; then
   return
 fi
 
-# Check the current usage
-if [ $# -gt 2 ]; then
-  usage
-  \popd >/dev/null 2>&1
-  exit 0
-fi
-
-while test "$1" != ""; do
-  arg=$1
-  case $arg in
-
-    "-h"|"--help" )
+# check the options
+while getopts "hvept-:" option; do
+  case "${option}" in
+    -)
+      # Treat long options
+      case "${OPTARG}" in
+        help)
+          usage
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        version)
+          echo "`basename $0` version ${SCRIPT_VERSION}"
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        eula)
+          setup_eula=1
+          nb_states=$((nb_states+1))
+          ;;
+        patch)
+          setup_patches=1
+          nb_states=$((nb_states+1))
+          ;;
+        tee)
+          setup_tee=1
+          nb_states=$((nb_states+1))
+          ;;
+        *)
+          usage
+          popd >/dev/null 2>&1
+          exit 1
+          ;;
+      esac;;
+    # Treat short options
+    h)
       usage
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-v"|"--version" )
+    v)
       echo "`basename $0` version ${SCRIPT_VERSION}"
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-e"|"--eula" )
+    e)
       setup_eula=1
       nb_states=$((nb_states+1))
       ;;
-
-    "-p"|"--patch" )
+    p)
       setup_patches=1
       nb_states=$((nb_states+1))
       ;;
-
-    "-t"|"--tee" )
+    t)
       setup_tee=1
       nb_states=$((nb_states+1))
       ;;
-
-    ** )
+    *)
       usage
       \popd >/dev/null 2>&1
-      exit 0
+      exit 1
       ;;
   esac
-  shift
 done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 0 ]; then
+  error "Unknown command : $*"
+  usage
+  popd >/dev/null 2>&1
+  exit 1
+fi
 
 if [[ ${setup_patches} == 0 ]] && [[ ${setup_eula} == 0 ]] && [[ ${setup_tee} == 0 ]]; then
   setup_patches=1

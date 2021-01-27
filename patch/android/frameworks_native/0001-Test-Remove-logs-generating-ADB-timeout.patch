@@ -1,0 +1,126 @@
+From e579294c40e164378a26747f977ae393dd0217b7 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Fri, 27 Nov 2020 14:39:56 +0100
+Subject: [PATCH] Test: Remove logs generating ADB timeout
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Change-Id: I6aef2d497159507cc578667f7bc257544e451fff
+---
+ libs/binder/tests/binderSafeInterfaceTest.cpp | 32 +++++++++----------
+ 1 file changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/libs/binder/tests/binderSafeInterfaceTest.cpp b/libs/binder/tests/binderSafeInterfaceTest.cpp
+index 09f58cc83..510dc653d 100644
+--- a/libs/binder/tests/binderSafeInterfaceTest.cpp
++++ b/libs/binder/tests/binderSafeInterfaceTest.cpp
+@@ -273,15 +273,15 @@ public:
+           : SafeBpInterface<ISafeInterfaceTest>(impl, getLogTag()) {}
+ 
+     status_t setDeathToken(const sp<IBinder>& token) override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<decltype(&ISafeInterfaceTest::setDeathToken)>(Tag::SetDeathToken, token);
+     }
+     status_t returnsNoMemory() const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<decltype(&ISafeInterfaceTest::returnsNoMemory)>(Tag::ReturnsNoMemory);
+     }
+     status_t logicalNot(bool a, bool* notA) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<decltype(&ISafeInterfaceTest::logicalNot)>(Tag::LogicalNot, a, notA);
+     }
+     status_t modifyEnum(TestEnum a, TestEnum* b) const override {
+@@ -291,14 +291,14 @@ public:
+     status_t increment(const TestFlattenable& a, TestFlattenable* aPlusOne) const override {
+         using Signature =
+                 status_t (ISafeInterfaceTest::*)(const TestFlattenable&, TestFlattenable*) const;
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<Signature>(Tag::IncrementFlattenable, a, aPlusOne);
+     }
+     status_t increment(const TestLightFlattenable& a,
+                        TestLightFlattenable* aPlusOne) const override {
+         using Signature = status_t (ISafeInterfaceTest::*)(const TestLightFlattenable&,
+                                                            TestLightFlattenable*) const;
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<Signature>(Tag::IncrementLightFlattenable, a, aPlusOne);
+     }
+     status_t increment(const sp<TestLightRefBaseFlattenable>& a,
+@@ -308,60 +308,60 @@ public:
+         return callRemote<Signature>(Tag::IncrementLightRefBaseFlattenable, a, aPlusOne);
+     }
+     status_t increment(const sp<NativeHandle>& a, sp<NativeHandle>* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature =
+                 status_t (ISafeInterfaceTest::*)(const sp<NativeHandle>&, sp<NativeHandle>*) const;
+         return callRemote<Signature>(Tag::IncrementNativeHandle, a, aPlusOne);
+     }
+     status_t increment(const NoCopyNoMove& a, NoCopyNoMove* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(const NoCopyNoMove& a,
+                                                            NoCopyNoMove* aPlusOne) const;
+         return callRemote<Signature>(Tag::IncrementNoCopyNoMove, a, aPlusOne);
+     }
+     status_t increment(const std::vector<TestParcelable>& a,
+                        std::vector<TestParcelable>* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(const std::vector<TestParcelable>&,
+                                                            std::vector<TestParcelable>*);
+         return callRemote<Signature>(Tag::IncrementParcelableVector, a, aPlusOne);
+     }
+     status_t toUpper(const String8& str, String8* upperStr) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemote<decltype(&ISafeInterfaceTest::toUpper)>(Tag::ToUpper, str, upperStr);
+     }
+     void callMeBack(const sp<ICallback>& callback, int32_t a) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         return callRemoteAsync<decltype(&ISafeInterfaceTest::callMeBack)>(Tag::CallMeBack, callback,
+                                                                           a);
+     }
+     status_t increment(int32_t a, int32_t* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(int32_t, int32_t*) const;
+         return callRemote<Signature>(Tag::IncrementInt32, a, aPlusOne);
+     }
+     status_t increment(uint32_t a, uint32_t* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(uint32_t, uint32_t*) const;
+         return callRemote<Signature>(Tag::IncrementUint32, a, aPlusOne);
+     }
+     status_t increment(int64_t a, int64_t* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(int64_t, int64_t*) const;
+         return callRemote<Signature>(Tag::IncrementInt64, a, aPlusOne);
+     }
+     status_t increment(uint64_t a, uint64_t* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(uint64_t, uint64_t*) const;
+         return callRemote<Signature>(Tag::IncrementUint64, a, aPlusOne);
+     }
+     status_t increment(float a, float* aPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature = status_t (ISafeInterfaceTest::*)(float, float*) const;
+         return callRemote<Signature>(Tag::IncrementFloat, a, aPlusOne);
+     }
+     status_t increment(int32_t a, int32_t* aPlusOne, int32_t b, int32_t* bPlusOne) const override {
+-        ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
++        // ALOG(LOG_INFO, getLogTag(), "%s", __PRETTY_FUNCTION__);
+         using Signature =
+                 status_t (ISafeInterfaceTest::*)(int32_t, int32_t*, int32_t, int32_t*) const;
+         return callRemote<Signature>(Tag::IncrementTwo, a, aPlusOne, b, bPlusOne);
+-- 
+2.17.1
+

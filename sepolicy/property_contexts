@@ -1,21 +1,29 @@
-# list of camera properties
-ro.vendor.camera.req.fmq.size     u:object_r:camera_prop:s0
-ro.vendor.camera.res.fmq.size     u:object_r:camera_prop:s0
+# list of camera hal properties
+ro.vendor.camera.req.fmq.size           u:object_r:vendor_camera_prop:s0
+ro.vendor.camera.res.fmq.size           u:object_r:vendor_camera_prop:s0
 
-# list of new properties used by the graphical library
-ro.vendor.hwc.drm.device          u:object_r:graphics_prop:s0
-vendor.hwc.drm.use_overlay_planes u:object_r:graphics_prop:s0
-vendor.hwc.drm.primary_display_order u:object_r:graphics_prop:s0
+# list of allocator hal properties
+ro.vendor.gralloc.drm.device            u:object_r:vendor_allocator_prop:s0
+vendor.gralloc.trace                    u:object_r:vendor_allocator_prop:s0
 
-ro.vendor.gralloc.drm.device      u:object_r:graphics_prop:s0
-vendor.gralloc.trace              u:object_r:graphics_prop:s0
-
-# list of properties that can be set by the initprop executable
-persist.vendor.fw_config          u:object_r:vendor_initprop_prop:s0
-persist.vendor.blkcfg             u:object_r:vendor_initprop_prop:s0
-vendor.disable_bluetooth          u:object_r:vendor_initprop_prop:s0
-vendor.disable_audio              u:object_r:vendor_initprop_prop:s0
-vendor.disable_wifi               u:object_r:vendor_initprop_prop:s0
+# list of composer hal properties
+ro.vendor.hwc.drm.device                u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.use_overlay_planes       u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.primary_display_order    u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.exclude_non_hwfb_imports u:object_r:vendor_composer_prop:s0
 
 # property set by initdriver when all kernel module have been loaded
-vendor.modules.ready              u:object_r:vendor_initdriver_prop:s0
+vendor.modules.ready                    u:object_r:vendor_initdriver_prop:s0
+
+# list of audio hal properties
+vendor.disable_audio                    u:object_r:vendor_audio_prop:s0
+
+# list of keymaster hal properties
+vendor.keymaster.optee.                 u:object_r:vendor_km_optee_prop:s0
+
+# list of dumpstate hal properties
+persist.vendor.verbose_logging_enabled  u:object_r:vendor_logging_prop:s0
+
+# list of wlan hal properties
+vendor.wlan.driver.version              u:object_r:vendor_wifi_prop:s0
+vendor.wlan.firmware.version            u:object_r:vendor_wifi_prop:s0

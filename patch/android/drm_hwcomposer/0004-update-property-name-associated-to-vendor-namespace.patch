@@ -1,0 +1,40 @@
+From 94092a7243d8e51fe1afdd1c32ae48c849ab857b Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Thu, 23 Jan 2020 11:45:34 +0100
+Subject: [PATCH 4/7] update property name (associated to vendor namespace)
+
+Change-Id: I7e5b28e25163a2c7a2680514d0001a4891c8cb8f
+---
+ drm/resourcemanager.cpp | 2 +-
+ drmhwctwo.cpp           | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drm/resourcemanager.cpp b/drm/resourcemanager.cpp
+index 6e23561..49607b1 100644
+--- a/drm/resourcemanager.cpp
++++ b/drm/resourcemanager.cpp
+@@ -32,7 +32,7 @@ int ResourceManager::Init() {
+   char path_pattern[PROPERTY_VALUE_MAX];
+   // Could be a valid path or it can have at the end of it the wildcard %
+   // which means that it will try open all devices until an error is met.
+-  int path_len = property_get("hwc.drm.device", path_pattern, "/dev/dri/card0");
++  int path_len = property_get("ro.vendor.hwc.drm.device", path_pattern, "/dev/dri/card0");
+   int ret = 0;
+   if (path_pattern[path_len - 1] != '%') {
+     ret = AddDrmDevice(std::string(path_pattern));
+diff --git a/drmhwctwo.cpp b/drmhwctwo.cpp
+index 4a2f84e..12a27c1 100644
+--- a/drmhwctwo.cpp
++++ b/drmhwctwo.cpp
+@@ -262,7 +262,7 @@ HWC2::Error DrmHwcTwo::HwcDisplay::Init(std::vector<DrmPlane *> *planes) {
+   // Split up the given display planes into primary and overlay to properly
+   // interface with the composition
+   char use_overlay_planes_prop[PROPERTY_VALUE_MAX];
+-  property_get("hwc.drm.use_overlay_planes", use_overlay_planes_prop, "1");
++  property_get("vendor.hwc.drm.use_overlay_planes", use_overlay_planes_prop, "1");
+   bool use_overlay_planes = atoi(use_overlay_planes_prop);
+   for (auto &plane : *planes) {
+     if (plane->type() == DRM_PLANE_TYPE_PRIMARY)
+-- 
+2.17.1
+

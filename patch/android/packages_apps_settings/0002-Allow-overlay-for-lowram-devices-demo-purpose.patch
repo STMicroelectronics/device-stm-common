@@ -1,0 +1,28 @@
+From 4dfcdcda4783f18601d46dfd562fdd76ae5c5d0e Mon Sep 17 00:00:00 2001
+From: frq09432 <nicolas.louboutin@st.com>
+Date: Mon, 27 Jan 2020 15:05:12 +0100
+Subject: [PATCH] Allow overlay for lowram devices (demo purpose)
+
+Change-Id: I1c6f6d0a65b6df6e153b30cae6d815ef7db7ce7c
+---
+ src/com/android/settings/Utils.java | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/src/com/android/settings/Utils.java b/src/com/android/settings/Utils.java
+index 64919d9e80..26d846aa1a 100644
+--- a/src/com/android/settings/Utils.java
++++ b/src/com/android/settings/Utils.java
+@@ -1044,9 +1044,7 @@ public final class Utils extends com.android.settingslib.Utils {
+      * Starting from Q, SYSTEM_ALERT_WINDOW is disabled on low ram phones.
+      */
+     public static boolean isSystemAlertWindowEnabled(Context context) {
+-        // SYSTEM_ALERT_WINDOW is disabled on on low ram devices starting from Q
+-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+-        return !(am.isLowRamDevice() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q));
++        return true;
+     }
+ 
+     /**
+-- 
+2.17.1
+

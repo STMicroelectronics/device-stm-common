@@ -1,4 +1,5 @@
 subdirs = [
+    "audio",
     "bootctrl",
     "camera",
     "copro",
@@ -8,7 +9,6 @@ subdirs = [
     "lights",
     "oemlock",
     "thermal",
-    "tinyaudio",
     "usb",
-    "wlan",
+    "wifi",
 ]

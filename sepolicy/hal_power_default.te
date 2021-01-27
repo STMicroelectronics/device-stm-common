@@ -1,0 +1,2 @@
+allow hal_power_default dumpstate:fd use;
+allow hal_power_default dumpstate:fifo_file write;

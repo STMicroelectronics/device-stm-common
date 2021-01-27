@@ -1,4 +1,2 @@
+gpu_access(mediaswcodec);
 dontaudit mediaswcodec vendor_file:file { read open getattr execute map };
-
-allow mediaswcodec graphics_prop:file { getattr open read map };
-allow mediaswcodec render_device:chr_file { ioctl open read write };

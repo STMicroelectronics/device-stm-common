@@ -1,0 +1,31 @@
+From f5f0c07cbc7a5426dc7b3e7942294cd73015c03e Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Thu, 8 Oct 2020 08:47:48 +0200
+Subject: [PATCH 2/3] gralloc0 module can't treat layerCount, test shall be
+ performed in wrapper
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Change-Id: I880f1d24f86bbd3e4b0cd1853db70998df93eac7
+---
+ .../passthrough/include/mapper-passthrough/2.1/Gralloc0Hal.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/graphics/mapper/2.1/utils/passthrough/include/mapper-passthrough/2.1/Gralloc0Hal.h b/graphics/mapper/2.1/utils/passthrough/include/mapper-passthrough/2.1/Gralloc0Hal.h
+index 13df3bcbc..57821fb00 100644
+--- a/graphics/mapper/2.1/utils/passthrough/include/mapper-passthrough/2.1/Gralloc0Hal.h
++++ b/graphics/mapper/2.1/utils/passthrough/include/mapper-passthrough/2.1/Gralloc0Hal.h
+@@ -45,6 +45,11 @@ class Gralloc0HalImpl : public V2_0::passthrough::detail::Gralloc0HalImpl<Hal> {
+              return Error::NONE;
+          }
+ 
++         // not treated in gralloc0, consider bad value if > 1
++         if (descriptorInfo.layerCount > 1) {
++             return Error::BAD_VALUE;
++         }
++
+          int32_t ret = mModule->validateBufferSize(
+                  mModule, bufferHandle, descriptorInfo.width, descriptorInfo.height,
+                  static_cast<int32_t>(descriptorInfo.format),
+-- 
+2.17.1
+

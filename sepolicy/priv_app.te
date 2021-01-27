@@ -1,5 +1,2 @@
+gpu_access(priv_app);
 dontaudit priv_app vendor_file:file { read open getattr execute map };
-
-allow priv_app render_device:chr_file { rw_file_perms };
-
-get_prop(priv_app, graphics_prop)

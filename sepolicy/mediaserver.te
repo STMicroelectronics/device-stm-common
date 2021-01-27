@@ -1,5 +1,2 @@
+gpu_access(mediaserver);
 dontaudit mediaserver vendor_file:file { read open getattr execute map };
-
-allow mediaserver render_device:chr_file { rw_file_perms };
-
-get_prop(mediaserver, graphics_prop)

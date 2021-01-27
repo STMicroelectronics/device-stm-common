@@ -19,7 +19,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.2"
 
 SOC_FAMILY="stm32mp1"
 
@@ -57,6 +57,9 @@ agreement_file=
 agreement_status=0
 agreement_accepted=0
 output_path=
+
+do_force=0
+do_create_git=0
 
 # agreement request is disabled
 agreement_requested=0
@@ -97,8 +100,9 @@ usage()
   echo "  listed in the following file: $EULA_CONFIG_PATH"
   empty_line
   echo "Options:"
-  echo "  -h/--help: print this message"
-  echo "  -v/--version: get script version"
+  echo "  -h / --help: print this message"
+  echo "  -v / --version: get script version"
+  echo "  -f / --force: force EULA dependent libraries load"
   empty_line
 }
 
@@ -156,22 +160,6 @@ green()
 blue()
 {
   echo "$(tput setaf 6)$1$(tput sgr0)"
-}
-
-#######################################
-# Since this script is sourced, be careful not to pollute
-# caller's environment with temp variables.
-# Globals:
-#   All
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
-teardown() {
-  # Remove temporary directories and files
-  \rm -rf $TMP_PATH
-  \popd >/dev/null 2>&1
 }
 
 #######################################
@@ -303,7 +291,7 @@ extract_file()
 # Globals:
 #   I EULA_PATCH_PATH
 # Arguments:
-#   $1: patch (file name without .patch)
+#   $1: patch (file name)
 # Returns:
 #   None
 #######################################
@@ -313,10 +301,22 @@ apply_patch()
 
   loc_patch_path=${EULA_PATCH_PATH}
   loc_patch_path+=$1
-  loc_patch_path+=".patch"
+  if [ "${1##*.}" != "patch" ];then
+    loc_patch_path+=".patch"
+  fi
 
   \pushd ${output_path} >/dev/null 2>&1
-  \patch -p1 --merge < ${loc_patch_path} >/dev/null 2>&1
+  if [[ ${do_create_git} == 1 ]]; then
+    \git am ${loc_patch_path} &> /dev/null
+    if [ $? -ne 0 ]; then
+      error "Not possible to apply patch ${loc_patch_path}, please review android_eula.config"
+      \popd >/dev/null 2>&1
+      rm -rf ${TMP_PATH}
+      exit 1
+    fi
+  else
+    \patch -p1 --merge < ${loc_patch_path} >/dev/null 2>&1
+  fi
   \popd >/dev/null 2>&1
 }
 
@@ -333,38 +333,60 @@ if [[ "$0" != "$BASH_SOURCE" ]]; then
   return
 fi
 
-# Check the current usage
-if [ $# -gt 2 ]
-then
-  usage
-  \popd >/dev/null 2>&1
-  exit 1
-fi
-
-while test "$1" != ""; do
-  arg=$1
-  case $arg in
-    "-h"|"--help" )
+# check the options
+while getopts "hvf-:" option; do
+  case "${option}" in
+    -)
+      # Treat long options
+      case "${OPTARG}" in
+        help)
+          usage
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        version)
+          echo "`basename $0` version ${SCRIPT_VERSION}"
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        force)
+          do_force=1
+          ;;
+        *)
+          usage
+          \popd >/dev/null 2>&1
+          exit 1
+          ;;
+      esac;;
+    # Treat short options
+    h)
       usage
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-v"|"--version" )
-      echo "$(basename $BASH_SOURCE) version ${SCRIPT_VERSION}"
+    v)
+      echo "`basename $0` version ${SCRIPT_VERSION}"
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    ** )
+    f)
+      do_force=1
+      ;;
+    *)
       usage
       \popd >/dev/null 2>&1
       exit 1
       ;;
-
   esac
-  shift
 done
+
+shift $((OPTIND-1))
+
+if [ $# -gt 0 ]; then
+  error "Unknown command : $*"
+  usage
+  exit 1
+fi
 
 # Check availability of the EULA configuration file
 if [[ ! -f ${EULA_CONFIG_PATH} ]]; then
@@ -381,33 +403,31 @@ while IFS='' read -r line || [[ -n $line ]]; do
   if [ $? -eq 0 ]; then
 
     line=$(echo "${line: 5}")
-
-    unset eula_value
     eula_value=($(echo $line | awk '{ print $1 }'))
-    if [ $eula_value == "AGREEMENT" ]; then
+
+    if [ ${eula_value} == "AGREEMENT" ]; then
       parsing_step=0
       agreement_status=0
-      unset agreement_file
       agreement_file=($(echo $line | awk '{ print $2 }'))
-      check_eula_status $agreement_file || agreement_status=1
+      check_eula_status ${agreement_file} || agreement_status=1
 
-      if [ $agreement_status == 1 ]; then
+      if [ ${agreement_status} == 1 ] && [ ${do_force} == 0 ]; then
         green "The graphics libraries have been already loaded successfully"
+        \popd >/dev/null 2>&1
+        exit 0
       fi
-
     else
-      if [ $agreement_status == 0 ]; then
+      if [ ${agreement_status} == 0 ]; then
         if [ -n "${agreement_file+1}" ]; then
-          if [ $eula_value == "FILE_MSG" ]; then
+          if [ ${eula_value} == "FILE_MSG" ]; then
             agreement_accepted=0
-            \rm -rf $TMP_PATH
+            \rm -rf ${TMP_PATH}
             eula_message=$(echo "${line: 9}")
             full_message=${eula_message}
             full_message+=${GENERIC_MSG}
             if [ -n "${ANDROID_FORCE_EULA_AGREEMENT+1}" ]; then
               agreement_accepted=1
-              echo "$agreement_file ACCEPTED" >> ${EULA_CONFIG_STATUS_PATH}
-
+              echo "${agreement_file} ACCEPTED" >> ${EULA_CONFIG_STATUS_PATH}
               empty_line
               blue "${full_message}"
               empty_line
@@ -416,18 +436,25 @@ while IFS='' read -r line || [[ -n $line ]]; do
               ask_eula_agreement "${full_message}" || agreement_accepted=1
             fi
           fi
-
+        fi
+      elif [ ${do_force} == 1 ]; then
+        # agreement already accepted, force reload
+        agreement_accepted=1
+      else
+        agreement_accepted=0
+      fi
           if [ ${agreement_accepted} == 1 ]; then
             case ${eula_value} in
               "GIT_PATH" )
                 parsing_step=$((parsing_step+1))
+                rm -rf ${TMP_PATH}
                 \mkdir -p ${TMP_PATH}
                 git_path=($(echo $line | awk '{ print $2 }'))
                 echo "  => Loading ${eula_message}"
                 \git clone ${git_path} ${TMP_PATH} >/dev/null 2>&1
                 if [ $? -ne 0 ]; then
                   error "Not possible to clone module from ${git_path}"
-                  sed -n '/${agreement_file}/!p' ${EULA_CONFIG_STATUS_PATH}
+                  sed -n '/${agreement_file}/!p' ${EULA_CONFIG_STATUS_PATH} >/dev/null 2>&1
                 fi
                 ;;
               "GIT_SHA1" )
@@ -455,6 +482,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
                 parsing_step=$((parsing_step+1))
                 output_path=($(echo $line | awk '{ print $2 }'))
                 msg_patch=0
+                do_create_git=0
                 \rm -rf ${output_path}
                 ;;
               "FILE_NAME" )
@@ -473,28 +501,35 @@ while IFS='' read -r line || [[ -n $line ]]; do
                 fi
                 apply_patch "${patch_path}"
                 ;;
+              "CREATE_GIT" )
+                do_create_git=1
+                msg_git="$(echo "${line: 10}")"
+                ;;
             esac
-
             if [[ ${parsing_step} == 5 ]]; then
               parsing_step=2
               mkdir -p ${output_path}
               echo "  => Extracting data to $output_path"
               extract_file ${output_path} ${file_name} ${file_format}
+              if [[ ${do_create_git} == 1 ]]; then
+                \pushd ${output_path} >/dev/null 2>&1
+                \git init >/dev/null 2>&1
+                \git commit --allow-empty -m "Initial commit" >/dev/null 2>&1
+                \git add . >/dev/null 2>&1
+                \git commit -m "${msg_git}" >/dev/null 2>&1
+                \popd >/dev/null 2>&1
+              fi
             fi
-          fi
         else
-          error "need to set EULA_AGREEMENT first within android_eula.config"
+            empty_line
+            warning "You have to read and accept agreements to allow loading required modules"
+            empty_line
+            \popd >/dev/null 2>&1
+            exit 1
         fi
       fi
     fi
-  fi
-
 done < ${EULA_CONFIG_PATH}
 
-if [ ${eula_error} -eq 1 ]; then
-  empty_line
-  warning "You have to read and accept agreements to allow loading required modules"
-  empty_line
-fi
-
-teardown
+\rm -rf ${TMP_PATH}
+\popd >/dev/null 2>&1

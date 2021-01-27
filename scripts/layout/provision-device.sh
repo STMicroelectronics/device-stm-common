@@ -19,7 +19,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.2"
 
 SOC_FAMILY="stm32mp1"
 
@@ -41,7 +41,7 @@ PART_LAYOUT_DIR="device/stm/stm32mp1/layout"
 SD_BOOT_INSTANCE="0"
 EMMC_BOOT_INSTANCE="1"
 
-BOOT_MODE_LIST=( "optee" "trusted" )
+BOOT_MODE_LIST=( "optee" )
 
 #######################################
 # Variables
@@ -58,6 +58,7 @@ part_image_path=${ANDROID_PRODUCT_OUT}
 do_interactive=0
 do_not_ask_confirmation=0
 do_fastboot=0
+do_wrapped=0
 
 fastboot_cmd=""
 fastboot_instance_var="boot_instance"
@@ -164,12 +165,13 @@ usage()
   echo "  Provision selected device with latest built images"
   empty_line
   echo "Options:"
-  echo "  -h/--help: print this message"
-  echo "  -v/--version: get script version"
-  echo "  -y/--yes: do not ask confirmation"
-  echo "  -i/--interactive: set interactive mode (select provisioned partition one by one)"
-  echo "  -c/--config <config-file-path>: set used partition configuration file (default: ${part_layout_config})"
-  echo "  -p/--path <image path>: path to images directory which shall be provisioned (default: ${ANDROID_PRODUCT_OUT})"
+  echo "  -h / --help: print this message"
+  echo "  -v / --version: get script version"
+  echo "  -y / --yes: do not ask confirmation"
+  echo "  -i / --interactive: set interactive mode (select provisioned partitions one by one)"
+  echo "  -g / --gdb: wrap fsbl image for debug purpose (required for GDB/OpenOCD)"
+  echo "  -c <config file> / --config=<config file>: set used partition configuration file (default: ${part_layout_config})"
+  echo "  -p <image path> / --path=<image path>: path to images directory which shall be provisioned (default: ${ANDROID_PRODUCT_OUT})"
   empty_line
   echo "Command:"
   echo " reboot: force board reboot after download"
@@ -281,30 +283,102 @@ get_boot_mode()
 # Main
 #######################################
 
-# Check the current usage
-if [ $# -gt 6 ]; then
+# Check that the current script is not sourced
+if [[ "$0" != "$BASH_SOURCE" ]]; then
+  empty_line
+  error "This script shall not be sourced"
+  empty_line
   usage
   \popd >/dev/null 2>&1
-  exit 1
+  return
 fi
 
-while test "$1" != ""; do
-  arg=$1
-  case $arg in
-
-    "-h"|"--help" )
+# check the options
+while getopts "hvigyc:p:-:" option; do
+  case "${option}" in
+    -)
+      # Treat long options
+      case "${OPTARG}" in
+        help)
+          usage
+          popd >/dev/null 2>&1
+          exit 0
+          ;;
+        version)
+          echo "`basename $0` version ${SCRIPT_VERSION}"
+          \popd >/dev/null 2>&1
+          exit 0
+          ;;
+        interactive)
+          do_interactive=1
+          ;;
+        yes)
+          do_not_ask_confirmation=1
+          ;;
+        config)
+          part_layout_config="${OPTARG#*=}"
+          ;;
+        path)
+          part_image_path="${OPTARG#*=}"
+          ;;
+        gdb)
+          if [ ${TARGET_BUILD_VARIANT} == "user" ]; then
+            error "GDB option not compatible with user build"
+            \popd >/dev/null 2>&1
+            exit 1
+          fi
+          do_wrapped=1
+          ;;
+        *)
+          usage
+          popd >/dev/null 2>&1
+          exit 1
+          ;;
+      esac;;
+    # Treat short options
+    h)
       usage
+      popd >/dev/null 2>&1
+      exit 0
+      ;;
+    v)
+      echo "`basename $0` version ${SCRIPT_VERSION}"
       \popd >/dev/null 2>&1
       exit 0
       ;;
-
-    "-i"|"--interactive" )
+    i)
       do_interactive=1
       ;;
-
-    "-y"|"--yes" )
+    g)
+      if [ ${TARGET_BUILD_VARIANT} == "user" ]; then
+        error "GDB option not compatible with user build"
+        \popd >/dev/null 2>&1
+        exit 1
+      fi
+      do_wrapped=1
+      ;;
+    y)
       do_not_ask_confirmation=1
       ;;
+    c)
+      part_layout_config="$OPTARG"
+      ;;
+    p)
+      part_image_path="$OPTARG"
+      ;;
+    *)
+      usage
+      popd >/dev/null 2>&1
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+while test "$1" != ""; do
+  arg=$1
+  case ${arg} in
 
     /dev/sd*)
       target_device_access="usb"
@@ -318,16 +392,6 @@ while test "$1" != ""; do
 
     reboot )
       fastboot_cmd=$1
-      ;;
-
-    "-c"|"--config" )
-      part_layout_config="$2"
-      shift # past argument
-      ;;
-
-    "-p"|"--path" )
-      part_image_path="$2"
-      shift # past argument
       ;;
 
     ** )
@@ -366,13 +430,17 @@ if [ -n "${target_device}" ]; then
 
   target_disk_type="sd"
 
-  PS3='Which boot option do you want to flash ?'
   options=(${BOOT_MODE_LIST[*]})
-  select opt in "${options[@]}"
-  do
-    target_boot_mode=${opt}
-    break
-  done
+  if [[ ${#options[@]} -eq 1 ]];then
+    target_boot_mode=${options[0]}
+  else
+    PS3='Which boot option do you want to flash ?'
+    select opt in "${options[@]}"
+    do
+      target_boot_mode=${opt}
+      break
+    done
+  fi
 
 else
   echo "Provisionning remote target through USB fastboot using ${part_layout_config} partition config file"
@@ -431,9 +499,15 @@ while IFS='' read -r line || [[ -n $line ]]; do
 
     # For fsbl and ssbl, use prebuilt image dependeing on boot mode and disk type
     if [ "${part_label}" = "fsbl" ]; then
-      part_filename=${part_label}-${target_boot_mode}.img
+      if [ ${do_wrapped} -eq 1 ]; then
+        \rm -f ${part_image_path}/${part_label}-${target_boot_mode}-wrapped.img
+        \stm32wrapper4dbg -s ${part_image_path}/${part_label}-${target_boot_mode}.img -d ${part_image_path}/${part_label}-${target_boot_mode}-wrapped.img
+        part_filename=${part_label}-${target_boot_mode}-wrapped.img
+      else
+        part_filename=${part_label}-${target_boot_mode}.img
+      fi
     elif [ "${part_label}" = "ssbl" ]; then
-      part_filename=${part_label}-${target_boot_mode}-fb${target_disk_type}.img
+      part_filename=${part_label}-trusted-fb${target_disk_type}.img
     else
       part_filename=${part_label}.img
     fi

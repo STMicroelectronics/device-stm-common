@@ -1,5 +1,2 @@
+gpu_access(bootanim);
 dontaudit bootanim vendor_file:file { read open getattr execute map };
-
-allow bootanim render_device:chr_file { rw_file_perms };
-
-get_prop(bootanim, graphics_prop)

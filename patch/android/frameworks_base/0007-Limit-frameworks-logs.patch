@@ -1,0 +1,180 @@
+From 41a78f969545c675cf97e491010bb9cc7dfae25b Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 2 Nov 2020 13:43:17 +0100
+Subject: [PATCH 2/3] Limit frameworks logs
+
+Change-Id: Ib3d6e2c23a5ca1d9f5f745cf8edc10774d52beca
+---
+ cmds/bootanimation/BootAnimation.cpp                            | 2 +-
+ core/jni/android_view_SurfaceControl.cpp                        | 2 +-
+ services/core/jni/BroadcastRadio/BroadcastRadioService.cpp      | 2 +-
+ services/core/jni/BroadcastRadio/Tuner.cpp                      | 2 +-
+ services/core/jni/BroadcastRadio/TunerCallback.cpp              | 2 +-
+ services/core/jni/BroadcastRadio/convert.cpp                    | 2 +-
+ services/core/jni/BroadcastRadio/regions.cpp                    | 2 +-
+ services/core/jni/com_android_server_TestNetworkService.cpp     | 2 +-
+ services/core/jni/com_android_server_UsbMidiDevice.cpp          | 2 +-
+ .../core/jni/com_android_server_adb_AdbDebuggingManager.cpp     | 2 +-
+ services/core/jni/com_android_server_connectivity_Vpn.cpp       | 2 +-
+ .../jni/com_android_server_location_GnssLocationProvider.cpp    | 2 +-
+ 12 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/cmds/bootanimation/BootAnimation.cpp b/cmds/bootanimation/BootAnimation.cpp
+index bb2de17b42f..c3b125c79af 100644
+--- a/cmds/bootanimation/BootAnimation.cpp
++++ b/cmds/bootanimation/BootAnimation.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #define LOG_TAG "BootAnimation"
+ 
+ #include <vector>
+diff --git a/core/jni/android_view_SurfaceControl.cpp b/core/jni/android_view_SurfaceControl.cpp
+index ae36f8a7b30..0bbdbbc784e 100644
+--- a/core/jni/android_view_SurfaceControl.cpp
++++ b/core/jni/android_view_SurfaceControl.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "SurfaceControl"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "android_os_Parcel.h"
+ #include "android_util_Binder.h"
+diff --git a/services/core/jni/BroadcastRadio/BroadcastRadioService.cpp b/services/core/jni/BroadcastRadio/BroadcastRadioService.cpp
+index be3e8784af7..3ed98075935 100644
+--- a/services/core/jni/BroadcastRadio/BroadcastRadioService.cpp
++++ b/services/core/jni/BroadcastRadio/BroadcastRadioService.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "BroadcastRadioService.jni"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "BroadcastRadioService.h"
+ 
+diff --git a/services/core/jni/BroadcastRadio/Tuner.cpp b/services/core/jni/BroadcastRadio/Tuner.cpp
+index a2a7f7d9645..1f60c666f4d 100644
+--- a/services/core/jni/BroadcastRadio/Tuner.cpp
++++ b/services/core/jni/BroadcastRadio/Tuner.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "BroadcastRadioService.Tuner.jni"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "Tuner.h"
+ 
+diff --git a/services/core/jni/BroadcastRadio/TunerCallback.cpp b/services/core/jni/BroadcastRadio/TunerCallback.cpp
+index 085a86a819c..73de02309c0 100644
+--- a/services/core/jni/BroadcastRadio/TunerCallback.cpp
++++ b/services/core/jni/BroadcastRadio/TunerCallback.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "BroadcastRadioService.TunerCallback.jni"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "TunerCallback.h"
+ 
+diff --git a/services/core/jni/BroadcastRadio/convert.cpp b/services/core/jni/BroadcastRadio/convert.cpp
+index d2b7c7d555e..b2f836070d4 100644
+--- a/services/core/jni/BroadcastRadio/convert.cpp
++++ b/services/core/jni/BroadcastRadio/convert.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "BroadcastRadioService.convert.jni"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "convert.h"
+ 
+diff --git a/services/core/jni/BroadcastRadio/regions.cpp b/services/core/jni/BroadcastRadio/regions.cpp
+index 1757a4d5c36..fa549b14dde 100644
+--- a/services/core/jni/BroadcastRadio/regions.cpp
++++ b/services/core/jni/BroadcastRadio/regions.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "BroadcastRadioService.regions.jni"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include "regions.h"
+ 
+diff --git a/services/core/jni/com_android_server_TestNetworkService.cpp b/services/core/jni/com_android_server_TestNetworkService.cpp
+index 36a6fde3619..f92c6edb79e 100644
+--- a/services/core/jni/com_android_server_TestNetworkService.cpp
++++ b/services/core/jni/com_android_server_TestNetworkService.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #define LOG_TAG "TestNetworkServiceJni"
+ 
+diff --git a/services/core/jni/com_android_server_UsbMidiDevice.cpp b/services/core/jni/com_android_server_UsbMidiDevice.cpp
+index 79d935fe610..ec3047a94a2 100644
+--- a/services/core/jni/com_android_server_UsbMidiDevice.cpp
++++ b/services/core/jni/com_android_server_UsbMidiDevice.cpp
+@@ -15,7 +15,7 @@
+  */
+ 
+ #define LOG_TAG "UsbMidiDeviceJNI"
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ #include "utils/Log.h"
+ 
+ #include "jni.h"
+diff --git a/services/core/jni/com_android_server_adb_AdbDebuggingManager.cpp b/services/core/jni/com_android_server_adb_AdbDebuggingManager.cpp
+index 9c834aaece8..f00042d5452 100644
+--- a/services/core/jni/com_android_server_adb_AdbDebuggingManager.cpp
++++ b/services/core/jni/com_android_server_adb_AdbDebuggingManager.cpp
+@@ -16,7 +16,7 @@
+ 
+ #define LOG_TAG "AdbDebuggingManager-JNI"
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include <algorithm>
+ #include <condition_variable>
+diff --git a/services/core/jni/com_android_server_connectivity_Vpn.cpp b/services/core/jni/com_android_server_connectivity_Vpn.cpp
+index 836d6d8abdb..af5ed2f2646 100644
+--- a/services/core/jni/com_android_server_connectivity_Vpn.cpp
++++ b/services/core/jni/com_android_server_connectivity_Vpn.cpp
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #define LOG_TAG "VpnJni"
+ 
+diff --git a/services/core/jni/com_android_server_location_GnssLocationProvider.cpp b/services/core/jni/com_android_server_location_GnssLocationProvider.cpp
+index 465a3518ab6..82c6f357249 100644
+--- a/services/core/jni/com_android_server_location_GnssLocationProvider.cpp
++++ b/services/core/jni/com_android_server_location_GnssLocationProvider.cpp
+@@ -16,7 +16,7 @@
+ 
+ #define LOG_TAG "GnssLocationProvider"
+ 
+-#define LOG_NDEBUG 0
++// #define LOG_NDEBUG 0
+ 
+ #include <android/hardware/gnss/1.0/IGnss.h>
+ #include <android/hardware/gnss/1.1/IGnss.h>
+-- 
+2.17.1
+

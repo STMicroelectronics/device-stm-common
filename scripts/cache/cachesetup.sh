@@ -22,7 +22,7 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
 SOC_FAMILY="stm32mp1"
 
@@ -56,6 +56,8 @@ nb_states=0
 
 config_req=""
 config_list=""
+config_done=""
+
 env_item=0
 
 #######################################
@@ -144,8 +146,8 @@ usage()
   echo "  or"
   echo "  -u/--update: update cache (default)"
   echo "  or"
-  echo "  -f/--force: create cache (force)"
   echo "  -n/--new: create cache (only create non-existing cache)"
+  echo "  -f/--force: create cache (overwrite existing cache)"
   empty_line
   echo "<cache option>:"
   echo "    all (default)"
@@ -319,7 +321,7 @@ setup_repo_cache()
       "REMOTE" )
         if [[ ${bypass} == 0 ]]; then
           repo_config_remote=$(echo $line | awk '{ print $2 }')
-          if [[ $create_cache == 1 ]]; then
+          if [[ ${create_cache} == 1 ]]; then
             if [[ "$repo_config_version" == "" ]]; then
               empty_line
               \repo init -u ${repo_config_remote} --mirror >/dev/null 2>&1
@@ -333,13 +335,14 @@ setup_repo_cache()
             empty_line
             \repo sync -q
           fi
+          config_done+="$(echo ${repo_config_name} | awk '{ print $1 }') "
           \popd >/dev/null 2>&1
         fi
         ;;
       "DIR" )
         if [[ ${bypass} == 0 ]]; then
           repo_config_dir=$(echo $line | awk '{ print $2 }')
-          if [[ $create_cache == 1 ]]; then
+          if [[ ${create_cache} == 1 ]]; then
             \rm -rf ${repo_config_dir}
             \mkdir -p ${repo_config_dir} >/dev/null 2>&1
           fi
@@ -441,18 +444,19 @@ setup_git_cache()
       "REMOTE" )
         if [[ ${bypass} == 0 ]]; then
           git_config_remote=$(echo $line | awk '{ print $2 }')
-          if [[ $create_cache == 1 ]]; then
+          if [[ ${create_cache} == 1 ]]; then
             \git clone -q --mirror ${git_config_remote} .
           else
             \git remote update
           fi
+          config_done+="$(echo ${git_config_name} | awk '{ print $1 }') "
           \popd >/dev/null 2>&1
         fi
         ;;
       "DIR" )
         if [[ ${bypass} == 0 ]]; then
           git_config_dir=$(echo $line | awk '{ print $2 }')
-          if [[ $create_cache == 1 ]]; then
+          if [[ ${create_cache} == 1 ]]; then
             \mkdir -p ${git_config_dir} >/dev/null 2>&1
             \rm -rf ${git_config_dir}/*
           fi
@@ -586,7 +590,7 @@ else
   fi
 fi
 
-if [[ $setup_all == 1 ]]; then
+if [[ ${setup_all} == 1 ]]; then
   config_req="${config_list}"
   nb_states=${total_states}
 fi
@@ -605,8 +609,8 @@ fi
 
 clear_line
 
-if [[ $create_cache == 1 ]]; then
-  green "Required caches (${config_req} ) have been successfully created"
+if [[ ${create_cache} == 1 ]]; then
+  green "Required caches ( ${config_done}) have been successfully created"
 
   if [[ ${#env_msg[@]} -gt 0 ]]; then
     echo "Please add following lines in your ~/.bashrc:"
@@ -616,7 +620,7 @@ if [[ $create_cache == 1 ]]; then
     done
   fi
 else
-  green "Required caches (${config_req} ) have been successfully updated"
+  green "Required caches ( ${config_done}) have been successfully updated"
 fi
 
 \popd >/dev/null 2>&1

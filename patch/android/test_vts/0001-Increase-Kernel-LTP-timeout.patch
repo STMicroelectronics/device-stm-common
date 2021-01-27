@@ -1,0 +1,26 @@
+From af2ad8e0b4da9e66c3490a190d5be3e5bc31f3ac Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 23 Nov 2020 17:37:45 +0100
+Subject: [PATCH] Increase Kernel LTP timeout
+
+Change-Id: I83f323a233ee577b1a5c9371b8ed69e94d0efeaf
+---
+ ltp/testcase/tools/template/template.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ltp/testcase/tools/template/template.xml b/ltp/testcase/tools/template/template.xml
+index 8fdd687..0026969 100644
+--- a/ltp/testcase/tools/template/template.xml
++++ b/ltp/testcase/tools/template/template.xml
+@@ -45,7 +45,7 @@
+     <test class="com.android.tradefed.testtype.binary.KernelTargetTest" >
+         <option name="ignore-binary-check" value="true" />
+         <!-- Set binary timeout to be 6 min which is greater than the default 5 min timeout. Otherwise TF will retry to the command and attempt to do device recovery. -->
+-        <option name="per-binary-timeout" value="360000" />
++        <option name="per-binary-timeout" value="20m" />
+ {}
+     </test>
+ </configuration>
+-- 
+2.17.1
+

@@ -3,3 +3,5 @@ allow netd kernel:system module_request;
 allow netd self:capability sys_module;
 allow netd proc_net:file create;
 allow netd shell:fifo_file write;
+
+allow netd untrusted_app:unix_stream_socket { read write };

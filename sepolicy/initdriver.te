@@ -12,4 +12,3 @@ allow initdriver debugfs_regulator:dir search;
 
 # Set the sys.vendor.modules.ready property
 set_prop(initdriver, vendor_initdriver_prop)
-

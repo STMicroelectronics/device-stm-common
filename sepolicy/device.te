@@ -1,2 +1,3 @@
-type render_device, dev_type, mlstrustedobject;
 type removable_device, dev_type;
+type teefs_block_device, dev_type;
+type rpmb_block_device, dev_type;
