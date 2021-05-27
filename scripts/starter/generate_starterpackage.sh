@@ -25,7 +25,7 @@ SOC_FAMILY="stm32mp1"
 
 BOARD_NAME_LIST=( "eval" "disco" )
 BOARD_FLAVOUR_LIST=( "ev1" "dk2" )
-BOARD_OPTION_LIST=( "default" "normal" "demo" "empty" )
+BOARD_OPTION_LIST=( "default" "normal" "demost" "empty" )
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -64,6 +64,7 @@ nb_states_starter=0
 starter_target_emmc=0
 starter_target_sd=0
 
+starter_type="starter"
 starter_board_option="normal"
 starter_soc_version="stm32mp157f"
 
@@ -459,7 +460,7 @@ if [[ "$0" == "$BASH_SOURCE" ]]; then
 fi
 
 # Check the current usage
-if [ $# -gt 4 ]; then
+if [ $# -gt 6 ]; then
   usage_starter
   teardown_starter
   return 1
@@ -498,9 +499,20 @@ while test "$1" != ""; do
 
     "-o"|"--opt" )
       starter_board_option=$2
-      if [ "${starter_board_option}" = "default" ]; then
-        starter_board_option=${DEFAULT_BOARD_OPTION}
+      if in_list_starter "${BOARD_OPTION_LIST[*]}" "$starter_board_option"; then
+        if [ "${starter_board_option}" = "default" ]; then
+          starter_board_option=${DEFAULT_BOARD_OPTION}
+        fi
+        if [ "${starter_board_option}" = "demost" ]; then
+          starter_type="demo"
+        fi
+      else
+        error_starter "Unknown option $starter_board_option"
+        usage_starter
+        teardown_starter
+        return 1
       fi
+
       shift
       ;;
 
@@ -574,7 +586,7 @@ if [ ${starter_target_emmc} -eq 1 ]; then
     BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=emmc TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
-    emmc_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-emmc-starter
+    emmc_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-emmc-${starter_type}
     state_starter "create starter in ${STARTER_OUT}/${starter_board_name}/${emmc_starter_dir}"
 
     emmc_starter_path=${STARTER_OUT}/${starter_board_name}/${emmc_starter_dir}
@@ -638,7 +650,7 @@ if [ ${starter_target_sd} -eq 1 ]; then
     BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=sd TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
-    sd_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-sd-starter
+    sd_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-sd-${starter_type}
     state_starter "create starter in ${STARTER_OUT}/${starter_board_name}/${sd_starter_dir}"
 
     sd_starter_path=${STARTER_OUT}/${starter_board_name}/${sd_starter_dir}
