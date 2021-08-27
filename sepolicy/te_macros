@@ -6,4 +6,5 @@ allow $1 gpu_device:chr_file { rw_file_perms };
 allow $1 graphics_device:chr_file { ioctl open read write map };
 allow $1 graphics_device:dir search;
 get_prop($1, vendor_allocator_prop)
+get_prop($1, vendor_graphics_prop)
 ')

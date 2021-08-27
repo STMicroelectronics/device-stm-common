@@ -3,6 +3,7 @@ allow ephemeral_app storage_file:dir { getattr search };
 allow ephemeral_app mnt_user_file:dir { getattr search };
 
 get_prop(ephemeral_app, vendor_allocator_prop);
+get_prop(ephemeral_app, vendor_graphics_prop);
 
 dontaudit ephemeral_app {
   system_bootstrap_lib_file

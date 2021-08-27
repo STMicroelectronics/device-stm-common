@@ -3,8 +3,31 @@ ro.vendor.camera.req.fmq.size           u:object_r:vendor_camera_prop:s0
 ro.vendor.camera.res.fmq.size           u:object_r:vendor_camera_prop:s0
 
 # list of allocator hal properties
-ro.vendor.gralloc.drm.device            u:object_r:vendor_allocator_prop:s0
+vendor.gralloc.drm.device               u:object_r:vendor_allocator_prop:s0
 vendor.gralloc.trace                    u:object_r:vendor_allocator_prop:s0
+vendor.drv.config                       u:object_r:vendor_allocator_prop:s0
+
+# list of graphics properties
+vendor.VSC_OPTION                       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GLSL_DUMP                    u:object_r:vendor_graphics_prop:s0
+vendor.VIV_MEMORY_PROFILE               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_TRACE                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_NO_MT                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_EGL_PLATFORM                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DEBUG                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_RA_DEPTH_WRITE       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_FBO_PREFER_MEM               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_FBO_PREFER_TILED             u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_DEC400               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_HZ                   u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OCL_VIR_SHADER               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OCL_USE_MULTI_DEVICE         u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_OPENCV_WORKGROUPSIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_MGPU_AFFINITY                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_PROCESS_NAME                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_MSAAx2                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_PROFILE                      u:object_r:vendor_graphics_prop:s0
+vendor.VC_OPTION                        u:object_r:vendor_graphics_prop:s0
 
 # list of composer hal properties
 ro.vendor.hwc.drm.device                u:object_r:vendor_composer_prop:s0

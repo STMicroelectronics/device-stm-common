@@ -78,6 +78,7 @@
 /sys/devices/platform/charger-0/power_supply/dummy-charger-ac/wakeup[0-9](/.*)*            u:object_r:sysfs_wakeup:s0
 /sys/devices/platform/charger-0/power_supply/dummy-battery/wakeup[0-9](/.*)*               u:object_r:sysfs_wakeup:s0
 /sys/devices/platform/soc/5c002000.i2c/i2c-1/1-0033/5c002000.i2c\:stpmic@33\:onkey/wakeup/wakeup[0-9](/.*)* u:object_r:sysfs_wakeup:s0
+/sys/devices/platform/soc/40013000.i2c/i2c-0/0-0038/wakeup/wakeup[0-9](/.*)*               u:object_r:sysfs_wakeup:s0
 /sys/devices/platform/soc/5c004000.rtc/rtc/rtc[0-9]/wakeup[0-9](/.*)*                      u:object_r:sysfs_wakeup:s0
 /sys/devices/platform/soc/5c004000.rtc/wakeup/wakeup[0-9](/.*)*                            u:object_r:sysfs_wakeup:s0
 /sys/devices/platform/mlahb/mlahb:m4@10000000/wakeup/wakeup[0-9](/.*)*                     u:object_r:sysfs_wakeup:s0

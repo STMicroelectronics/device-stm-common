@@ -1,9 +1,10 @@
 vendor_restricted_prop(vendor_allocator_prop)
+vendor_restricted_prop(vendor_graphics_prop)
+
 vendor_internal_prop(vendor_audio_prop)
 vendor_internal_prop(vendor_camera_prop)
 vendor_internal_prop(vendor_composer_prop)
 vendor_internal_prop(vendor_km_optee_prop)
 vendor_internal_prop(vendor_wifi_prop)
-
 vendor_internal_prop(vendor_initdriver_prop)
 vendor_internal_prop(vendor_logging_prop)

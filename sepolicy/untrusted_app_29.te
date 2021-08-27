@@ -8,3 +8,5 @@ dontaudit untrusted_app_29 {
   block_device
   mnt_vendor_file
 }:dir search;
+
+get_prop(untrusted_app_29, vendor_graphics_prop)

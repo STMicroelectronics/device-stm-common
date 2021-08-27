@@ -8,6 +8,8 @@ allow untrusted_app {
   proc_fs_file_max
 }:file getattr;
 
+get_prop(untrusted_app, vendor_graphics_prop)
+
 allow untrusted_app rootfs:dir read;
 allow untrusted_app teefs_file:dir getattr;
 allow untrusted_app mnt_media_rw_file:dir getattr;

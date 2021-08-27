@@ -1,4 +1,4 @@
-From 0d6913e05c996fac40b44ba2d80f86b3ba0dc834 Mon Sep 17 00:00:00 2001
+From 2b959bea81c6b3a154a175a38bca180dda8fefe7 Mon Sep 17 00:00:00 2001
 From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 Date: Mon, 2 Nov 2020 13:49:32 +0100
 Subject: [PATCH] Remove unnecessary packages
@@ -7,12 +7,12 @@ Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 Change-Id: Ic1fa2b480a6d94d3184171a5a36b8014b9e225d7
 ---
  target/product/handheld_product.mk    | 8 --------
- target/product/handheld_system.mk     | 4 ----
+ target/product/handheld_system.mk     | 1 -
  target/product/handheld_system_ext.mk | 1 -
- 3 files changed, 13 deletions(-)
+ 3 files changed, 10 deletions(-)
 
 diff --git a/target/product/handheld_product.mk b/target/product/handheld_product.mk
-index 2199c570a..7b71f6192 100644
+index 2199c570a0..7b71f61925 100644
 --- a/target/product/handheld_product.mk
 +++ b/target/product/handheld_product.mk
 @@ -22,15 +22,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/media_product.mk)
@@ -32,7 +32,7 @@ index 2199c570a..7b71f6192 100644
      QuickSearchBox \
      SettingsIntelligence \
 diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
-index 77c103d7e..def1a6112 100644
+index 77c103d7ee..907cd0ae0d 100644
 --- a/target/product/handheld_system.mk
 +++ b/target/product/handheld_system.mk
 @@ -25,7 +25,6 @@ $(call inherit-product-if-exists, external/google-fonts/carrois-gothic-sc/fonts.
@@ -43,19 +43,8 @@ index 77c103d7e..def1a6112 100644
  $(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
  $(call inherit-product-if-exists, external/hyphenation-patterns/patterns.mk)
  $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
-@@ -53,10 +52,7 @@ PRODUCT_PACKAGES += \
-     KeyChain \
-     librs_jni \
-     ManagedProvisioning \
--    MmsService \
-     MtpService \
--    MusicFX \
--    NfcNci \
-     PacProcessor \
-     PrintRecommendationService \
-     PrintSpooler \
 diff --git a/target/product/handheld_system_ext.mk b/target/product/handheld_system_ext.mk
-index d935fbfdd..811c4f54d 100644
+index d935fbfddf..811c4f54d3 100644
 --- a/target/product/handheld_system_ext.mk
 +++ b/target/product/handheld_system_ext.mk
 @@ -22,7 +22,6 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/media_system_ext.mk)
