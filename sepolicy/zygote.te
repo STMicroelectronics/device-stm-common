@@ -1,4 +1,0 @@
-allow zygote labeledfs:filesystem unmount;
-gpu_access(zygote);
-dontaudit zygote self:capability dac_read_search;
-dontaudit zygote vendor_file:file { read open getattr execute map };

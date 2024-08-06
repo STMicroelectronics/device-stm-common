@@ -19,13 +19,14 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.3"
+SCRIPT_VERSION="1.4"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
+SOC_VERSION="stm32mp257f"
 
-BOARD_NAME_LIST=( "eval" "disco" )
-BOARD_FLAVOUR_LIST=( "ev1" "dk2" )
-BOARD_OPTION_LIST=( "default" "normal" "demost" "empty" )
+BOARD_NAME_LIST=( "eval" )
+BOARD_FLAVOUR_LIST=( "ev1" )
+BOARD_OPTION_LIST=( "st" "empty" )
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -47,11 +48,11 @@ STARTER_CONFIG_FILE_NAME="starter.config"
 STARTER_CONFIG_FILE_DEFAULT_RELATIVE="${RELATIVE_DEVICE_PATH_STARTER}/scripts/starter/${STARTER_CONFIG_FILE_NAME}"
 STARTER_CONFIG_FILE_DEFAULT="${TOP_PATH}/${STARTER_CONFIG_FILE_DEFAULT_RELATIVE}"
 
-STARTER_NAME="st-android-11.0.0"
+STARTER_NAME="st-android-13.0.0"
 STARTER_BUILD="userdebug"
 STARTER_OUT="out-starter"
 
-DEFAULT_BOARD_OPTION="normal"
+DEFAULT_BOARD_OPTION="st"
 
 STARTER_TARGET_SD_SIZE_DEFAULT="4GiB"
 STARTER_TARGET_EMMC_SIZE_DEFAULT="4GiB"
@@ -64,12 +65,16 @@ nb_states_starter=0
 starter_target_emmc=0
 starter_target_sd=0
 
+starter_image_list=""
+starter_emmc_image_list=""
+starter_sd_image_list=""
+starter_sparse_image_list=""
+
 starter_type="starter"
-starter_board_option="normal"
-starter_soc_version="stm32mp157f"
+starter_board_option="st"
+starter_soc_version=${SOC_VERSION}
 
 starter_build_mode="optee"
-starter_no_teeimage="false"
 
 starter_targets=
 starter_version=
@@ -185,8 +190,8 @@ usage_starter()
   echo "Options:"
   echo "  -h/--help: get current help"
   echo "  -v/--version: get script version"
-  echo "  -s/--soc <soc version> = stm32mp157c or stm32mp157f options (default = stm32mp157f)"
-  echo "  -o/--opt <board option> = normal, empty or demo options (default = normal)"
+  echo "  -s/--soc <soc version> = stm32mp257f options (default = stm32mp257f)"
+  echo "  -o/--opt <board option> = st or empty options (default = st)"
   echo "  -c/--config  <starter_config>  = starter config file (default = ${STARTER_CONFIG_FILE_DEFAULT_RELATIVE})"
   echo "  -k/--kit  <starter_version>  = starterpackage version (default = current date)"
   empty_line_starter
@@ -285,14 +290,6 @@ get_starter_config()
             fi
           fi
           ;;
-        "STARTER_BUILD_MODE" )
-          starter_build_mode=$config_value1
-          if [ "$starter_build_mode" == "trusted" ]; then
-            starter_no_teeimage="true"
-          else
-            starter_no_teeimage="false"
-          fi
-          ;;
         "STARTER_TARGETS" )
           if [ "$config_value1" == "emmc" ]; then
             starter_target_emmc=1
@@ -322,6 +319,20 @@ get_starter_config()
           ;;
         "STARTER_TARGET_EMMC_SIZE" )
           starter_target_emmc_size=$config_value1
+          ;;
+        "STARTER_IMAGE"* )
+          if [ "$config_value2" == "sd" ]; then
+            starter_sd_image_list+="$config_value1 "
+          else
+            if [ "$config_value2" == "emmc" ]; then
+              starter_emmc_image_list+="$config_value1 "
+            else
+              starter_image_list+="$config_value1 "
+              if [ "$config_value2" == "sparse" ]; then
+                starter_sparse_image_list+="$config_value1 "
+              fi
+            fi
+          fi
           ;;
         ** )
           warning_starter "${config_name} is unknown"
@@ -500,10 +511,7 @@ while test "$1" != ""; do
     "-o"|"--opt" )
       starter_board_option=$2
       if in_list_starter "${BOARD_OPTION_LIST[*]}" "$starter_board_option"; then
-        if [ "${starter_board_option}" = "default" ]; then
-          starter_board_option=${DEFAULT_BOARD_OPTION}
-        fi
-        if [ "${starter_board_option}" = "demost" ]; then
+        if [ "${starter_board_option}" = "st" ]; then
           starter_type="demo"
         fi
       else
@@ -583,7 +591,7 @@ if [ ${starter_target_emmc} -eq 1 ]; then
     fi
 
     # build distribution
-    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=emmc TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
+    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=emmc make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
     emmc_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-emmc-${starter_type}
@@ -592,30 +600,23 @@ if [ ${starter_target_emmc} -eq 1 ]; then
     emmc_starter_path=${STARTER_OUT}/${starter_board_name}/${emmc_starter_dir}
     \mkdir -p ${emmc_starter_path}
 
-    \cp ${OUTPUT_PATH_STARTER}/fsbl-${starter_build_mode}.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/fsbl-programmer.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-trusted-fbemmc.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-programmer.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/splash.img ${emmc_starter_path}/
-    if [ "${starter_build_mode}" == "optee" ]; then
-      \cp ${OUTPUT_PATH_STARTER}/teed.img ${emmc_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teeh.img ${emmc_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teex.img ${emmc_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teefs.img ${emmc_starter_path}/
+    pushd ${OUTPUT_PATH_STARTER}
+    \cp ${starter_image_list} ${TOP_PATH}/${emmc_starter_path}/
+    if [ -n "$starter_emmc_image_list" ]; then
+      \cp ${starter_emmc_image_list} ${TOP_PATH}/${emmc_starter_path}/
     fi
-    \cp ${OUTPUT_PATH_STARTER}/boot.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/dt.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/super.img ${emmc_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/misc.img ${emmc_starter_path}/
-
-    # F2FS format no more resizeable and sparsed by default (not possible to deactivate)
-    \simg2img ${OUTPUT_PATH_STARTER}/userdata.img ${OUTPUT_PATH_STARTER}/userdata2.img
-    \mv ${OUTPUT_PATH_STARTER}/userdata2.img ${emmc_starter_path}/userdata.img
-    # \resize2fs ${emmc_starter_path}/userdata.img 256M &> /dev/null
+    pushd ${TOP_PATH}/${emmc_starter_path}
+    for sparse_image in ${starter_sparse_image_list}
+    do
+      \simg2img ${sparse_image} ${sparse_image}.raw
+      \mv ${sparse_image}.raw ${sparse_image}
+    done
+    \popd >/dev/null 2>&1
+    \popd >/dev/null 2>&1
 
     \mkdir -p ${emmc_starter_path}/flashlayout
     \cp ${DEVICE_PATH_STARTER}/../layout/programmer/FlashLayout_emmc_${starter_build_mode}.tsv ${emmc_starter_path}/flashlayout/
-    \sed -i -e 's/^PE/P/g' ${emmc_starter_path}/flashlayout/FlashLayout_emmc_${starter_build_mode}.tsv
+    \sed -i -e 's/^PE\t/P\t/g' ${emmc_starter_path}/flashlayout/FlashLayout_emmc_${starter_build_mode}.tsv
     \cp ${DEVICE_PATH_STARTER}/../layout/programmer/FlashLayout_emmc_clear.tsv ${emmc_starter_path}/flashlayout/
 
     \pushd ${STARTER_OUT}/${starter_board_name} >/dev/null 2>&1
@@ -647,7 +648,7 @@ if [ ${starter_target_sd} -eq 1 ]; then
     fi
 
     # build distribution
-    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=sd TARGET_USERIMAGES_SPARSE_EXT_DISABLED=true TARGET_NO_TEEIMAGE=${starter_no_teeimage} make -j4 >/dev/null 2>&1
+    BOARD_OPTION=${starter_board_option} BOARD_FLAVOUR=${board_flavour} BOARD_DISK_TYPE=sd make -j4 >/dev/null 2>&1
 
     # create starter (copy images and associated layout)
     sd_starter_dir=${STARTER_NAME}-${starter_version}-${starter_soc_version}-${board_flavour}-sd-${starter_type}
@@ -656,30 +657,23 @@ if [ ${starter_target_sd} -eq 1 ]; then
     sd_starter_path=${STARTER_OUT}/${starter_board_name}/${sd_starter_dir}
     \mkdir -p ${sd_starter_path}
 
-    \cp ${OUTPUT_PATH_STARTER}/fsbl-${starter_build_mode}.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/fsbl-programmer.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-trusted-fbsd.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/ssbl-programmer.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/splash.img ${sd_starter_path}/
-    if [ "${starter_build_mode}" == "optee" ]; then
-      \cp ${OUTPUT_PATH_STARTER}/teed.img ${sd_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teeh.img ${sd_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teex.img ${sd_starter_path}/
-      \cp ${OUTPUT_PATH_STARTER}/teefs.img ${sd_starter_path}/
+    pushd ${OUTPUT_PATH_STARTER}
+    \cp ${starter_image_list} ${TOP_PATH}/${sd_starter_path}/
+    if [ -n "$starter_sd_image_list" ]; then
+      \cp ${starter_sd_image_list} ${TOP_PATH}/${sd_starter_path}/
     fi
-    \cp ${OUTPUT_PATH_STARTER}/boot.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/dt.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/super.img ${sd_starter_path}/
-    \cp ${OUTPUT_PATH_STARTER}/misc.img ${sd_starter_path}/
-
-    # F2FS format no more resizeable and sparsed by default (not possible to deactivate)
-    \simg2img ${OUTPUT_PATH_STARTER}/userdata.img ${OUTPUT_PATH_STARTER}/userdata2.img
-    \mv ${OUTPUT_PATH_STARTER}/userdata2.img ${sd_starter_path}/userdata.img
-    # \resize2fs ${sd_starter_path}/userdata.img 256M &> /dev/null
+    pushd ${TOP_PATH}/${sd_starter_path}
+    for sparse_image in ${starter_sparse_image_list}
+    do
+      \simg2img ${sparse_image} ${sparse_image}.raw
+      \mv ${sparse_image}.raw ${sparse_image}
+    done
+    \popd >/dev/null 2>&1
+    \popd >/dev/null 2>&1
 
     \mkdir -p ${sd_starter_path}/flashlayout
     \cp ${DEVICE_PATH_STARTER}/../layout/programmer/FlashLayout_sd_${starter_build_mode}.tsv ${sd_starter_path}/flashlayout/
-    \sed -i -e 's/^PE/P/g' ${sd_starter_path}/flashlayout/FlashLayout_sd_${starter_build_mode}.tsv
+    \sed -i -e 's/^PE\t/P\t/g' ${sd_starter_path}/flashlayout/FlashLayout_sd_${starter_build_mode}.tsv
 
     \pushd ${STARTER_OUT}/${starter_board_name} >/dev/null 2>&1
 

@@ -1,0 +1,54 @@
+From 5944625c59038b1c30c18015d81910a3804be40e Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Thu, 17 Aug 2023 14:55:14 +0200
+Subject: [PATCH 2/3] Correct signed and unsigned values comparison warning
+
+ComposerServiceWriter: use unsigned integer for index to compare it with size which is unsigned.
+
+Change-Id: Id07564d51ccff9f82104068fee005240bd0d5256
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ .../hardware/graphics/composer3/ComposerServiceWriter.h   | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/graphics/composer/aidl/include/android/hardware/graphics/composer3/ComposerServiceWriter.h b/graphics/composer/aidl/include/android/hardware/graphics/composer3/ComposerServiceWriter.h
+index b50b84bce6..e49a849f22 100644
+--- a/graphics/composer/aidl/include/android/hardware/graphics/composer3/ComposerServiceWriter.h
++++ b/graphics/composer/aidl/include/android/hardware/graphics/composer3/ComposerServiceWriter.h
+@@ -56,7 +56,7 @@ class ComposerServiceWriter {
+         ChangedCompositionTypes changedCompositionTypes;
+         changedCompositionTypes.display = display;
+         changedCompositionTypes.layers.reserve(layers.size());
+-        for (int i = 0; i < layers.size(); i++) {
++        for (uint i = 0; i < layers.size(); i++) {
+             auto layer = ChangedCompositionLayer{.layer = layers[i], .composition = types[i]};
+             changedCompositionTypes.layers.emplace_back(std::move(layer));
+         }
+@@ -70,7 +70,7 @@ class ComposerServiceWriter {
+         displayRequest.display = display;
+         displayRequest.mask = displayRequestMask;
+         displayRequest.layerRequests.reserve(layers.size());
+-        for (int i = 0; i < layers.size(); i++) {
++        for (uint i = 0; i < layers.size(); i++) {
+             auto layerRequest =
+                     DisplayRequest::LayerRequest{.layer = layers[i], .mask = layerRequestMasks[i]};
+             displayRequest.layerRequests.emplace_back(std::move(layerRequest));
+@@ -93,7 +93,7 @@ class ComposerServiceWriter {
+                           std::vector<::ndk::ScopedFileDescriptor> releaseFences) {
+         ReleaseFences releaseFencesCommand;
+         releaseFencesCommand.display = display;
+-        for (int i = 0; i < layers.size(); i++) {
++        for (uint i = 0; i < layers.size(); i++) {
+             if (releaseFences[i].get() >= 0) {
+                 ReleaseFences::Layer layer;
+                 layer.layer = layers[i];
+@@ -124,4 +124,4 @@ class ComposerServiceWriter {
+     std::vector<CommandResultPayload> mCommandsResults;
+ };
+ 
+-}  // namespace aidl::android::hardware::graphics::composer3::impl
+\ No newline at end of file
++}  // namespace aidl::android::hardware::graphics::composer3::impl
+-- 
+2.34.1
+

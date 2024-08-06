@@ -19,9 +19,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [[ -n "${ANDROID_BUILD_TOP+1}" ]]; then
   COMMON_PATH=${ANDROID_BUILD_TOP}/device/stm/${SOC_FAMILY}
@@ -36,6 +36,9 @@ PART_LAYOUT_START=34
 PART_LAYOUT_START_BYTES=$(( ${PART_LAYOUT_START} * 512 ))
 # Remove first and last 34 blocs (512B), revserved for GPT table, and GPT backup table
 ADDITIONNAL_SIZE_BYTES=$(( ${PART_LAYOUT_START_BYTES} * 2 ))
+
+# set by default 14GB for userdata, take care to use adapted sdcard (16GB min)
+DEFAULT_HYBRID_USERDATA_SIZE="14G"
 
 #######################################
 # Variables
@@ -161,6 +164,9 @@ teardown_layout() {
   unset last_part_name
   unset part_size
   unset part_size_bytes
+  unset part_hybrid
+  unset part_hybrid_size
+
   unset part_mode
   unset part_nb
   unset part_prefix
@@ -249,6 +255,10 @@ while IFS='' read -r line || [[ -n $line ]]; do
     part_name=($(echo $line | awk '{ print $1 }'))
     part_size=($(echo $line | awk '{ print $2 }'))
     part_mode=($(echo $line | awk '{ print $4 }'))
+
+    part_hybrid=($(echo $line | awk '{ print $5 }'))
+    part_hybrid_size=($(echo $line | awk '{ print $6 }'))
+
     part_nb=($(echo $line | awk '{ print $3 }'))
     part_nb=${part_nb: -1}
 
@@ -259,11 +269,22 @@ while IFS='' read -r line || [[ -n $line ]]; do
       transform_part_size_in_bytes ${part_size}
       export ${SOC_FAMILY^^}_${part_name}_PART_SIZE=${part_size_bytes}
       if [[ ${part_name} == "SUPER" ]]; then
-        # case dynamic partition (A/B included), consider 1MB margin for METADATA
-        dynamic_part_size=$(( ($part_size_bytes/2)-1048576 ))
+        # case dynamic partition (A/B included), consider 4MB margin for METADATA
+        dynamic_part_size=$(( ($part_size_bytes)-4194304 ))
         export ${SOC_FAMILY^^}_DYNAMIC_PART_SIZE=${dynamic_part_size}
       fi
       reserved_memory_size=$(( reserved_memory_size + (part_nb*part_size_bytes) ))
+      if [ -n "${part_hybrid}" ] && [ -n "${part_hybrid_size}" ]; then
+        if [ ${part_hybrid} == "hybrid" ]; then
+          transform_part_size_in_bytes ${part_hybrid_size}
+          export ${SOC_FAMILY^^}_HYBRID_${part_name}_PART_SIZE=${part_size_bytes}
+          if [[ ${part_name} == "SUPER" ]]; then
+            # case dynamic partition (A/B included), consider 4MB margin for METADATA
+            dynamic_part_size=$(( ($part_size_bytes)-4194304 ))
+            export ${SOC_FAMILY^^}_HYBRID_DYNAMIC_PART_SIZE=${dynamic_part_size}
+          fi
+        fi
+      fi
     else
       if [ ${part_name} == "MEMORY_SIZE" ]; then
         if [ ${disk_default} == 1 ]; then
@@ -285,6 +306,8 @@ while IFS='' read -r line || [[ -n $line ]]; do
           if [ ! -z ${last_part_name} ];then
             part_size_bytes=$(( disk_size_accurate - reserved_memory_size ))
             export ${SOC_FAMILY^^}_${last_part_name}_PART_SIZE=${part_size_bytes}
+            transform_part_size_in_bytes ${DEFAULT_HYBRID_USERDATA_SIZE}
+            export ${SOC_FAMILY^^}_HYBRID_${last_part_name}_PART_SIZE=${part_size_bytes}
           fi
           break
         fi
@@ -292,11 +315,6 @@ while IFS='' read -r line || [[ -n $line ]]; do
     fi
   fi
 done < ${layout_config}
-
-if [ -z "$STM32MP1_BOOTLOADER_PART_SIZE" ]; then
-  bootloader_part_size=$(( ($STM32MP1_ATF_PART_SIZE*2)+$STM32MP1_BL33_PART_SIZE ))
-  export ${SOC_FAMILY^^}_BOOTLOADER_PART_SIZE=${bootloader_part_size}
-fi
 
 teardown_layout
 unset -f teardown_layout

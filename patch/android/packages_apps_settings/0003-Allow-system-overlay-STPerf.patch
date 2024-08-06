@@ -1,0 +1,29 @@
+From 1a2c2c31672c2034f4b6e943d07a91ca1c1ede67 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Tue, 27 Feb 2024 08:45:25 +0100
+Subject: [PATCH 3/3] Allow system overlay (STPerf)
+
+Change-Id: I1d223bcf14cdd9dbb5b27eb65b71ab92b8fffccc
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ src/com/android/settings/Utils.java | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/src/com/android/settings/Utils.java b/src/com/android/settings/Utils.java
+index 58788de2f88..b4a2e01f0e8 100644
+--- a/src/com/android/settings/Utils.java
++++ b/src/com/android/settings/Utils.java
+@@ -1116,9 +1116,7 @@ public final class Utils extends com.android.settingslib.Utils {
+      * Starting from Q, SYSTEM_ALERT_WINDOW is disabled on low ram phones.
+      */
+     public static boolean isSystemAlertWindowEnabled(Context context) {
+-        // SYSTEM_ALERT_WINDOW is disabled on on low ram devices starting from Q
+-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+-        return !(am.isLowRamDevice() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q));
++        return true;
+     }
+ 
+     /**
+-- 
+2.34.1
+

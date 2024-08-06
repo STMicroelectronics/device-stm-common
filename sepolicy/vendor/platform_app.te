@@ -1,0 +1,16 @@
+gpu_access(platform_app)
+# get_prop(platform_app, vendor_default_prop)
+
+allow platform_app proc_stat:file { r_file_perms };
+allow platform_app system_data_file:file open;
+
+r_dir_file(platform_app, sysfs_rifsc)
+r_dir_file(platform_app, sysfs_gc)
+r_dir_file(platform_app, sysfs_display)
+r_dir_file(platform_app, sysfs_zram)
+
+allow platform_app graphics_device:chr_file r_file_perms;
+
+dontaudit platform_app debugfs:file { open read getattr };
+dontaudit platform_app debugfs_gc:dir search;
+dontaudit platform_app debugfs_gc:file { open read getattr };

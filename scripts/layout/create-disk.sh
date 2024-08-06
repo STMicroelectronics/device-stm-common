@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.0"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -33,7 +33,7 @@ else
 fi
 
 PART_LAYOUT_NAME="android_layout.config"
-PART_LAYOUT_DIR="device/stm/stm32mp1/layout"
+PART_LAYOUT_DIR="device/stm/stm32mp2/layout"
 PART_LAYOUT_CONFIG=${TOP_PATH}/${PART_LAYOUT_DIR}/${PART_LAYOUT_NAME}
 
 BOOT_MODE_LIST=( "optee" )
@@ -51,8 +51,11 @@ boot_mode=${DEFAULT_BOOT_MODE}
 
 do_pv=1
 do_zip=0
+do_hybrid=0
 
 part_image_path=${ANDROID_PRODUCT_OUT}
+
+tmp_version="nodate"
 
 #######################################
 # Functions
@@ -91,6 +94,7 @@ usage()
   echo "  -h/--help: print this message"
   echo "  -v/--version: get script version"
   echo "  -c/--config <path to layout config file>: select configuration file (default: ${layout_config})"
+  echo "  --hybrid : create disk image for hybrid configuration (only metadata and userdata)"
   echo "  -z/--zip: compress disk image (.zip)"
   empty_line
 }
@@ -223,7 +227,7 @@ provision_disk()
   local l_offset
   local l_name
 
-  \sgdisk --print ${raw_name} > /tmp/disk_info
+  \sgdisk --print ${raw_name} > /tmp/disk_info-${tmp_version}
   if [ $? -ne 0 ]; then
     error "Not possible to read device ${raw_name} info"
     \popd >/dev/null 2>&1
@@ -252,6 +256,10 @@ provision_disk()
             ssbl* )
               echo "[${l_number}] Provision ssbl-${boot_mode}-fbsd.img to ${l_name} partition"
               provision_partition "ssbl-trusted-fbsd" "${l_offset}" "false"
+              ;;
+            fip )
+              echo "[${l_number}] Provision fip.img to ${l_name} partition"
+              provision_partition "fip" "${l_offset}" "false"
               ;;
             teeh )
               echo "[${l_number}] Provision teeh.img to ${l_name} partition"
@@ -301,6 +309,10 @@ provision_disk()
               echo "[${l_number}] Provision misc.img to ${l_name} partition"
               provision_partition "misc" "${l_offset}" "false"
               ;;
+            metadata )
+              echo "[${l_number}] Provision metadata.img to ${l_name} partition"
+              provision_partition "metadata" "${l_offset}" "true"
+              ;;
             userdata )
               echo "[${l_number}] Provision userdata.img to ${l_name} partition"
               provision_partition "userdata" "${l_offset}" "true"
@@ -314,8 +326,8 @@ provision_disk()
         fi
       fi
     fi
-  done < /tmp/disk_info
-  \rm -rf /tmp/disk_info
+  done < /tmp/disk_info-${tmp_version}
+  \rm -rf /tmp/disk_info-${tmp_version}
 }
 
 #######################################
@@ -351,6 +363,11 @@ while test "$1" != ""; do
       do_zip=1
       ;;
 
+    "--hybrid" )
+      echo "CASE HYBRID"
+      do_hybrid=1
+      ;;
+
     ** )
       usage
       exit 1
@@ -384,6 +401,9 @@ if ! [ -x "$(command -v pv)" ]; then
   do_pv=0
 fi
 
+# Use date to set unique tmp file name
+tmp_version=`date +%Y-%m-%d_%H-%M`
+
 empty_line
 
 # get back required boot mode
@@ -406,7 +426,12 @@ zip_name="st-android-${boot_mode}-sd.zip"
 empty_line
 
 # Create disk image
+if [[ ${do_hybrid} -eq 0 ]];then
 format-device -c ${layout_config} -r ${raw_name} ${boot_mode}
+else
+format-device --hybrid -c ${layout_config} -r ${raw_name} ${boot_mode}
+fi
+
 if [ $? -ne 0 ]; then
   exit 1
 fi

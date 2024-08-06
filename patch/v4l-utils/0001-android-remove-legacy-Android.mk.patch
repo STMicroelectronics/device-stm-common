@@ -1,0 +1,218 @@
+From 8bef35e40cb1948a16bd8494661680c66819ef29 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Fri, 7 Jul 2023 15:17:41 +0200
+Subject: [PATCH 1/4] android: remove legacy Android.mk
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ lib/Android.mk                   |  4 ---
+ lib/libv4l2/Android.mk           | 31 -------------------
+ lib/libv4lconvert/Android.mk     | 53 --------------------------------
+ utils/v4l2-compliance/Android.mk | 26 ----------------
+ utils/v4l2-ctl/Android.mk        | 26 ----------------
+ utils/v4l2-dbg/Android.mk        | 18 -----------
+ 6 files changed, 158 deletions(-)
+ delete mode 100644 lib/Android.mk
+ delete mode 100644 lib/libv4l2/Android.mk
+ delete mode 100644 lib/libv4lconvert/Android.mk
+ delete mode 100644 utils/v4l2-compliance/Android.mk
+ delete mode 100644 utils/v4l2-ctl/Android.mk
+ delete mode 100644 utils/v4l2-dbg/Android.mk
+
+diff --git a/lib/Android.mk b/lib/Android.mk
+deleted file mode 100644
+index 2e431205..00000000
+--- a/lib/Android.mk
++++ /dev/null
+@@ -1,4 +0,0 @@
+-LOCAL_PATH:= $(call my-dir)
+-include $(CLEAR_VARS)
+-
+-include $(call all-makefiles-under,$(LOCAL_PATH))
+diff --git a/lib/libv4l2/Android.mk b/lib/libv4l2/Android.mk
+deleted file mode 100644
+index 7d723fbe..00000000
+--- a/lib/libv4l2/Android.mk
++++ /dev/null
+@@ -1,31 +0,0 @@
+-LOCAL_PATH:= $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-
+-LOCAL_SRC_FILES := \
+-    log.c \
+-    libv4l2.c \
+-    v4l2convert.c \
+-    v4l2-plugin-android.c
+-
+-LOCAL_CFLAGS += -Wno-missing-field-initializers
+-LOCAL_CFLAGS += -Wno-sign-compare
+-
+-LOCAL_C_INCLUDES := \
+-    $(LOCAL_PATH)/../include \
+-    $(LOCAL_PATH)/../../include \
+-    $(LOCAL_PATH)/../.. \
+-	$(TOP)/bionic/libc/upstream-openbsd/lib/libc/gen
+-
+-LOCAL_SHARED_LIBRARIES := \
+-    libutils \
+-    libcutils \
+-    libdl \
+-    libssl \
+-    libz
+-
+-LOCAL_STATIC_LIBRARIES := libv4l_convert
+-LOCAL_MODULE := libv4l2
+-LOCAL_MODULE_TAGS := optional
+-
+-include $(BUILD_SHARED_LIBRARY)
+diff --git a/lib/libv4lconvert/Android.mk b/lib/libv4lconvert/Android.mk
+deleted file mode 100644
+index 99a136b4..00000000
+--- a/lib/libv4lconvert/Android.mk
++++ /dev/null
+@@ -1,53 +0,0 @@
+-LOCAL_PATH:= $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-
+-LOCAL_SRC_FILES := \
+-    bayer.c \
+-    cpia1.c \
+-    crop.c \
+-    flip.c \
+-    helper.c \
+-    hm12.c \
+-    jidctflt.c \
+-    jl2005bcd.c \
+-    jpeg.c \
+-    jpeg_memsrcdest.c \
+-    jpgl.c \
+-    libv4lconvert.c \
+-    mr97310a.c \
+-    pac207.c \
+-    rgbyuv.c \
+-    se401.c \
+-    sn9c10x.c \
+-    sn9c2028-decomp.c \
+-    sn9c20x.c \
+-    spca501.c \
+-    spca561-decompress.c \
+-    sq905c.c \
+-    stv0680.c \
+-    tinyjpeg.c \
+-    control/libv4lcontrol.c \
+-    processing/autogain.c  \
+-    processing/gamma.c \
+-    processing/libv4lprocessing.c  \
+-    processing/whitebalance.c \
+-
+-LOCAL_CFLAGS += -Wno-missing-field-initializers
+-LOCAL_CFLAGS += -Wno-sign-compare
+-
+-LOCAL_C_INCLUDES := \
+-    $(LOCAL_PATH)/../include \
+-    $(LOCAL_PATH)/../../include \
+-    $(LOCAL_PATH)/../.. \
+-
+-LOCAL_SHARED_LIBRARIES := \
+-    libutils \
+-    libcutils \
+-    libdl \
+-    libz
+-
+-LOCAL_MODULE := libv4l_convert
+-LOCAL_MODULE_TAGS := optional
+-
+-include $(BUILD_STATIC_LIBRARY)
+diff --git a/utils/v4l2-compliance/Android.mk b/utils/v4l2-compliance/Android.mk
+deleted file mode 100644
+index 3b901dab..00000000
+--- a/utils/v4l2-compliance/Android.mk
++++ /dev/null
+@@ -1,26 +0,0 @@
+-LOCAL_PATH := $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-
+-LOCAL_MODULE := v4l2-compliance
+-LOCAL_MODULE_TAGS := optional
+-
+-LOCAL_CFLAGS += -DNO_LIBV4L2
+-LOCAL_CFLAGS += -Wno-missing-braces
+-LOCAL_CFLAGS += -Wno-missing-field-initializers
+-LOCAL_C_INCLUDES := \
+-    $(LOCAL_PATH)/../.. \
+-    $(LOCAL_PATH)/../../include \
+-    $(LOCAL_PATH)/../common \
+-    bionic \
+-    external/stlport/stlport
+-
+-LOCAL_SHARED_LIBRARIES := libstlport
+-
+-LOCAL_SRC_FILES := \
+-    v4l2-compliance.cpp v4l2-test-debug.cpp v4l2-test-input-output.cpp \
+-    v4l2-test-controls.cpp v4l2-test-io-config.cpp v4l2-test-formats.cpp \
+-    v4l2-test-buffers.cpp v4l2-test-codecs.cpp v4l2-test-colors.cpp \
+-    v4l2-test-media.cpp v4l2-test-subdevs.cpp media-info.cpp v4l2-info.cpp
+-
+-include $(BUILD_EXECUTABLE)
+diff --git a/utils/v4l2-ctl/Android.mk b/utils/v4l2-ctl/Android.mk
+deleted file mode 100644
+index 1eab3cd2..00000000
+--- a/utils/v4l2-ctl/Android.mk
++++ /dev/null
+@@ -1,26 +0,0 @@
+-LOCAL_PATH := $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-
+-LOCAL_MODULE := v4l2-ctl
+-LOCAL_MODULE_TAGS := optional
+-
+-LOCAL_CFLAGS += -DNO_LIBV4L2
+-LOCAL_CFLAGS += -Wno-missing-field-initializers
+-LOCAL_C_INCLUDES := \
+-    $(LOCAL_PATH)/../.. \
+-    $(LOCAL_PATH)/../../include \
+-    $(LOCAL_PATH)/../common \
+-    bionic \
+-    external/stlport/stlport
+-
+-LOCAL_SHARED_LIBRARIES := libstlport
+-
+-LOCAL_SRC_FILES := \
+-    v4l2-ctl.cpp v4l2-ctl.h v4l2-ctl-common.cpp v4l2-ctl-tuner.cpp \
+-    v4l2-ctl-io.cpp v4l2-ctl-stds.cpp v4l2-ctl-vidcap.cpp v4l2-ctl-vidout.cpp \
+-    v4l2-ctl-overlay.cpp v4l2-ctl-vbi.cpp v4l2-ctl-selection.cpp v4l2-ctl-misc.cpp \
+-    v4l2-ctl-streaming.cpp v4l2-ctl-sdr.cpp v4l2-ctl-edid.cpp v4l2-ctl-modes.cpp \
+-    v4l2-ctl-meta.cpp v4l2-ctl-subdev.cpp v4l2-info.cpp media-info.cpp \
+-    v4l2-tpg-colors.c v4l2-tpg-core.c v4l-stream.c codec-fwht.c
+-include $(BUILD_EXECUTABLE)
+diff --git a/utils/v4l2-dbg/Android.mk b/utils/v4l2-dbg/Android.mk
+deleted file mode 100644
+index f605e10a..00000000
+--- a/utils/v4l2-dbg/Android.mk
++++ /dev/null
+@@ -1,18 +0,0 @@
+-LOCAL_PATH := $(call my-dir)
+-
+-include $(CLEAR_VARS)
+-
+-LOCAL_MODULE := v4l2-dbg
+-LOCAL_MODULE_TAGS := optional
+-
+-LOCAL_C_INCLUDES := \
+-    $(LOCAL_PATH)/../.. \
+-    $(LOCAL_PATH)/../../include \
+-    bionic \
+-    external/stlport/stlport
+-
+-LOCAL_SHARED_LIBRARIES := libstlport
+-
+-LOCAL_SRC_FILES := v4l2-dbg.cpp
+-
+-include $(BUILD_EXECUTABLE)
+-- 
+2.17.1
+

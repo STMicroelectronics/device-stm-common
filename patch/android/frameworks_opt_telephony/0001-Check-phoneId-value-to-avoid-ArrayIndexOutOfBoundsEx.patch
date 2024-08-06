@@ -1,19 +1,21 @@
-From 1330a71770c5483a11258f38669c12351c7c8b79 Mon Sep 17 00:00:00 2001
-From: frq09432 <nicolas.louboutin@st.com>
-Date: Tue, 15 Oct 2019 09:19:13 +0200
+From c908e7880e7d4dbb705f27e2b1a2fc199b29c51a Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Wed, 10 Aug 2022 18:00:15 +0200
 Subject: [PATCH] Check phoneId value to avoid ArrayIndexOutOfBoundsException
- (case no telephony)
 
-Change-Id: I9a9c5e6b6b3b3c963b378b08b95da8f648d7ff9f
+Case: no telephony
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Change-Id: Id685e250803b76d2131db7101bc3465fc5f89457
 ---
- src/java/com/android/internal/telephony/PhoneSwitcher.java | 3 +++
+ .../com/android/internal/telephony/data/PhoneSwitcher.java     | 3 +++
  1 file changed, 3 insertions(+)
 
-diff --git a/src/java/com/android/internal/telephony/PhoneSwitcher.java b/src/java/com/android/internal/telephony/PhoneSwitcher.java
-index 3e156661c..40f6ff523 100644
---- a/src/java/com/android/internal/telephony/PhoneSwitcher.java
-+++ b/src/java/com/android/internal/telephony/PhoneSwitcher.java
-@@ -932,6 +932,9 @@ public class PhoneSwitcher extends Handler {
+diff --git a/src/java/com/android/internal/telephony/data/PhoneSwitcher.java b/src/java/com/android/internal/telephony/data/PhoneSwitcher.java
+index 720c04d600..6cfcebd900 100644
+--- a/src/java/com/android/internal/telephony/data/PhoneSwitcher.java
++++ b/src/java/com/android/internal/telephony/data/PhoneSwitcher.java
+@@ -1208,6 +1208,9 @@ public class PhoneSwitcher extends Handler {
      }
  
      private void switchPhone(int phoneId, boolean active) {

@@ -1,0 +1,14 @@
+subdirs = [
+    "audio",
+    "bootctrl",
+    "camera",
+    "composer",
+    "memtrack",
+    "gralloc",
+    "health",
+    "lights",
+    "oemlock",
+    "thermal",
+    "usb",
+    "wifi",
+]

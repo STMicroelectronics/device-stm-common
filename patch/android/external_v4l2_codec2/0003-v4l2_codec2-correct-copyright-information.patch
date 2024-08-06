@@ -1,0 +1,85 @@
+From fe268dc039776a7d3172468e1b0d32b38e58b47e Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Fri, 28 Jun 2024 10:17:52 +0200
+Subject: [PATCH] v4l2_codec2: correct copyright information
+
+Copyright information is corrected in some files.
+The components/V4L2Device.cpp file was useless, and had no copyright and license:
+it is removed.
+
+Change-Id: I7288c39082376121e5f3a26feb0d2612b0d55db3
+---
+ components/V4L2Device.cpp                     | 29 -------------------
+ .../components/vp8/parser/VP8Parser.h         |  4 ++-
+ components/vp8/parser/VP8Parser.cpp           |  4 ++-
+ 3 files changed, 6 insertions(+), 31 deletions(-)
+ delete mode 100644 components/V4L2Device.cpp
+
+diff --git a/components/V4L2Device.cpp b/components/V4L2Device.cpp
+deleted file mode 100644
+index e42b524..0000000
+--- a/components/V4L2Device.cpp
++++ /dev/null
+@@ -1,29 +0,0 @@
+-#include "V4L2Device.h"
+-
+-#include <cstring>
+-
+-std::shared_ptr<V4L2Request> V4L2Decoder::allocSubRequest(V4L2Request *prevRequest, ) {
+-    int ret;
+-
+-    std::shared_ptr<V4L2Request> request = mRequestPool.front();
+-    mRequestPool.pop();
+-
+-    if (!request) {
+-        request = std::make_shared<V4L2Request>();
+-
+-        ret = ioctl(mMediaFD, MEDIA_IOC_REQUEST_ALLOC, request->fd);
+-        if (ret < 0) {
+-            ALOGE("MEDIA_IOC_REQUEST_ALLOC failed: %s", std::strerror(errno));
+-            return nullptr;
+-        }
+-    }
+-
+-    request->decoder = this;
+-    request->bitstream = bitstream;
+-    request->picBuf = prevRequest->picBuf;
+-    request->frameNum = prevRequest->frameNum;
+-    request->subRequest = true;
+-    request->refCount = 1;
+-
+-    return request;
+-}
+diff --git a/components/include/v4l2_codec2/components/vp8/parser/VP8Parser.h b/components/include/v4l2_codec2/components/vp8/parser/VP8Parser.h
+index 1439c12..53984df 100644
+--- a/components/include/v4l2_codec2/components/vp8/parser/VP8Parser.h
++++ b/components/include/v4l2_codec2/components/vp8/parser/VP8Parser.h
+@@ -2,7 +2,9 @@
+  * NOTE: some of implementations are copied/modified from GStreamer code
+  *
+  * GStreamer
+- * Copyright (C) 2019 Seungha Yang <seungha.yang@navercorp.com>
++ * Copyright (C) 2013-2014 Intel Corporation
++ *   Author: Halley Zhao <halley.zhao@intel.com>
++ *   Author: Gwenole Beauchesne <gwenole.beauchesne@intel.com>
+  *
+  * This library is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Library General Public
+diff --git a/components/vp8/parser/VP8Parser.cpp b/components/vp8/parser/VP8Parser.cpp
+index 48c72f7..3ff5b9e 100644
+--- a/components/vp8/parser/VP8Parser.cpp
++++ b/components/vp8/parser/VP8Parser.cpp
+@@ -2,7 +2,9 @@
+  * NOTE: some of implementations are copied/modified from GStreamer code
+  *
+  * GStreamer
+- * Copyright (C) 2019 Seungha Yang <seungha.yang@navercorp.com>
++ * Copyright (C) 2013-2014 Intel Corporation
++ *   Author: Halley Zhao <halley.zhao@intel.com>
++ *   Author: Gwenole Beauchesne <gwenole.beauchesne@intel.com>
+  *
+  * This library is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Library General Public
+-- 
+2.34.1
+

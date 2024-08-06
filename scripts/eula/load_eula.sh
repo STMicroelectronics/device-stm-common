@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.2"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -266,18 +266,22 @@ extract_file()
 
   case $3 in
     "raw" )
-      \cp -rf ${loc_file_path} $1
+      if [[ -d ${loc_file_path} ]]; then
+        \cp -rf ${loc_file_path}/* $1
+      else
+        \cp -f ${loc_file_path} $1
+      fi
       ;;
     "tar-xz" )
       loc_tar_file=${loc_file_path}
       loc_tar_file+=".tar.xz"
-      \tar -Jxvf ${loc_tar_file} -C ${TMP_PATH} >/dev/null 2>&1
+      \tar -Jxf ${loc_tar_file} -C ${TMP_PATH} >/dev/null 2>&1
       \cp -rf ${loc_file_path}/* $1
       ;;
     "tar-gz" )
       loc_tar_file=${loc_file_path}
       loc_tar_file+=".tar.gz"
-      \tar -zxvf ${loc_tar_file} -C ${TMP_PATH} >/dev/null 2>&1
+      \tar -zxf ${loc_tar_file} -C ${TMP_PATH} >/dev/null 2>&1
       \cp -rf ${loc_file_path}/* $1
       ;;
     ** )
@@ -438,6 +442,9 @@ while IFS='' read -r line || [[ -n $line ]]; do
           fi
         fi
       elif [ ${do_force} == 1 ]; then
+        if [ ${eula_value} == "FILE_MSG" ]; then
+          eula_message=$(echo "${line: 9}")
+        fi
         # agreement already accepted, force reload
         agreement_accepted=1
       else
@@ -473,7 +480,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
                 local_path=($(echo $line | awk '{ print $2 }'))
                 \mkdir -p ${TMP_PATH}
                 if [ -d ${local_path} ]; then
-                  \cp ${local_path}/* ${TMP_PATH}/
+                  \cp -rf ${local_path}/* ${TMP_PATH}/
                 else
                   error "${local_path} doesn't exist"
                 fi

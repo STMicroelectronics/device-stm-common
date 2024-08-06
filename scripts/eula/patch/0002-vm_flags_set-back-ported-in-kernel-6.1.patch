@@ -1,0 +1,40 @@
+From bac9ad530344ef1a08c48f1240da4e3274cc52ab Mon Sep 17 00:00:00 2001
+From: Felix HENAFF <felix.henaff@st.com>
+Date: Mon, 18 Dec 2023 17:54:25 +0100
+Subject: [PATCH 2/3] vm_flags_set back-ported in kernel 6.1
+
+Signed-off-by: Felix HENAFF <felix.henaff@st.com>
+---
+ .../kernel/allocator/default/gc_hal_kernel_allocator_gfp.c      | 2 +-
+ .../allocator/default/gc_hal_kernel_allocator_reserved_mem.c    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_gfp.c b/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_gfp.c
+index fa9d0f8..a8c7819 100644
+--- a/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_gfp.c
++++ b/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_gfp.c
+@@ -727,7 +727,7 @@ _GFPMmap(gckALLOCATOR Allocator, PLINUX_MDL Mdl, gctBOOL Cacheable,
+ 
+     gcmkHEADER_ARG("Allocator=%p Mdl=%p vma=%p", Allocator, Mdl, vma);
+ 
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
+     vm_flags_set(vma, gcdVM_FLAGS);
+ #else
+     vma->vm_flags |= gcdVM_FLAGS;
+diff --git a/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_reserved_mem.c b/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_reserved_mem.c
+index 6080541..a38061a 100644
+--- a/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_reserved_mem.c
++++ b/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_reserved_mem.c
+@@ -252,7 +252,7 @@ reserved_mem_mmap(gckALLOCATOR Allocator, PLINUX_MDL Mdl, gctBOOL Cacheable,
+     pfn = (res->start >> PAGE_SHIFT) + skipPages;
+ 
+     /* Make this mapping non-cached. */
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
+     vm_flags_set(vma, gcdVM_FLAGS);
+ #else
+     vma->vm_flags |= gcdVM_FLAGS;
+-- 
+2.34.1
+

@@ -1,0 +1,28 @@
+From bc883c2f9b93cc81aa1dfc68693b721800ba2460 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Thu, 17 Aug 2023 15:47:57 +0200
+Subject: [PATCH] Add libwifi-hal-stm (vendor-specific) library
+
+Change-Id: I9e76ff320a2994354d47ac98a1b9f278a5ecf5ee
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ libwifi_hal/Android.mk | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libwifi_hal/Android.mk b/libwifi_hal/Android.mk
+index d76c3811a..846736572 100644
+--- a/libwifi_hal/Android.mk
++++ b/libwifi_hal/Android.mk
+@@ -130,6 +130,9 @@ endif
+     LIB_WIFI_HAL := libwifi-hal-emu
+   else ifeq ($(BOARD_WLAN_DEVICE), slsi)
+     LIB_WIFI_HAL := libwifi-hal-slsi
++  else ifeq ($(BOARD_WLAN_DEVICE), stm)
++    # support STM WIFI HAL (temporary)
++    LIB_WIFI_HAL := libwifi-hal-stm
+   endif
+ endif
+ 
+-- 
+2.17.1
+

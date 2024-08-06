@@ -21,14 +21,15 @@ import os
 
 usage = ("Convert Android layout config into STM32CubeProgrammer TSV layout file",
          "\nusage : build_tsv [option]",
-         "build TSV files in device/stm/stm32mp1/layout/programmer from",
-         "android layout located in device/stm/stm32mp1/layout/",
+         "build TSV files in device/stm/stm32mp2/layout/programmer from",
+         "android layout located in device/stm/stm32mp2/layout/",
          "[-h]                         : return this help",
          "[<android layout file path>] : build TSV files in the same folder as the one given for android layout")
 
 # List of supported Android partition : if you add a new partition, don't forget to also update tsv_dict
-android_allowed_part = ("PART_ATF", "PART_BL33", "PART_TEEH", "PART_TEED", "PART_TEEX", "PART_TEEFS", "PART_SPLASH", "PART_VBMETA", "PART_BOOT",
-                        "PART_DTB", "PART_SUPER", "PART_VENDOR", "PART_MODULE", "PART_SYSTEM", "PART_MISC", "PART_LAST_USERDATA")
+android_allowed_part = ("PART_ATF", "PART_FIP", "PART_UBOOT_ENV", "PART_BL33", "PART_TEEH", "PART_TEED", "PART_TEEX", "PART_TEEFS", "PART_SPLASH", "PART_VBMETA", "PART_BOOT",
+                        "PART_VENDOR_BOOT", "PART_DTBO", "PART_SUPER", "PART_VENDOR", "PART_MODULE", "PART_MISC", "PART_SYSTEM", "PART_METADATA",
+                        "PART_LAST_USERDATA")
 
 # fsbl partitions are going to boot1 and boot2 where size are not configurable
 tsv_part_type_dico = {"sd": {"name": "mmc0", "start_addr": 0x00004400},
@@ -37,13 +38,16 @@ tsv_part_type_dico = {"sd": {"name": "mmc0", "start_addr": 0x00004400},
 
 # This header is common for all TSV mapping files and placed at the beginning of the file
 tsv_header_file = ("#opt	Id		Name		Type		IP		Offset		Binary",
-                   "-		0x01	fsbl-prog	Binary		none	0x00000000	fsbl-programmer.img",
-                   "-		0x03	ssbl-prog	Binary		none	0x00000000	ssbl-programmer.img")
+                   "-		0x01	fsbl-boot	Binary		none	0x00000000	fsbl-programmer.img",
+                   "-		0x02	fip-ddr		FIP			none	0x00000000	fip-ddr-programmer.img",
+                   "-		0x03	fip-boot	FIP			none	0x00000000	fip.img")
 
 # dictionnary which contains some input to build TSV file. When Id is None, Id is incremented in the output file,
 # otherwise, use provided value
 # To keep all columns aligned, add a tab at the end of the type if needed
 tsv_dict = {"fsbl": {"opt": "P", "type": "Binary\t", "id": 0x4},
+            "fip": {"opt": "P", "type": "\tBinary\t", "id": None},
+            "u-boot-env": {"opt": "PED", "type": "Binary\t", "id": None},
             "ssbl": {"opt": "P", "type": "Binary\t", "id": None},
             "teeh": {"opt": "P", "type": "Binary\t", "id": 0xA},
             "teed": {"opt": "P", "type": "Binary\t", "id": None},
@@ -52,11 +56,13 @@ tsv_dict = {"fsbl": {"opt": "P", "type": "Binary\t", "id": 0x4},
             "splash": {"opt": "P", "type": "Binary\t", "id": 0x10},
             "vbmeta": {"opt": "P", "type": "Binary\t", "id": None},
             "boot": {"opt": "PE", "type": "System\t", "id": 0x21},
-            "dt": {"opt": "PE", "type": "System\t", "id": None},
+            "vendor_boot": {"opt": "PE", "type": "System", "id": None},
+            "dtbo": {"opt": "PE", "type": "System\t", "id": None},
             "super": {"opt": "PE", "type": "Binary\t", "id": None},
             "vendor": {"opt": "PE", "type": "FileSystem", "id": None},
-            "system": {"opt": "PE", "type": "FileSystem", "id": None},
             "misc": {"opt": "PE", "type": "FileSystem", "id": None},
+            "system": {"opt": "PE", "type": "FileSystem", "id": None},
+            "metadata": {"opt": "PE", "type": "FileSystem", "id": None},
             "userdata": {"opt": "PE", "type": "FileSystem", "id": 0x30}}
 
 
@@ -82,7 +88,7 @@ def get_size(android_size: str):
     return None
 
 
-def build_tsv(part_list, boot_mode: str = "trusted", memory_type: str = "sd"):
+def build_tsv(part_list, boot_mode: str = "trusted", memory_type: str = "sd", memory_hybrid: bool = False):
     """
     Build a list of partition compatible with TSV format
     :param part_list: list of partition compatible with Android format
@@ -99,8 +105,18 @@ def build_tsv(part_list, boot_mode: str = "trusted", memory_type: str = "sd"):
         if not boot_mode == "optee" and dict["part_name"][:-1] == "tee":
             continue
 
+        # do not care about sd partition if emmc is concerened, except fsbl which have a specific treatment
+        if memory_type == "emmc" and dict["part_for_sd"] == "sd" and not dict["part_name"] == "fsbl":
+            continue
+
+        # check special case with hybrid configuration
+        if memory_hybrid and dict["hybrid"] == "enable" and dict["hybrid_size"] is None:
+            continue
+
         # compute filename
-        if dict["part_name"] == "fsbl":
+        if dict["file_name"] is not None:
+            filename = dict["file_name"]
+        elif dict["part_name"] == "fsbl":
             filename = "%s-%s.img" % (dict["part_name"], boot_mode)
         elif dict["part_name"] == "ssbl":
             filename = "%s-%s-fb%s.img" % (dict["part_name"], "trusted", memory_type)
@@ -161,7 +177,18 @@ def build_tsv(part_list, boot_mode: str = "trusted", memory_type: str = "sd"):
         if memory_type == "emmc" and dict["part_name"] == "fsbl":
             offset = "0x{:08x}".format(tsv_part_type_dico[memory_type]["start_addr"])
         else:
-            offset = "0x{:08x}".format(int(offset, 0) + get_size(dict["size"]))
+            if memory_hybrid and dict["hybrid_size"] is not None:
+                offset = "0x{:08x}".format(int(offset, 0) + get_size(dict["hybrid_size"]))
+            else:
+                offset = "0x{:08x}".format(int(offset, 0) + get_size(dict["size"]))
+
+    # in case of hybrid, add a spare partition at the end to allow reloading GSI
+    if memory_hybrid:
+        id = "0x{:02x}".format((int(id, 16) + 1))
+        tsv_part_list.append("%s\t\t%s\t%s\t\t%s\t\t%s\t%s\t%s" % (
+            "PED", id, "spare", "Binary",
+            tsv_part_type_dico[memory_type]["name"], offset, "none"))
+
 
     return tsv_part_list
 
@@ -178,8 +205,8 @@ if len(sys.argv) == 1:
         print("Android environment not set", file=sys.stderr)
         exit(2)  # error code : 2 : Android environment not set
 
-    android_layout_file_path = "%s/device/stm/stm32mp1/layout/android_layout.config" % android_build_top
-    tsv_dir_path = "%s/device/stm/stm32mp1/layout/programmer" % android_build_top
+    android_layout_file_path = "%s/device/stm/stm32mp2/layout/android_layout.config" % android_build_top
+    tsv_dir_path = "%s/device/stm/stm32mp2/layout/programmer" % android_build_top
 
 elif len(sys.argv) == 2:
     if sys.argv[-1] == "-h":
@@ -211,22 +238,37 @@ try:
                     if android_name in android_allowed_part:
                         partition_list.append(
                             {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
-                             "part_ab": None, "part_for_sd": None})
-
+                             "part_ab": None, "part_for_sd": None, "hybrid" : "disable", "hybrid_size": None, "file_name": None})
                 elif len(part_desc) == 5:
                     android_name, size, part_nb, part_name, part_ab = partition.split()
                     if android_name in android_allowed_part:
-                        partition_list.append(
-                            {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
-                             "part_ab": part_ab, "part_for_sd": None})
-
+                        if part_ab == "sd" :
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": None, "part_for_sd": part_ab, "hybrid" : "disable", "hybrid_size": None, "file_name": None})
+                        elif part_ab == "hybrid" :
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": part_ab, "part_for_sd": None, "hybrid" : "enable", "hybrid_size": None, "file_name": None})
+                        elif part_ab == "none" :
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": part_ab, "part_for_sd": None, "hybrid" : "disable", "hybrid_size": None, "file_name": part_ab})
+                        else:
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": part_ab, "part_for_sd": None, "hybrid" : "disable", "hybrid_size": None, "file_name": None})
                 elif len(part_desc) == 6:
                     android_name, size, part_nb, part_name, part_ab, part_for_sd = partition.split()
                     if android_name in android_allowed_part:
-                        partition_list.append(
-                            {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
-                             "part_ab": part_ab, "part_for_sd": part_for_sd})
-
+                        if part_ab == "hybrid" :
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": part_ab, "part_for_sd": None, "hybrid" : "enable", "hybrid_size": part_for_sd, "file_name": None})
+                        else:
+                            partition_list.append(
+                                {"android_name": android_name, "size": size, "part_nb": part_nb, "part_name": part_name,
+                                 "part_ab": part_ab, "part_for_sd": part_for_sd, "hybrid" : "disable", "hybrid_size": None, "file_name": None})
                 else:
                     print("The number of parameter of the partition is not supported", file=sys.stderr)
 
@@ -241,5 +283,10 @@ with open("%s/FlashLayout_sd_optee.tsv" % tsv_dir_path, "wt") as tsv_file:
 
 with open("%s/FlashLayout_emmc_optee.tsv" % tsv_dir_path, "wt") as tsv_file:
     tsv_partition_list = build_tsv(partition_list, boot_mode="optee", memory_type="emmc")
+    print('\n'.join(tsv_header_file), file=tsv_file)
+    print('\n'.join(tsv_partition_list), file=tsv_file)
+
+with open("%s/FlashLayout_hybrid_optee.tsv" % tsv_dir_path, "wt") as tsv_file:
+    tsv_partition_list = build_tsv(partition_list, boot_mode="optee", memory_type="emmc", memory_hybrid=True)
     print('\n'.join(tsv_header_file), file=tsv_file)
     print('\n'.join(tsv_partition_list), file=tsv_file)

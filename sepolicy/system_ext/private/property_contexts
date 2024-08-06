@@ -1,0 +1,4 @@
+# list of allocator hal properties
+persist.logd.logpersistd.buffer      u:object_r:logpersistd_logging_prop:s0
+logd.logpersistd.buffer              u:object_r:logpersistd_logging_prop:s0
+logd.logpersistd.enable              u:object_r:logpersistd_logging_prop:s0

@@ -17,9 +17,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.2"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -34,8 +34,9 @@ fi
 
 COMMON_PATH="${TOP_PATH}/device/stm/${SOC_FAMILY}"
 
-PATCH_CONFIG_PATH=${COMMON_PATH}/patch/android/android_patch.config
-PATCH_FILES_PATH=${COMMON_PATH}/patch/android
+PATCH_CONFIG_FILE="android_patch.config"
+DEFAULT_PATCH_CONFIG_PATH="${COMMON_PATH}/patch/android/${PATCH_CONFIG_FILE}"
+
 PATCH_STATUS_FILE="${COMMON_PATH}/configs/patch.config"
 
 #######################################
@@ -45,6 +46,8 @@ force_apply=0
 apply_error=0
 apply_state=0
 patch_count=0
+
+patch_config_path=${DEFAULT_PATCH_CONFIG_PATH}
 
 #######################################
 # Functions
@@ -67,7 +70,7 @@ empty_line()
 #######################################
 # Print script usage on stdout
 # Globals:
-#   I PATCH_CONFIG_PATH
+#   I patch_config_path
 # Arguments:
 #   None
 # Returns:
@@ -83,7 +86,7 @@ usage()
   echo "  -h / --help: get current help"
   echo "  -v / --version: get script version"
   echo "  -f / --force: force applying patches"
-  echo "  -c <patch config file> / --config=<patch config file>: get patch configuration file path [default = ${PATCH_CONFIG_PATH}]"
+  echo "  -c <patch config file> / --config=<patch config file>: patch configuration file absolute path [default = ${patch_config_path}]"
   empty_line
 }
 
@@ -146,7 +149,7 @@ green()
 #######################################
 # Apply selected patch in current target directory
 # Globals:
-#   I PATCH_FILES_PATH
+#   I patch_files_path
 # Arguments:
 #   $1: patch
 # Returns:
@@ -157,7 +160,7 @@ apply_patch()
 {
   local loc_patch_path
 
-  loc_patch_path=${PATCH_FILES_PATH}/
+  loc_patch_path=${patch_files_path}/
   loc_patch_path+=$1
   if [ "${1##*.}" != "patch" ];then
     loc_patch_path+=".patch"
@@ -165,7 +168,10 @@ apply_patch()
 
   \git am ${loc_patch_path} >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    return 1
+    patch -p1 ${loc_patch_path} >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+       return 1
+    fi
   fi
   return 0
 }
@@ -189,14 +195,16 @@ check_patch_status()
 
   \ls ${PATCH_STATUS_FILE}  >/dev/null 2>&1
   if [ $? -eq 0 ]; then
-    l_patch_status=`grep PATCH ${PATCH_STATUS_FILE}`
-    l_patch_version=($(echo ${l_patch_status} | awk '{ print $2 }'))
-    if [[ "${l_patch_version}" -eq "$1" ]]; then
+    l_patch_status=$(grep "PATCH ${patch_subdir//-/_}" ${PATCH_STATUS_FILE})
+    if [ $? -eq 0 ]; then
+    l_patch_version=($(echo ${l_patch_status} | awk '{ print $3 }'))
+      if [[ $((l_patch_version)) -eq $((1)) ]]; then
       return 3
-    elif [ "${l_patch_version}" -gt "$1" ]; then
-      return 1
-    else
+      elif [ $((l_patch_version)) -gt $((1)) ]; then
       return 2
+      else
+        return 1
+      fi
     fi
   fi
   return 0
@@ -236,7 +244,7 @@ while getopts "hvfc:-:" option; do
                     force_apply=1
                     ;;
                 config=*)
-                    PATCH_CONFIG_PATH=${OPTARG#*=}
+                    patch_config_path=${OPTARG#*=}
                     ;;
                 *)
                     usage
@@ -259,7 +267,7 @@ while getopts "hvfc:-:" option; do
             force_apply=1
             ;;
         c)
-            PATCH_CONFIG_PATH=${OPTARG}
+            patch_config_path=${OPTARG}
             ;;
         *)
             usage
@@ -278,11 +286,14 @@ if [ $# -gt 0 ]; then
   exit 1
 fi
 
-if [[ ! -f ${PATCH_CONFIG_PATH} ]]; then
-  error "patch configuration file ${PATCH_CONFIG_PATH} not found"
+if [[ ! -f ${patch_config_path} ]]; then
+  error "patch configuration file ${patch_config_path} not found"
   \popd >/dev/null 2>&1
   exit 0
 fi
+
+patch_files_path="$(dirname "${patch_config_path}")"
+patch_subdir=$(basename "${patch_files_path}")
 
 while IFS='' read -r line || [[ -n $line ]]; do
 
@@ -329,6 +340,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
         if [ $? -ne 0 ]; then
           error "$patch_path not found, please review android_patch.config"
           \popd >/dev/null 2>&1
+          \popd >/dev/null 2>&1
           exit 0
         fi
 
@@ -373,10 +385,10 @@ while IFS='' read -r line || [[ -n $line ]]; do
 
   fi
 
-done < ${PATCH_CONFIG_PATH}
+done < ${patch_config_path}
 
 if [ ${apply_state} -eq 1 ]; then
   \popd >/dev/null 2>&1
 fi
 
-echo "PATCH ${patch_version}" >> ${PATCH_STATUS_FILE}
+echo "PATCH ${patch_subdir//-/_} ${patch_version}" >> ${PATCH_STATUS_FILE}

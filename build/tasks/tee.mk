@@ -1,4 +1,4 @@
-ifneq ($(filter stm32mp1, $(SOC_FAMILY)),)
+ifneq ($(filter stm32mp2, $(SOC_FAMILY)),)
 ifneq ($(TARGET_NO_TEEIMAGE), true)
 
 ifeq ($(TARGET_PREBUILT_TEE),)
@@ -13,22 +13,22 @@ ifeq ($(BOARD_FLAVOUR),)
 $(error BOARD_FLAVOUR not defined)
 endif
 
-OPTEE_HEADER := $(TARGET_PREBUILT_TEE)/tee-header_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).stm32
-OPTEE_PAGEABLE := $(TARGET_PREBUILT_TEE)/tee-pageable_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).stm32
-OPTEE_PAGER := $(TARGET_PREBUILT_TEE)/tee-pager_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).stm32
+OPTEE_HEADER := $(TARGET_PREBUILT_TEE)/tee-header_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).bin
+OPTEE_PAGEABLE := $(TARGET_PREBUILT_TEE)/tee-pageable_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).bin
+OPTEE_PAGER := $(TARGET_PREBUILT_TEE)/tee-pager_v2-$(SOC_VERSION)-$(BOARD_FLAVOUR).bin
 
-.PHONY: teed.img teex.img teeh.img
+.PHONY: tee-pageable_v2.bin tee-pager_v2.bin tee-header_v2.bin
 
-teed.img:
+tee-pageable_v2.bin:
 	$(ACP) -fp $(OPTEE_PAGEABLE) $(PRODUCT_OUT)/$@
 
-teex.img:
+tee-pager_v2.bin:
 	$(ACP) -fp $(OPTEE_PAGER) $(PRODUCT_OUT)/$@
 
-teeh.img:
+tee-header_v2.bin:
 	$(ACP) -fp $(OPTEE_HEADER) $(PRODUCT_OUT)/$@
 
-droidcore: teed.img teex.img teeh.img
+droidcore: tee-pageable_v2.bin tee-pager_v2.bin tee-header_v2.bin
 
 endif
 endif

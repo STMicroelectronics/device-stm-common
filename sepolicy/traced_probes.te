@@ -1,3 +1,0 @@
-dontaudit debugfs_tracing_debug {
-  debugfs_tracing_debug
-}:file write;

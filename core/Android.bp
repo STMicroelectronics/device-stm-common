@@ -1,4 +1,0 @@
-subdirs = [
-    "initprop",
-    "miscgen",
-]

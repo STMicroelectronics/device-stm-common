@@ -1,0 +1,19 @@
+#####################################
+# gpu_access(client_domain)
+# Allow client_domain to communicate with the GPU
+define(`gpu_access', `
+allow $1 gpu_device:chr_file { rw_file_perms };
+allow $1 graphics_device:chr_file { ioctl open read write map };
+allow $1 graphics_device:dir search;
+get_prop($1, vendor_allocator_prop)
+get_prop($1, vendor_graphics_prop)
+')
+
+###########################################
+# dump_hal(hal_type)
+# Ability to dump the hal debug info
+#
+define(`dump_hal', `
+  allow $1 dumpstate:fifo_file write;
+  allow $1 dumpstate:fd use;
+')

@@ -1,0 +1,10 @@
+recovery_only(`
+allow recovery gpu_device:dir search;
+allow recovery graphics_device:chr_file rw_file_perms;
+
+allow recovery aac_drc_prop:file { getattr map open };
+allow recovery adbd_config_prop:file { getattr map open };
+allow recovery adbd_prop:file { getattr map open };
+allow recovery apexd_config_prop:file { getattr map open };
+
+')

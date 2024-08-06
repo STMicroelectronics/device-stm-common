@@ -1,7 +1,0 @@
-# OemLock service
-type hal_oemlock_default, domain;
-type hal_oemlock_default_exec, exec_type, vendor_file_type, file_type;
-
-hal_server_domain(hal_oemlock_default, hal_oemlock)
-
-init_daemon_domain(hal_oemlock_default)

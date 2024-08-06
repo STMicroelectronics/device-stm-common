@@ -1,0 +1,40 @@
+# STM USB init
+allow init mnt_vendor_file:dir mounton;
+allow init configfs:dir create_dir_perms;
+allow init configfs:file create_file_perms;
+allow init configfs:lnk_file { read create unlink };
+# STM USB drive init
+allow init tmpfs:lnk_file { create unlink };
+# STM load module capability (to be removed when kernel generated without module loading capability)
+allow init self:capability sys_module;
+# STM LEDs init
+allow init sysfs_leds:lnk_file read;
+
+allow init kernel:system module_request;
+
+allow init proc_cpu_alignment:file w_file_perms;
+allow init proc_slabinfo:file setattr;
+
+allow init system_file:system module_load;
+allow init vendor_file:system module_load;
+allow init shell_data_file:sock_file getattr;
+
+allow init teefs_block_device:lnk_file relabelto;
+allow init teefs_file:dir mounton;
+
+allow init sysfs_blockinfo:file { open read write };
+
+userdebug_or_eng(`
+allow init debugfs:dir relabelfrom;
+allow init debugfs:file { getattr relabelfrom };
+allow init debugfs_clk:dir relabelto;
+allow init debugfs_clk:file relabelto;
+allow init debugfs_gpio:file relabelto;
+allow init debugfs_pinctrl:dir relabelto;
+allow init debugfs_pinctrl:file relabelto;
+allow init debugfs_regulator:dir relabelto;
+allow init debugfs_regulator:file relabelto;
+allow init debugfs_wakeup_sources:file getattr;
+')
+
+dontaudit init self:capability dac_read_search;

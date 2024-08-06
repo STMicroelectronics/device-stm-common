@@ -1,4 +1,4 @@
-ifneq ($(filter stm32mp1, $(SOC_FAMILY)),)
+ifneq ($(filter stm32mp2, $(SOC_FAMILY)),)
 ifneq ($(TARGET_NO_SSBLIMAGE), true)
 
 ifeq ($(TARGET_PREBUILT_SBL),)
@@ -17,21 +17,23 @@ ifeq ($(BOARD_DISK_TYPE),)
 $(error BOARD_DISK_TYPE not defined)
 endif
 
-ifeq ($(BOARD_DISPLAY_PANEL), mb1230)
-SSBL_TRUSTED_BIN := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-trusted-fb$(BOARD_DISK_TYPE).stm32
-else
-SSBL_TRUSTED_BIN := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-$(BOARD_DISPLAY_PANEL)-trusted-fb$(BOARD_DISK_TYPE).stm32
-endif
+SSBL_TRUSTED_BIN := $(TARGET_PREBUILT_SBL)/u-boot-nodtb-trusted-fb$(BOARD_DISK_TYPE).bin
+SSBL_TRUSTED_DTB := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-trusted-fb$(BOARD_DISK_TYPE).dtb
 
 SSBL_PROG := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-programmer.stm32
 
-.PHONY: ssbl.img
+.PHONY: u-boot-nodtb.bin u-boot.dtb ssbl-programmer.img
 
-ssbl.img:
-	$(ACP) -fp $(SSBL_TRUSTED_BIN) $(PRODUCT_OUT)/ssbl-trusted-fb$(BOARD_DISK_TYPE).img
-	$(ACP) -fp $(SSBL_PROG) $(PRODUCT_OUT)/ssbl-programmer.img
+u-boot-nodtb.bin:
+	$(ACP) -fp $(SSBL_TRUSTED_BIN) $(PRODUCT_OUT)/$@
 
-droidcore: ssbl.img
+u-boot.dtb:
+	$(ACP) -fp $(SSBL_TRUSTED_DTB) $(PRODUCT_OUT)/$@
+
+ssbl-programmer.img:
+	$(ACP) -fp $(SSBL_PROG) $(PRODUCT_OUT)/$@
+
+droidcore: u-boot-nodtb.bin u-boot.dtb ssbl-programmer.img
 
 endif
 endif

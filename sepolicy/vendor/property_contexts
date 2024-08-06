@@ -1,0 +1,140 @@
+# list of camera hal properties
+ro.vendor.camera.req.fmq.size           u:object_r:vendor_camera_prop:s0
+ro.vendor.camera.res.fmq.size           u:object_r:vendor_camera_prop:s0
+
+# list of camera script properties
+vendor.camera.update                    u:object_r:vendor_camera_prop:s0
+vendor.camera.update.config             u:object_r:vendor_camera_prop:s0
+vendor.camera.media.device              u:object_r:vendor_camera_prop:s0
+vendor.camera.main.device               u:object_r:vendor_camera_prop:s0
+vendor.camera.aux.device                u:object_r:vendor_camera_prop:s0
+vendor.camera.main.width                u:object_r:vendor_camera_prop:s0
+vendor.camera.main.height               u:object_r:vendor_camera_prop:s0
+vendor.camera.main.format               u:object_r:vendor_camera_prop:s0
+vendor.camera.aux.width                 u:object_r:vendor_camera_prop:s0
+vendor.camera.aux.height                u:object_r:vendor_camera_prop:s0
+vendor.camera.aux.format                u:object_r:vendor_camera_prop:s0
+vendor.camera.isp.update.frequency      u:object_r:vendor_camera_prop:s0
+
+# list of allocator hal properties
+vendor.gralloc.drm.device               u:object_r:vendor_allocator_prop:s0
+vendor.gralloc.trace                    u:object_r:vendor_allocator_prop:s0
+vendor.drv.config                       u:object_r:vendor_allocator_prop:s0
+
+# list of graphics properties
+vendor.VSC_OPTION                       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GLSL_DUMP                    u:object_r:vendor_graphics_prop:s0
+vendor.VIV_MEMORY_PROFILE               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_TRACE                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_NO_MT                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_EGL_PLATFORM                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DEBUG                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_RA_DEPTH_WRITE       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_FBO_PREFER_MEM               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_FBO_PREFER_TILED             u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_DEC400               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DISABLE_HZ                   u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OCL_VIR_SHADER               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OCL_USE_MULTI_DEVICE         u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_OPENCV_WORKGROUPSIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_MGPU_AFFINITY                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_PROCESS_NAME                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_MSAAx2                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_PROFILE                      u:object_r:vendor_graphics_prop:s0
+vendor.VC_OPTION                        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_EGL_OPENGL_CTS               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_EGL_ALL_CONFIG               u:object_r:vendor_graphics_prop:s0
+vendor.WL_EGL_SYNC_SWAP                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GL_FOR_GLES                  u:object_r:vendor_graphics_prop:s0
+vendor.DRV_CONFIG                       u:object_r:vendor_graphics_prop:s0
+vendor.WL_EGL_GBM_FENCE                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GBM_ENABLE_ASYNC             u:object_r:vendor_graphics_prop:s0
+vendor.GPU_VIV_DISABLE_CLEAR_FB         u:object_r:vendor_graphics_prop:s0
+vendor.SKIP_Frame                       u:object_r:vendor_graphics_prop:s0
+vendor.VP_FRAME_NUM                     u:object_r:vendor_graphics_prop:s0
+vendor.VP_FRAME_START                   u:object_r:vendor_graphics_prop:s0
+vendor.VP_FRAME_END                     u:object_r:vendor_graphics_prop:s0
+vendor.VP_USE_GLFINISH                  u:object_r:vendor_graphics_prop:s0
+vendor.VP_PERDRAW_MODE                  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_WAIT_DEBUGGER                u:object_r:vendor_graphics_prop:s0
+vendor.VP_USE_VGFINISH                  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GBM_MULTI_BUFFER             u:object_r:vendor_graphics_prop:s0
+vendor.VIV_SW_READPIXELS                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_CL_PROFILE                   u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_PROFILE                   u:object_r:vendor_graphics_prop:s0
+vendor.VIV_PRIORITY                     u:object_r:vendor_graphics_prop:s0
+vendor.VP_SUPPROT_V62                   u:object_r:vendor_graphics_prop:s0
+vendor.VP_OUTPUT                        u:object_r:vendor_graphics_prop:s0
+vendor.VP_PROCESS_NAME                  u:object_r:vendor_graphics_prop:s0
+vendor.VP_ENABLE_PRINT                  u:object_r:vendor_graphics_prop:s0
+vendor.VP_DISABLE_PROBE                 u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_TP_NN_PROBE        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_NN_ZDP3            u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_NN_ZDP6            u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_NN_STRIDE          u:object_r:vendor_graphics_prop:s0
+vendor.VIV_NO_Y_INVERT                  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OVX_USE_MULTI_DEVICE         u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_NN_DDR_BURST_SIZE         u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_NN_ACTIVE_CORE_COUNT      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_NNTP_PARALLEL      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_VA40               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_SAVE_NETWORK_BINARY      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_CACHE_GRAPH_BINARY       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_SHOW_COMMAND       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_QUICK_RESET        u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_ENABLE_BINARY_GRAPH_DEBUG       u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_SKIP_SHADER               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID1_DDR_BURST_SIZE      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID2_DDR_BURST_SIZE      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID3_DDR_BURST_SIZE      u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID0_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID1_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID2_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_VIP_AXI_ID3_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_OVX_MULTI_DEVICES            u:object_r:vendor_graphics_prop:s0
+vendor.2D_DUMP_LEVEL                    u:object_r:vendor_graphics_prop:s0
+vendor.VIV_DUMP_FRAME_TGA               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_SWAPBUFFERS_MT               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_GRAPHICS_CARD_ID             u:object_r:vendor_graphics_prop:s0
+vendor.VP_ENABLE_DEBUG_COUNTER          u:object_r:vendor_graphics_prop:s0
+vendor.VP_SUPPORT_FPGA_COUNTER          u:object_r:vendor_graphics_prop:s0
+vendor.VP_SUPPORT_L2_COUNTER            u:object_r:vendor_graphics_prop:s0
+vendor.USE_DECONV_MODE_SW               u:object_r:vendor_graphics_prop:s0
+vendor.GAL_DEVICE_NAME                  u:object_r:vendor_graphics_prop:s0
+vendor.OCL_USC_CACHE_RATIO              u:object_r:vendor_graphics_prop:s0
+vendor.TMPDIR                           u:object_r:vendor_graphics_prop:s0
+vendor.VIV_LIB_SHADER_DIR               u:object_r:vendor_graphics_prop:s0
+
+ro.boot.soc_type                        u:object_r:vendor_graphics_prop:s0
+ro.boot.soc_rev                         u:object_r:vendor_graphics_prop:s0
+
+# list of composer hal properties
+vendor.hwc.drm.device                   u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.use_overlay_planes       u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.primary_display_order    u:object_r:vendor_composer_prop:s0
+vendor.hwc.backend_override             u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.scale_with_gpu           u:object_r:vendor_composer_prop:s0
+vendor.hwc.drm.ctm                      u:object_r:vendor_composer_prop:s0
+
+# list of media properties
+vendor.media.omx                        u:object_r:vendor_media_prop:s0
+
+# property set by initdriver when all kernel module have been loaded
+vendor.modules.ready                    u:object_r:vendor_initdriver_prop:s0
+
+# list of audio hal properties
+vendor.disable_audio                    u:object_r:vendor_audio_prop:s0
+
+# list of keymaster hal properties
+vendor.keymaster.optee.                 u:object_r:vendor_km_optee_prop:s0
+
+# list of dumpstate hal properties
+persist.vendor.verbose_logging_enabled  u:object_r:vendor_logging_prop:s0
+
+# list of wlan hal properties
+vendor.wlan.driver.version              u:object_r:vendor_wifi_prop:s0
+vendor.wlan.firmware.version            u:object_r:vendor_wifi_prop:s0
+
+# list of USB hal properties
+vendor.usb.ncm.config                   u:object_r:vendor_usb_prop:s0
+vendor.usb.rndis.config                 u:object_r:vendor_usb_prop:s0

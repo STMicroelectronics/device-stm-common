@@ -1,0 +1,28 @@
+# system application access to /data/user_de/0/com... (user profile)
+allow system_app radio_data_file:dir getattr;
+
+gpu_access(system_app);
+# get_prop(system_app, vendor_default_prop)
+set_prop(system_app, logpersistd_logging_prop)
+
+binder_call(system_app, hal_copro_default)
+binder_call(system_app, hal_power_default)
+binder_call(system_app, hal_camera_default)
+binder_call(system_app, hal_graphics_composer_default)
+binder_call(system_app, hal_memtrack_default)
+binder_call(system_app, hal_health_default)
+binder_call(system_app, hal_light_default)
+binder_call(system_app, hal_usb_default)
+
+binder_call(system_app, iorapd)
+binder_call(system_app, update_engine)
+binder_call(system_app, vold)
+binder_call(system_app, wificond)
+
+r_dir_file(system_app, sysfs_rifsc)
+r_dir_file(system_app, sysfs_gc)
+r_dir_file(system_app, sysfs_display)
+r_dir_file(system_app, sysfs_zram)
+
+allow system_app graphics_device:chr_file r_file_perms;
+allow system_app proc_pagetypeinfo:file r_file_perms;

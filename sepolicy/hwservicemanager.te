@@ -1,2 +1,0 @@
-allow hwservicemanager dumpstate:fd use;
-allow hwservicemanager dumpstate:fifo_file write;

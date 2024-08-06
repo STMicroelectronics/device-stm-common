@@ -1,0 +1,69 @@
+From dd947fc49b8f38520ebbd282227e876aed837c15 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Fri, 31 May 2024 15:40:52 +0200
+Subject: [PATCH] Internal : remove gralloc and libdrm_vivante prebuilt
+
+Integrate in source :
+- gralloc.stm.so source in device/stm/stm32mp2/hardware/gralloc/
+- libdrm_vivante source in external/libdrm/
+
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ Android.bp | 36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/Android.bp b/Android.bp
+index d902321..64fcbe1 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -14,14 +14,14 @@ license {
+ }
+ 
+ // libdrm Vivante
+-cc_prebuilt_library_shared {
+-    srcs: ["libdrm_vivante.so"],
+-    name: "libdrm_vivante",
+-    strip: { none: true, },
+-    shared_libs: ["libdrm", "liblog"],
+-    compile_multilib: "64",
+-    proprietary: true,
+-}
++// cc_prebuilt_library_shared {
++//    srcs: ["libdrm_vivante.so"],
++//    name: "libdrm_vivante",
++//    strip: { none: true, },
++//    shared_libs: ["libdrm", "liblog"],
++//    compile_multilib: "64",
++//    proprietary: true,
++//}
+ 
+ // libGLESv2, libEGL and libGLESv1_CM names shall be set without proprietary extension (no more egl.cfg)
+ cc_prebuilt_library_shared {
+@@ -83,13 +83,13 @@ cc_prebuilt_library_shared {
+ }
+ 
+ // gralloc HAL prebuilt library
+-cc_prebuilt_library_shared {
+-    srcs: ["gralloc.stm.so"],
+-    name: "gralloc.stm",
+-    strip: { none: true, },
+-    shared_libs: ["android.hardware.graphics.mapper@4.0", "libc++", "libcutils", "libdrm", "libdrm_vivante", "libgralloctypes", "libhidlbase", "liblog", "libutils"],
+-    header_libs: ["libhardware_headers", "libsystem_headers", "liblog_headers"],
+-    relative_install_path: "hw",
+-    compile_multilib: "64",
+-    proprietary: true,
+-}
++//cc_prebuilt_library_shared {
++//    srcs: ["gralloc.stm.so"],
++//    name: "gralloc.stm",
++//    strip: { none: true, },
++//    shared_libs: ["android.hardware.graphics.mapper@4.0", "libc++", "libcutils", "libdrm", "libdrm_vivante", "libgralloctypes", "libhidlbase", "liblog", "libutils"],
++//    header_libs: ["libhardware_headers", "libsystem_headers", "liblog_headers"],
++//    relative_install_path: "hw",
++//    compile_multilib: "64",
++//    proprietary: true,
++//}
+-- 
+2.34.1
+

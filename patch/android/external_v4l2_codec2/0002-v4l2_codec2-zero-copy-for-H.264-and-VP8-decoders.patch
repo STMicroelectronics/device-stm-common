@@ -1,0 +1,603 @@
+From 21eec8f702df7bd9a1a57354d1715c306ba532dc Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Tue, 28 May 2024 11:01:28 +0200
+Subject: [PATCH 2/2] v4l2_codec2: zero copy for H.264 and VP8 decoders
+
+The bitstream data (compressed data, input of the decoders) of the input buffers
+provided by the display side are copied into buffers allocated by the V4L2
+drivers: memory mapping I/O (V4L2_MEMORY_MMAP).
+The V4L2 decoders write the decoded data (uncompressed data, output of the
+decoders) directly into the output buffers provided by the display side
+(0-copy): DMA shared buffer I/O (V4L2_MEMORY_DMABUF).
+The stateless H.264 decoder needs extra space on the output buffers to store
+motion vectors: this requirement is communicated to the display side (that
+allocates the output buffers) through an implementation-specific private usage
+flag.
+
+Change-Id: Ic2e1726b17037ac8e432b561d901189c5d5c5481
+---
+ components/V4L2DecodeComponent.cpp            |   3 +-
+ components/V4L2Decoder.cpp                    | 245 ++++++++++++------
+ components/VideoFramePool.cpp                 |  10 +-
+ components/h264/V4L2H264Decoder.cpp           |   2 +-
+ .../v4l2_codec2/components/V4L2Decoder.h      |  23 +-
+ .../v4l2_codec2/components/VideoFramePool.h   |   2 +-
+ components/vp8/V4L2VP8Decoder.cpp             |   3 +-
+ 7 files changed, 196 insertions(+), 92 deletions(-)
+
+diff --git a/components/V4L2DecodeComponent.cpp b/components/V4L2DecodeComponent.cpp
+index 612b206..87e5d07 100644
+--- a/components/V4L2DecodeComponent.cpp
++++ b/components/V4L2DecodeComponent.cpp
+@@ -319,8 +319,9 @@ std::unique_ptr<VideoFramePool> V4L2DecodeComponent::getVideoFramePool(const ui:
+         return nullptr;
+     }
+ 
++    const auto codec = mIntfImpl->getVideoCodec();
+     return VideoFramePool::Create(std::move(blockPool), numBuffers, size, pixelFormat, mIsSecure,
+-                                  mDecoderTaskRunner);
++                                  mDecoderTaskRunner, *codec);
+ }
+ 
+ c2_status_t V4L2DecodeComponent::stop() {
+diff --git a/components/V4L2Decoder.cpp b/components/V4L2Decoder.cpp
+index 47fa8d8..6902772 100644
+--- a/components/V4L2Decoder.cpp
++++ b/components/V4L2Decoder.cpp
+@@ -36,21 +36,12 @@ constexpr std::initializer_list<uint32_t> kSupportedOutputFourccs = {
+         Fourcc::NV12, Fourcc::NV21, Fourcc::NM12, Fourcc::NM21,
+ };
+ 
+-uint32_t VideoCodecToV4L2PixFmt(VideoCodec codec) {
+-    switch (codec) {
+-    case VideoCodec::H264:
+-        return V4L2_PIX_FMT_H264_SLICE;
+-    case VideoCodec::VP8:
+-        return V4L2_PIX_FMT_VP8_FRAME;
+-    case VideoCodec::VP9:
+-        return V4L2_PIX_FMT_VP9_FRAME;
+-    }
+-}
+-
+ }  // namespace
+ 
+-V4L2Decoder::V4L2Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner)
+-      : mTaskRunner(std::move(taskRunner)) {
++V4L2Decoder::V4L2Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner,
++        uint32_t inputPixelFormat, enum v4l2_memory allocType)
++      : mInputPixelFormat(inputPixelFormat), mAllocType(allocType),
++      mTaskRunner(std::move(taskRunner)) {
+     ALOGV("%s()", __func__);
+ 
+     mWeakThis = mWeakThisFactory.GetWeakPtr();
+@@ -103,7 +94,6 @@ bool V4L2Decoder::start(const VideoCodec& codec, const size_t inputBufferSize,
+     }
+     mDevice = V4L2Device::create();
+ 
+-    mInputPixelFormat = VideoCodecToV4L2PixFmt(codec);
+     if (!mDevice->open(V4L2Device::Type::kDecoder, mInputPixelFormat)) {
+         ALOGE("Failed to open device for %s", VideoCodecToString(codec));
+         return false;
+@@ -141,7 +131,7 @@ bool V4L2Decoder::setupInputFormat(const ui::Size &size) {
+     std::vector<uint32_t> formats =
+             mDevice->enumerateSupportedPixelformats(V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
+     if (std::find(formats.begin(), formats.end(), mInputPixelFormat) == formats.end()) {
+-        ALOGE("Input codec s not supported by device.");
++        ALOGE("Input codec is not supported by device.");
+         return false;
+     }
+ 
+@@ -226,7 +216,7 @@ void V4L2Decoder::pumpDecodeRequest() {
+         DecodeRequest &request = mDecodeRequests.front();
+ 
+         // Drain the decoder.
+-        if (request.buffer == nullptr) {
++        if (mDecodeRequests.front().buffer == nullptr) {
+             ALOGV("Get drain request.");
+ 
+             auto request = std::move(mDecodeRequests.front());
+@@ -306,65 +296,134 @@ V4L2Decoder::ResultHandle V4L2Decoder::submitRequest(RequestHandle reqHandle,
+     ALOG_ASSERT(mTaskRunner->RunsTasksInCurrentSequence());
+ 
+     std::shared_ptr<V4L2Request> req = std::static_pointer_cast<V4L2Request>(reqHandle);
+-    std::optional<V4L2WritableBufferRef> outputBuffer;
+ 
+     if (!mInputBuffer) {
+         ALOGW("No input buffer");
+         goto error;
+     }
+ 
+-    if (!req->result) {
+-        outputBuffer = mOutputQueue->getFreeBuffer();
+-        if (!outputBuffer) {
+-            ALOGE("%s(): Failed to get output buffer", __func__);
+-            goto error;
+-        }
+-        if (!std::move(*outputBuffer).queueMMap()) {
+-            ALOGE("%s(): Failed to QBUF to output queue", __func__);
+-            goto error;
+-        }
+-    }
+-
+     mInputBuffer->addFlag(V4L2_BUF_FLAG_REQUEST_FD | flags);
+     mInputBuffer->setTimeStamp({ .tv_usec = req->frameNum });
+     mInputBuffer->setRequest(req->request);
++
+     if (!std::move(*mInputBuffer).queueMMap()) {
+         ALOGE("%s(): Failed to QBUF to input queue", __func__);
+         goto error;
+     }
+ 
+-    if (!mDevice->setExtCtrls(0, controls, req->request)) {
+-        ALOGE("%s(): Driver did not accept the bitrstream parameters.", __func__);
+-        goto error;
+-    }
+-
+-    if (!req->request->queue()) {
+-        ALOGE("%s(): Failed to QUEUE request", __func__);
+-        goto error;
+-    }
+     mInputBuffer = std::nullopt;
+ 
+-    mPendingRequest.push(req);
+-
+     if (!req->result) {
+         req->result = std::make_shared<V4L2Result>();
+         req->result->frameNum = req->frameNum;
+-        mPendingResult.push(req->result);
++        mPendingResults.push(req->result);
+     }
+ 
+-    return req->result;
++    if (!mDevice->setExtCtrls(0, controls, req->request)) {
++        ALOGE("%s(): Driver did not accept the bitstream parameters.", __func__);
++        goto error;
++    }
+ 
++
++    mPrePendingRequests.push(req);
++
++    handleRequests();
++
++    return req->result;
+ error:
+-    ALOGE("sumbitRequest failed");
++    ALOGE("submitRequest failed");
+     onError();
+     mInputBuffer = std::nullopt;
+     return nullptr;
+ }
+ 
+-void V4L2Decoder::flush() {
++bool V4L2Decoder::handleRequests() {
+     ALOGV("%s()", __func__);
+     ALOG_ASSERT(mTaskRunner->RunsTasksInCurrentSequence());
+ 
++    bool ret = true;
++
++    std::queue<VideoFramePool::FrameWithBlockId> busyFrames;
++    while (!mVideoFrames.empty())
++    {
++       VideoFramePool::FrameWithBlockId frameWithBlockId = std::move(mVideoFrames.front());
++       mVideoFrames.pop();
++       uint32_t blockId = frameWithBlockId.second;
++
++       std::optional<V4L2WritableBufferRef> outputBuffer;
++       // Find the V4L2 buffer that is associated with this block.
++       auto iter = mBlockIdToV4L2Id.find(blockId);
++       if (iter != mBlockIdToV4L2Id.end()) {
++           // If we have met this block in the past, reuse the same V4L2 buffer.
++           outputBuffer = mOutputQueue->getFreeBuffer(iter->second);
++       } else if (mBlockIdToV4L2Id.size() < mOutputQueue->allocatedBuffersCount()) {
++           // If this is the first time we see this block, give it the next
++           // available V4L2 buffer.
++           const size_t v4l2BufferId = mBlockIdToV4L2Id.size();
++           mBlockIdToV4L2Id.emplace(blockId, v4l2BufferId);
++           outputBuffer = mOutputQueue->getFreeBuffer(v4l2BufferId);
++       } else {
++           // If this happens, this is a bug in VideoFramePool. It should never
++           // provide more blocks than we have V4L2 buffers.
++           ALOGE("Got more different blocks than we have V4L2 buffers for.");
++       }
++
++       if (outputBuffer) {
++           std::unique_ptr<VideoFrame> frame;
++           uint32_t blockId;
++           std::tie(frame, blockId) = std::move(frameWithBlockId);
++           mReadyFrames.push(std::make_tuple(std::move(outputBuffer), std::move(frame), blockId));
++       }
++       else {
++           busyFrames.push(std::move(frameWithBlockId));
++       }
++    }
++    mVideoFrames.swap(busyFrames);
++
++    while (!mPrePendingRequests.empty() && !mReadyFrames.empty())
++    {
++        std::shared_ptr<V4L2Request> req = mPrePendingRequests.front();
++        mPrePendingRequests.pop();
++
++        std::optional<V4L2WritableBufferRef> outputBuffer;
++        std::unique_ptr<VideoFrame> frame;
++        uint32_t blockId;
++        std::tie(outputBuffer, frame, blockId) = std::move(mReadyFrames.front());
++        mReadyFrames.pop();
++
++            const std::vector<int> fds = frame->getFDs();
++            req->result->frame = std::move(frame);
++            req->result->blockId = blockId;
++
++        if (mAllocType == V4L2_MEMORY_DMABUF)
++            ret = std::move(*outputBuffer).queueDMABuf(fds);
++        else
++            ret = std::move(*outputBuffer).queueMMap();
++        if (!ret) {
++            ALOGE("%s(): Failed to QBUF to output queue", __func__);
++            goto error;
++        }
++
++        if (!req->request->queue()) {
++            ALOGE("%s(): Failed to QUEUE request", __func__);
++            goto error;
++        }
++
++        mPendingRequests.push(req);
++    }
++
++    return true;
++
++error:
++    ALOGE("handleRequests failed");
++    onError();
++    return false;
++}
++
++void V4L2Decoder::flush() {
++    ALOGV("%s() state=%s", __func__, StateToString(mState));
++    ALOG_ASSERT(mTaskRunner->RunsTasksInCurrentSequence());
++
+     if (mState == State::Idle) {
+         ALOGV("Nothing need to flush, ignore.");
+         return;
+@@ -393,10 +452,12 @@ void V4L2Decoder::flush() {
+     mInputBuffer = std::nullopt;
+ 
+     // Clear the pending queues
+-    while (!mPendingRequest.empty())
+-        mPendingRequest.pop();
+-    while (!mPendingResult.empty())
+-        mPendingResult.pop();
++    while (!mPrePendingRequests.empty())
++        mPrePendingRequests.pop();
++    while (!mPendingRequests.empty())
++        mPendingRequests.pop();
++    while (!mPendingResults.empty())
++        mPendingResults.pop();
+     // Clear the queue of frames to output
+     while (!mFrameToOutput.empty())
+         mFrameToOutput.pop();
+@@ -455,12 +516,18 @@ void V4L2Decoder::serviceDeviceTask(bool event) {
+             onError();
+             return;
+         }
+-        if (!dequeuedBuffer) continue;
+-
+-        inputDequeued = true;
++        if (!dequeuedBuffer) { // This queued buffer hasn't been handled by V4L2 yet.
++            usleep(5000);
++            break;
++        }
+ 
+-        std::shared_ptr<V4L2Request> req = std::move(mPendingRequest.front());
+-        mPendingRequest.pop();
++        std::shared_ptr<V4L2Request> req = std::move(mPendingRequests.front());
++        if (!req) {
++            ALOGE("Failed to get request.");
++            onError();
++            return;
++        }
++        mPendingRequests.pop();
+ 
+         const int32_t bitstreamId = static_cast<int32_t>(dequeuedBuffer->getTimeStamp().tv_usec);
+         if (bitstreamId != req->frameNum) {
+@@ -468,30 +535,36 @@ void V4L2Decoder::serviceDeviceTask(bool event) {
+             onError();
+             return;
+         }
++
++        inputDequeued = true;
+     }
+ 
+     // Dequeue output queue.
+     bool outputDequeued = false;
+-    while (!mVideoFrames.empty() && mOutputQueue->queuedBuffersCount() > 0) {
++    while (mOutputQueue->queuedBuffersCount() > 0) {
+         bool success;
+         V4L2ReadableBufferRef dequeuedBuffer;
+         std::tie(success, dequeuedBuffer) = mOutputQueue->dequeueBuffer();
+         if (!success) {
+             ALOGE("Failed to dequeue buffer from output queue.");
+-        // Workaround(b/168750131): If the buffer is not enqueued before the next drain is done,
+-        // then the driver will fail to notify EOS. So we recycle the buffer immediately.
+             onError();
+             return;
+         }
+-        if (!dequeuedBuffer) continue;
++        if (!dequeuedBuffer) // This queued buffer hasn't been handled by V4L2 yet.
++            break;
+ 
+         outputDequeued = true;
+ 
+         const int32_t bitstreamId = static_cast<int32_t>(dequeuedBuffer->getTimeStamp().tv_usec);
+         const size_t bytesUsed = dequeuedBuffer->getPlaneBytesUsed(0);
+ 
+-        std::shared_ptr<V4L2Result> res = mPendingResult.front();
+-        mPendingResult.pop();
++        std::shared_ptr<V4L2Result> res = mPendingResults.front();
++        if (!res) {
++            ALOGE("Failed to get result.");
++            onError();
++            return;
++        }
++        mPendingResults.pop();
+ 
+         if (bitstreamId != res->frameNum) {
+             ALOGE("Needed frame %d, but driver returned frame %d", res->frameNum, bitstreamId);
+@@ -500,28 +573,33 @@ void V4L2Decoder::serviceDeviceTask(bool event) {
+         }
+ 
+         if (bytesUsed > 0) {
+-            ALOGV("buffer %d completed", bitstreamId);
+             res->outputBuffer = dequeuedBuffer;
+ 
+-            // Unwrap our arguments.
+-            std::unique_ptr<VideoFrame> frame = std::move(mVideoFrames.front());
+-            mVideoFrames.pop();
++            std::unique_ptr<VideoFrame> frame = std::move(res->frame);
++
++            if (mAllocType == V4L2_MEMORY_DMABUF) {
++                // Map the client buffer
++                std::shared_ptr<C2GraphicBlock> block = frame->graphicBlock();
++                block->map();
++            }
+ 
+-            // Map the client buffer
+-            std::shared_ptr<C2GraphicBlock> block = frame->graphicBlock();
+-            C2GraphicView view = block->map().get();
+-            uint8_t *dst = view.data()[0];
++            if (mAllocType == V4L2_MEMORY_MMAP) {
++                // Map the client buffer
++                std::shared_ptr<C2GraphicBlock> block = frame->graphicBlock();
++                C2GraphicView view = block->map().get();
++                uint8_t *dst = view.data()[0];
+ 
+-            // Map the v4l2 buffer
+-            const void *src = dequeuedBuffer->getPlaneMapping(0);
++                // Map the v4l2 buffer
++                const void *src = dequeuedBuffer->getPlaneMapping(0);
+ 
+-            // copy the v4l2 buffer into the client buffer
+-            memcpy(dst, src, mCodedSize.width * mCodedSize.height * 3/2);
++                // copy the v4l2 buffer into the client buffer
++                memcpy(dst, src, mCodedSize.width * mCodedSize.height * 3/2);
++            }
+ 
+             frame->setBitstreamId(bitstreamId);
+             frame->setVisibleRect(Rect(mCodedSize.width, mCodedSize.height));
+ 
+-            mCompletedFrames[bitstreamId] = std::move(frame);
++            mCompletedFrames[bitstreamId] = std::make_pair(std::move(frame), res->blockId);
+         }
+     }
+ 
+@@ -590,7 +668,7 @@ bool V4L2Decoder::changeResolution(const ui::Size &size, std::vector<V4L2ExtCtrl
+     }
+ 
+     const size_t adjustedNumOutputBuffers =
+-            mOutputQueue->allocateBuffers(*numOutputBuffers, V4L2_MEMORY_MMAP);
++            mOutputQueue->allocateBuffers(*numOutputBuffers, mAllocType);
+     if (adjustedNumOutputBuffers == 0) {
+         ALOGE("Failed to allocate output buffer.");
+         return false;
+@@ -601,9 +679,8 @@ bool V4L2Decoder::changeResolution(const ui::Size &size, std::vector<V4L2ExtCtrl
+         return false;
+     }
+ 
+-    // Set last frame pool inactive and number of frames before it must be
+-    // deleted
+     if (!mVideoFramePools.empty()) {
++        // Set last frame pool inactive and number of frames before it must be deleted
+         VideoFramePoolInfo &poolInfo = mVideoFramePools.front();
+         poolInfo.active = false;
+         poolInfo.deleteDelay = mCompletedFrames.size();
+@@ -613,6 +690,11 @@ bool V4L2Decoder::changeResolution(const ui::Size &size, std::vector<V4L2ExtCtrl
+     while (!mVideoFrames.empty())
+         mVideoFrames.pop();
+ 
++    while (!mReadyFrames.empty())
++        mReadyFrames.pop();
++
++    mBlockIdToV4L2Id.clear();
++
+     // Always use flexible pixel 420 format YCBCR_420_888 in Android.
+     std::unique_ptr<VideoFramePool> pool =
+             mGetPoolCb.Run(mCodedSize, HalPixelFormat::YCBCR_420_888, adjustedNumOutputBuffers);
+@@ -656,7 +738,7 @@ void V4L2Decoder::tryOutputFrame() {
+         }
+         mFrameToOutput.pop();
+ 
+-        mOutputCb.Run(std::move(it->second));
++        mOutputCb.Run(std::move(it->second.first));
+         mCompletedFrames.erase(it);
+ 
+         // Check if there is still an unused frame pool that can be released
+@@ -695,8 +777,10 @@ void V4L2Decoder::tryFetchVideoFrame() {
+         return;
+     }
+ 
+-    if (mVideoFrames.size() >= mOutputQueue->freeBuffersCount())
++    if (mVideoFrames.size() >= mOutputQueue->freeBuffersCount()) {
++        ALOGE("Already more frames than available: %lu vs %lu", mVideoFrames.size(), mOutputQueue->freeBuffersCount());
+         return;
++    }
+ 
+     std::unique_ptr<VideoFramePool> &pool = mVideoFramePools.front().pool;
+     if (!pool->getVideoFrame(
+@@ -716,12 +800,9 @@ void V4L2Decoder::onVideoFrameReady(
+         return;
+     }
+ 
+-    // Unwrap our arguments.
+-    std::unique_ptr<VideoFrame> frame;
+-    uint32_t blockId;
+-    std::tie(frame, blockId) = std::move(*frameWithBlockId);
++    mVideoFrames.push(std::move(*frameWithBlockId));
+ 
+-    mVideoFrames.push(std::move(frame));
++    handleRequests();
+ 
+     // Check if there is output buffers to dequeue
+     serviceDeviceTask(false);
+diff --git a/components/VideoFramePool.cpp b/components/VideoFramePool.cpp
+index 9e0b971..6ec5914 100644
+--- a/components/VideoFramePool.cpp
++++ b/components/VideoFramePool.cpp
+@@ -74,7 +74,7 @@ bool VideoFramePool::setNotifyBlockAvailableCb(C2BlockPool& blockPool, ::base::O
+ std::unique_ptr<VideoFramePool> VideoFramePool::Create(
+         std::shared_ptr<C2BlockPool> blockPool, const size_t numBuffers, const ui::Size& size,
+         HalPixelFormat pixelFormat, bool isSecure,
+-        scoped_refptr<::base::SequencedTaskRunner> taskRunner) {
++        scoped_refptr<::base::SequencedTaskRunner> taskRunner, VideoCodec codec) {
+     ALOG_ASSERT(blockPool != nullptr);
+ 
+     uint64_t usage = static_cast<uint64_t>(BufferUsage::VIDEO_DECODER);
+@@ -84,6 +84,14 @@ std::unique_ptr<VideoFramePool> VideoFramePool::Create(
+         // CPU access to buffers is only required in byte buffer mode.
+         usage |= (C2MemoryUsage::CPU_READ | C2MemoryUsage::CPU_WRITE);
+     }
++
++    if (codec == VideoCodec::H264) {
++        ALOGV("%s() extra space on the output buffers requested for %s via the usage flags",
++            __func__, VideoCodecToString(codec));
++        // Set an implementation-specific private usage flag
++        usage |= GRALLOC_USAGE_PRIVATE_2;
++    }
++
+     const C2MemoryUsage memoryUsage(usage);
+ 
+     if (requestNewBufferSet(*blockPool, numBuffers, size, static_cast<uint32_t>(pixelFormat),
+diff --git a/components/h264/V4L2H264Decoder.cpp b/components/h264/V4L2H264Decoder.cpp
+index 9b46e60..2486a8f 100644
+--- a/components/h264/V4L2H264Decoder.cpp
++++ b/components/h264/V4L2H264Decoder.cpp
+@@ -51,7 +51,7 @@ std::unique_ptr<VideoDecoder> V4L2H264Decoder::Create(
+ }
+ 
+ V4L2H264Decoder::V4L2H264Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner)
+-    : V4L2Decoder(taskRunner)
++    : V4L2Decoder(taskRunner, V4L2_PIX_FMT_H264_SLICE, V4L2_MEMORY_DMABUF)
+ { }
+ 
+ V4L2H264Decoder::~V4L2H264Decoder()
+diff --git a/components/include/v4l2_codec2/components/V4L2Decoder.h b/components/include/v4l2_codec2/components/V4L2Decoder.h
+index 449ecb7..2f80635 100644
+--- a/components/include/v4l2_codec2/components/V4L2Decoder.h
++++ b/components/include/v4l2_codec2/components/V4L2Decoder.h
+@@ -34,7 +34,8 @@ public:
+     void release(int id);
+ 
+ protected:
+-    V4L2Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner);
++    V4L2Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner,
++            uint32_t inputPixelFormat, enum v4l2_memory allocType);
+ 
+     virtual bool start(const VideoCodec &codec, size_t inputBufferSize,
+                        GetPoolCB getPoolCb, OutputCB outputCb, ErrorCB errorCb);
+@@ -83,6 +84,8 @@ private:
+     struct V4L2Result {
+         int frameNum;
+         V4L2ReadableBufferRef outputBuffer;
++        std::unique_ptr<VideoFrame> frame;
++        uint32_t blockId;
+     };
+ 
+     struct V4L2Request {
+@@ -98,6 +101,7 @@ private:
+     bool setupInputFormat(const ui::Size &size);
+     bool setupOutputFormat(const ui::Size &size);
+ 
++    bool handleRequests();
+     void tryOutputFrame();
+     void tryFetchVideoFrame();
+     void onVideoFrameReady(std::optional<VideoFramePool::FrameWithBlockId> frameWithBlockId);
+@@ -122,20 +126,28 @@ private:
+     };
+     std::list<VideoFramePoolInfo> mVideoFramePools;
+ 
++    // Block IDs can be arbitrarily large, but we only have a limited number of
++    // buffers. This maintains an association between a block ID and a specific
++    // V4L2 buffer index.
++    std::map<size_t, size_t> mBlockIdToV4L2Id;
++
+     // Current video frames fetched from the active pool
+-    std::queue<std::unique_ptr<VideoFrame>> mVideoFrames;
++    std::queue<VideoFramePool::FrameWithBlockId> mVideoFrames;
++    std::queue<std::tuple<std::optional<V4L2WritableBufferRef>, std::unique_ptr<VideoFrame>, uint32_t>> mReadyFrames;
+ 
+     scoped_refptr<V4L2Queue> mInputQueue;
+     scoped_refptr<V4L2Queue> mOutputQueue;
+ 
+     // Newcoming requests to process
+     std::queue<DecodeRequest> mDecodeRequests;
++    // V4L2 requests that need buffers to be passed on to V4L2
++    std::queue<std::shared_ptr<V4L2Request>> mPrePendingRequests;
+     // Pending requests in the input queue
+-    std::queue<std::shared_ptr<V4L2Request>> mPendingRequest;
++    std::queue<std::shared_ptr<V4L2Request>> mPendingRequests;
+     // Pending result in the output queue
+-    std::queue<std::shared_ptr<V4L2Result>> mPendingResult;
++    std::queue<std::shared_ptr<V4L2Result>> mPendingResults;
+     /* Completed frame waiting to be sent back to the client */
+-    std::map<int32_t, std::unique_ptr<VideoFrame>> mCompletedFrames;
++    std::map<int32_t, VideoFramePool::FrameWithBlockId> mCompletedFrames;
+     /* Queue of frames to output */
+     std::queue<int32_t> mFrameToOutput;
+ 
+@@ -145,6 +157,7 @@ private:
+     ErrorCB mErrorCb;
+ 
+     uint32_t mInputPixelFormat;
++    enum v4l2_memory mAllocType;
+     size_t mInputBufferSize;
+     ui::Size mCodedSize;
+ 
+diff --git a/components/include/v4l2_codec2/components/VideoFramePool.h b/components/include/v4l2_codec2/components/VideoFramePool.h
+index 2978eed..9ba2fbf 100644
+--- a/components/include/v4l2_codec2/components/VideoFramePool.h
++++ b/components/include/v4l2_codec2/components/VideoFramePool.h
+@@ -33,7 +33,7 @@ public:
+     static std::unique_ptr<VideoFramePool> Create(
+             std::shared_ptr<C2BlockPool> blockPool, const size_t numBuffers, const ui::Size& size,
+             HalPixelFormat pixelFormat, bool isSecure,
+-            scoped_refptr<::base::SequencedTaskRunner> taskRunner);
++            scoped_refptr<::base::SequencedTaskRunner> taskRunner, VideoCodec codec);
+     ~VideoFramePool();
+ 
+     // Get a VideoFrame instance, which will be passed via |cb|.
+diff --git a/components/vp8/V4L2VP8Decoder.cpp b/components/vp8/V4L2VP8Decoder.cpp
+index e428117..5edee3c 100644
+--- a/components/vp8/V4L2VP8Decoder.cpp
++++ b/components/vp8/V4L2VP8Decoder.cpp
+@@ -58,7 +58,8 @@ namespace android {
+     }
+ 
+     V4L2VP8Decoder::V4L2VP8Decoder(scoped_refptr<::base::SequencedTaskRunner> taskRunner)
+-        : V4L2Decoder(taskRunner), mWidth(0), mHeight(0) {
++        : V4L2Decoder(taskRunner, V4L2_PIX_FMT_VP8_FRAME, V4L2_MEMORY_DMABUF),
++        mWidth(0), mHeight(0) {
+     }
+ 
+     V4L2VP8Decoder::~V4L2VP8Decoder() {
+-- 
+2.34.1
+

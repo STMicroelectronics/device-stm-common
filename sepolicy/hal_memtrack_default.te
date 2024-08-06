@@ -1,7 +1,0 @@
-allow hal_memtrack_default sysfs_gc:file { r_file_perms getattr open read };
-allow hal_memtrack_default sysfs_gc:dir  { r_dir_perms };
-
-userdebug_or_eng(`
-  allow hal_memtrack_default debugfs_gc:file { r_file_perms };
-  allow hal_memtrack_default debugfs_gc:dir  { r_dir_perms };
-')

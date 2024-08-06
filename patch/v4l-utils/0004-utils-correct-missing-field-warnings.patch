@@ -1,0 +1,63 @@
+From 47f51e153725cb550b69b023c25c5f5821e9732f Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 10 Jul 2023 15:33:28 +0200
+Subject: [PATCH 4/4] utils: correct missing field warnings
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ utils/media-ctl/libmediactl.c      | 2 +-
+ utils/media-ctl/libv4l2subdev.c    | 2 +-
+ utils/v4l2-ctl/v4l2-ctl-common.cpp | 4 ++--
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/utils/media-ctl/libmediactl.c b/utils/media-ctl/libmediactl.c
+index f8d21ef9..a10a85e7 100644
+--- a/utils/media-ctl/libmediactl.c
++++ b/utils/media-ctl/libmediactl.c
+@@ -210,7 +210,7 @@ int media_setup_link(struct media_device *media,
+ 		     struct media_pad *sink,
+ 		     __u32 flags)
+ {
+-	struct media_link_desc ulink = { { 0 } };
++	struct media_link_desc ulink = { 0 };
+ 	struct media_link *link;
+ 	unsigned int i;
+ 	int ret;
+diff --git a/utils/media-ctl/libv4l2subdev.c b/utils/media-ctl/libv4l2subdev.c
+index 0d0afbe7..0656186d 100644
+--- a/utils/media-ctl/libv4l2subdev.c
++++ b/utils/media-ctl/libv4l2subdev.c
+@@ -764,7 +764,7 @@ static int set_frame_interval(struct media_pad *pad,
+ static int v4l2_subdev_parse_setup_format(struct media_device *media,
+ 					  const char *p, char **endp)
+ {
+-	struct v4l2_mbus_framefmt format = { 0, 0, 0 };
++	struct v4l2_mbus_framefmt format = { 0 };
+ 	struct media_pad *pad;
+ 	struct v4l2_rect crop = { -1, -1, -1, -1 };
+ 	struct v4l2_rect compose = crop;
+diff --git a/utils/v4l2-ctl/v4l2-ctl-common.cpp b/utils/v4l2-ctl/v4l2-ctl-common.cpp
+index c9401714..4aa482d6 100644
+--- a/utils/v4l2-ctl/v4l2-ctl-common.cpp
++++ b/utils/v4l2-ctl/v4l2-ctl-common.cpp
+@@ -843,7 +843,7 @@ int common_find_ctrl_id(const char *name)
+ void common_process_controls(cv4l_fd &fd)
+ {
+ 	struct v4l2_query_ext_ctrl qc = {
+-		V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND
++		.flags= V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND
+ 	};
+ 	int rc;
+ 
+@@ -1066,7 +1066,7 @@ void common_set(cv4l_fd &_fd)
+ 			    qc.flags & V4L2_CTRL_FLAG_UPDATE)
+ 				use_ext_ctrls = true;
+ 			if (qc.flags & V4L2_CTRL_FLAG_HAS_PAYLOAD) {
+-				struct v4l2_ext_controls ctrls = { { 0 }, 1 };
++				struct v4l2_ext_controls ctrls = { .which=0, .count=1 };
+ 				unsigned divide[V4L2_CTRL_MAX_DIMS] = { 0 };
+ 				ctrl_subset subset;
+ 				long long v;
+-- 
+2.17.1
+

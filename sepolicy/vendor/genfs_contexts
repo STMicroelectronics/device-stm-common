@@ -1,0 +1,122 @@
+genfscon proc    /sys/vm/swappiness             u:object_r:proc_swappiness:s0
+genfscon proc    /sys/vm/vfs_cache_pressure     u:object_r:proc_cache_pressure:s0
+genfscon proc    /sys/vm/dirty_ratio            u:object_r:proc_dirty:s0
+genfscon proc    /sys/dev/scsi                  u:object_r:proc_dev_scsi:s0
+genfscon proc    /sys/dev/tty                   u:object_r:proc_dev_tty:s0
+genfscon proc    /sys/fs/aio-max-nr             u:object_r:proc_fs_aio:s0
+genfscon proc    /sys/fs/aio-nr                 u:object_r:proc_fs_aio:s0
+genfscon proc    /sys/fs/dentry-state           u:object_r:proc_fs_dentry_state:s0
+genfscon proc    /sys/fs/dir-notify-enable      u:object_r:proc_fs_dir_notify_enable:s0
+genfscon proc    /sys/fs/epoll/max_user_watches u:object_r:proc_fs_epoll:s0
+genfscon proc    /sys/fs/file-max               u:object_r:proc_fs_file_max:s0
+
+genfscon proc    /fb                            u:object_r:proc_fb:s0
+genfscon proc    /mtd                           u:object_r:proc_mtd:s0
+
+# debugfs cases
+genfscon debugfs /gpio                          u:object_r:debugfs_gpio:s0
+genfscon debugfs /clk                           u:object_r:debugfs_clk:s0
+genfscon debugfs /regulator                     u:object_r:debugfs_regulator:s0
+genfscon debugfs /pinctrl                       u:object_r:debugfs_pinctrl:s0
+genfscon debugfs /gc                            u:object_r:debugfs_gc:s0
+
+# RIF system configuration
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc                           u:object_r:sysfs_rifsc:s0
+
+# I2C
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/40130000.i2c              u:object_r:sysfs_i2c:s0
+
+# MMC blocks
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48230000.mmc/mmc_host     u:object_r:sysfs_blockinfo:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48220000.mmc/mmc_host     u:object_r:sysfs_blockinfo:s0
+genfscon sysfs /class/block                     u:object_r:sysfs_blockinfo:s0
+
+# USB blocks
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/42080000.rifsc:usb@48300000/48300000.usb/udc/48300000.usb  u:object_r:sysfs_udc:s0
+genfscon sysfs /class/udc                       u:object_r:sysfs_udc:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/42080000.rifsc:usb@482e0000/482f0000.usb/usb1/1-1          u:object_r:sysfs_blockinfo:s0
+
+# GPU
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48280000.gpu              u:object_r:sysfs_gc:s0
+
+# Lights
+genfscon sysfs /devices/platform/gpio-leds/leds/blue:heartbeat/brightness       u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/gpio-leds/leds/blue:heartbeat/max_brightness   u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/gpio-leds/leds/blue:heartbeat/trigger          u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-lvds-backlight/backlight/panel-lvds-backlight/brightness             u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-lvds-backlight/backlight/panel-lvds-backlight/max_brightness         u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-lvds-backlight/backlight/panel-lvds-backlight/actual_brightness      u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-lvds-backlight/backlight/panel-lvds-backlight/scale                  u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-lvds-backlight/backlight/panel-lvds-backlight/type                   u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-dsi-backlight/backlight/panel-dsi-backlight/brightness               u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-dsi-backlight/backlight/panel-dsi-backlight/max_brightness           u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-dsi-backlight/backlight/panel-dsi-backlight/actual_brightness        u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-dsi-backlight/backlight/panel-dsi-backlight/scale                    u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/panel-dsi-backlight/backlight/panel-dsi-backlight/type                     u:object_r:sysfs_leds:s0
+genfscon sysfs /class/backlight                 u:object_r:sysfs_leds:s0
+
+# Thermal
+genfscon sysfs /devices/virtual/thermal                                         u:object_r:sysfs_thermal:s0
+genfscon sysfs /class/thermal                                                   u:object_r:sysfs_thermal:s0
+
+# Ethernet
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/482c0000.eth1/net         u:object_r:sysfs_net:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/482d0000.eth2/net         u:object_r:sysfs_net:s0
+
+# Display
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48010000.display-controller           u:object_r:sysfs_display:s0
+
+# Camera and video decoder/encoder
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48030000.dcmipp/video4linux           u:object_r:sysfs_video:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/40130000.i2c/i2c-0/0-001a/video4linux u:object_r:sysfs_video:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/48020000.csi2host/video4linux         u:object_r:sysfs_video:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/480d0000.vdec/video4linux             u:object_r:sysfs_video:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/480e0000.venc/video4linux             u:object_r:sysfs_video:s0
+genfscon sysfs /class/video4linux                                                           u:object_r:sysfs_video:s0
+
+# Battery
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/technology            u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/capacity              u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/current_max           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/current_avg           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/current_now           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/voltage_max           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/voltage_now           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/temp                  u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/cycle_count           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/charge_full           u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/charge_counter        u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/type                  u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/status                u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/health                u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/present               u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-ac/type               u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-ac/online             u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-usb_c/online          u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-usb_c/type            u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/status                              u:object_r:sysfs_batteryinfo:s0
+
+# RTC
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/hctosys                        u:object_r:sysfs_rtc:s0
+
+# Wakeup
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/wakeup                                  u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/power/wakeup                            u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.1.auto/wakeup       u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.1.auto/power/wakeup u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/42080000.rifsc:usb@482e0000/482f0000.usb/usb1/power/wakeup        u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/42080000.rifsc:usb@482e0000/482f0000.usb/usb1/1-1/power/wakeup    u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/482c0000.eth1/power/wakeup            u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/482d0000.eth2/power/wakeup            u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/42080000.rifsc/400e0000.serial/tty/ttySTM0/power/wakeup      u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-ac/power/wakeup       u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-ac/wakeup1            u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/power/wakeup          u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-battery/wakeup2               u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-usb_c/power/wakeup    u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/charger-0/power_supply/dummy-charger-usb_c/wakeup0         u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/gpio-keys/wakeup                                           u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/gpio-keys/power/wakeup                                     u:object_r:sysfs_wakeup:s0
+
+# Coprocessor
+genfscon sysfs /devices/platform/ahb@1/ahb@1:m33@0/remoteproc   u:object_r:sysfs_remoteproc:s0

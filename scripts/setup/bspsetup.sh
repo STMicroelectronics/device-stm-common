@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Setup stm32mp1 BSP required configuration for Android
+# Setup stm32mp2 BSP required configuration for Android
 
 # Copyright (C)  2019. STMicroelectronics
 #
@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.0"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}

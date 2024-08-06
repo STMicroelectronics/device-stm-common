@@ -1,0 +1,7 @@
+# hal_attribute(copro) - can't use the macro here, expand it
+attribute hal_copro;
+expandattribute hal_copro true;
+attribute hal_copro_client;
+expandattribute hal_copro_client true;
+attribute hal_copro_server;
+expandattribute hal_copro_server false;

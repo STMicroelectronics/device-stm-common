@@ -1,0 +1,17 @@
+# Add insmod capability within kernel (load modules in STM init)
+allow kernel device:chr_file { create getattr setattr unlink };
+allow kernel device:dir { create write add_name remove_name rmdir };
+allow kernel device:blk_file { getattr };
+allow kernel removable_device:blk_file { create };
+#allow kernel removable_device:blk_file { rw_file_perms read create getattr setattr unlink };
+
+allow kernel self:capability mknod;
+allow kernel self:capability sys_admin;
+allow kernel vendor_file:file { open read };
+
+userdebug_or_eng(`
+allow kernel debugfs_tracing:filesystem mount;
+')
+
+# for kdevtmpfs
+dontaudit kernel device:blk_file { create setattr unlink };

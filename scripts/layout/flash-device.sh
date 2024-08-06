@@ -19,9 +19,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.1"
+SCRIPT_VERSION="1.2"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [[ -n "${ANDROID_BUILD_TOP+1}" ]]; then
   COMMON_PATH=${ANDROID_BUILD_TOP}/device/stm/${SOC_FAMILY}
@@ -33,6 +33,7 @@ else
 fi
 
 DEFAULT_LAYOUT_CONFIG=${COMMON_PATH}/layout/android_layout.config
+NUMBER_OF_TRY=2
 
 #######################################
 # Variables
@@ -41,7 +42,10 @@ layout_config=${DEFAULT_LAYOUT_CONFIG}
 flash_dfu=1
 flash_fastboot=1
 do_wrapped=0
+do_hybrid=0
 memory_type=""
+chosen_device=-1
+tmp_version="nodate"
 
 #######################################
 # Functions
@@ -84,6 +88,7 @@ usage()
   echo "  -f / --fastboot: ONLY flash partition through fastboot"
   echo "  -g / --gdb: wrap fsbl image for debug purpose (required for GDB/OpenOCD)"
   echo "  -c <config file> / --config=<config file>: select configuration file (default: ${layout_config})"
+  echo "  --hybrid: flash only emmc partitions considering hybrid configuration"
   empty_line
 }
 
@@ -134,6 +139,9 @@ while getopts "hvdfgc:-:" option; do
           ;;
         fastboot)
           flash_dfu=0
+          ;;
+        hybrid)
+          do_hybrid=1
           ;;
         gdb)
           if [ ${TARGET_BUILD_VARIANT} == "user" ]; then
@@ -197,6 +205,9 @@ if test ${flash_fastboot} -eq 1; then
   fi
 fi
 
+# Use date to set unique tmp file name
+tmp_version=`date +%Y-%m-%d_%H-%M`
+
 #Get the memory type from layout config
 memory_type=($(grep "PART_MEMORY_TYPE" ${layout_config} | awk '{ print $2 }'))
 
@@ -214,21 +225,93 @@ if test ${flash_dfu} -eq 1; then
     exit 1
   fi
 
-  STM32_Programmer_CLI -l usb > /tmp/stm32_programmer_result
-  usb_dfu=$(cat /tmp/stm32_programmer_result | grep "Device Index" | awk '{ print $5 }')
-  \rm -f /tmp/stm32_programmer_result
-  if [ ! ${usb_dfu} ]; then
-    error "USB DFU device not found"
-    echo "Check that USB cable is plugged and board is well configured in DFU"
+  STM32_Programmer_CLI -l usb > /tmp/stm32_programmer_result-${tmp_version}
+
+  usb_dfu_list=()
+  while read -r line; do
+    usb_dfu_list+=("$line")
+  done < <(cat /tmp/stm32_programmer_result-${tmp_version} | grep "Device Index" | awk '{ print $5 }')
+
+  android_serial_list=()
+  while read -r line; do
+    android_serial_list+=("$line")
+  done < <(cat /tmp/stm32_programmer_result-${tmp_version} | grep "Serial number" | awk '{ print $5 }')
+  \rm -f /tmp/stm32_programmer_result-${tmp_version}
+
+  if [ "${#usb_dfu_list[@]}" -eq 0 ]; then
+    error "No device detected, check that it's connected and configured in DFU"
     \popd >/dev/null 2>&1
     exit 1
   fi
 
-  #Get tsv list for the current memory type configuration
-  tsv_list=$(find ${COMMON_PATH}/layout/programmer -name "*.tsv" | grep -v "emmc_clear" | grep "$memory_type" | awk -F"/" '{print $NF}')
+  if [ "${#android_serial_list[@]}" -eq 0 ]; then
+    error "No device detected, check that it's connected and configured in DFU"
+    \popd >/dev/null 2>&1
+    exit 1
+  fi
+
+  # Check how much devices are available
+  num_devices=${#android_serial_list[@]}
+
+  # Test is ANDROID_SERIAL is already defined and if it correspond to one of the existing devices plugger to PC.
+  if [[ -n "${ANDROID_SERIAL+1}" ]]; then
+    for ((i=0; i<num_devices; i++)); do
+      if [ "$ANDROID_SERIAL" == "${android_serial_list[i]}" ]; then
+        chosen_device=${i}
+      fi
+    done
+
+    if [ ${chosen_device} == -1 ]; then
+      error "The defined serial number from your environment (ANDROID_SERIAL) was not found among the available devices"
+      \popd >/dev/null 2>&1
+      exit 1
+    fi
+    echo "Flashing the device $ANDROID_SERIAL"
+  # If there is no ANDROID_SERIAL number defined
+  else
+    # If there is only one device, it choose it by default
+    if [ ${num_devices} -eq 1 ]; then
+      chosen_device=0
+      echo "Flashing the device ${android_serial_list[0]}"
+    # Otherwise, it prints all the possibilities with an associated number so 
+    # that the user can choose the device he wants to flash.
+    else
+      for j in {0..NUMBER_OF_TRY}; do
+        echo "Available devices:"
+        for ((i=0; i<num_devices; i++)); do
+          echo "$i. ${android_serial_list[i]}"
+        done
+
+        read -p "Enter the id of the device you want to use: " chosen_device
+
+        if ! [ ${chosen_device} -ge 0 ] || ! [ ${chosen_device} -le ${num_devices} ] || ! [[ $chosen_device =~ ^[0-9]+$ ]]; then
+          if [ ${j} == NUMBER_OF_TRY ]; then
+            error "Invalid selection"
+            \popd >/dev/null 2>&1
+            exit 1
+          fi
+          error "Invalid value, please choose a number between 0 and ${num_devices}"
+          empty_line
+        else
+          echo "Flashing the device ${android_serial_list[chosen_device]}"
+          break
+        fi
+      done
+    fi
+  fi
+
+  usb_dfu=${usb_dfu_list[chosen_device]}
+
+  if test ${do_hybrid} -eq 1; then
+    #Get tsv list for the hybrid memory type configuration
+    tsv_list=$(find ${COMMON_PATH}/layout/programmer -name "*.tsv" | grep -v "emmc_clear" | grep "hybrid" | awk -F"/" '{print $NF}')
+  else
+    #Get tsv list for the current memory type configuration
+    tsv_list=$(find ${COMMON_PATH}/layout/programmer -name "*.tsv" | grep -v "emmc_clear" | grep "$memory_type" | awk -F"/" '{print $NF}')
+  fi
   options=($tsv_list)
 
-  if [[ ${#options[@]} -eq 1 ]];then
+  if [[ ${#options[@]} -eq 1 ]]; then
     echo "Layout config ${options[0]} selected"
     selected_tsv=${options[0]}
   else
@@ -264,17 +347,19 @@ if test ${flash_dfu} -eq 1; then
 fi
 
 if test ${flash_fastboot} -eq 1; then
-  if test $(basename ${ANDROID_PRODUCT_OUT}) == "disco"; then
-    fastboot_helper="(long press on USER2 button after reset)"
-  elif test $(basename ${ANDROID_PRODUCT_OUT}) == "eval"; then
-    fastboot_helper="(long press on PA13 button after reset)"
+  if test $(basename ${ANDROID_PRODUCT_OUT}) == "valid"; then
+    fastboot_helper="(long press on User-1 button after reset)"
   else
     fastboot_helper=""
   fi
 
   empty_line
   echo "$(tput bold)Change boot mode from DFU to normal boot ($memory_type), and select fastboot$(tput sgr0)" ${fastboot_helper}
-  provision-device -c ${layout_config} -y
+  if test ${do_hybrid} -eq 1; then
+    provision-device -c ${layout_config} -y --hybrid -s ${android_serial_list[chosen_device]}
+  else
+    provision-device -c ${layout_config} -y -s ${android_serial_list[chosen_device]}
+  fi
 fi
 
 \popd >/dev/null 2>&1

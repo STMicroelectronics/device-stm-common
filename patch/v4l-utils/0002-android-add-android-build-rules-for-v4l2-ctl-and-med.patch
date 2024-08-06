@@ -1,0 +1,238 @@
+From dbec1aa0a232efb49cd4dea4b1ef55d56dd9ddfe Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 10 Jul 2023 15:30:10 +0200
+Subject: [PATCH 2/4] android: add android build rules for v4l2-ctl and
+ media-ctl utils
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ Android.bp                    |  20 +++++++
+ android-config.h              |   5 +-
+ include/linux/compiler.h      |   1 +
+ utils/Android.bp              | 107 ++++++++++++++++++++++++++++++++++
+ utils/media-ctl/libmediactl.c |   2 -
+ utils/media-ctl/options.c     |   6 ++
+ utils/media-ctl/options.h     |   2 -
+ 7 files changed, 136 insertions(+), 7 deletions(-)
+ create mode 100644 Android.bp
+ create mode 100644 utils/Android.bp
+
+diff --git a/Android.bp b/Android.bp
+new file mode 100644
+index 00000000..d16146e0
+--- /dev/null
++++ b/Android.bp
+@@ -0,0 +1,20 @@
++
++cc_library_static {
++    name: "libv4lutils_headers",
++    export_include_dirs: [".", "include/"],
++    vendor: true,
++}
++
++genrule {
++    name: "media_bus_format_names",
++    srcs: ["include/linux/media-bus-format.h"],
++    out: ["media-bus-format-names.h"],
++    cmd: "sed -e '/#define MEDIA_BUS_FMT/ ! d; s/.*FMT_//; /FIXED/ d; s/\t.*//; s/.*/{ \"&\", MEDIA_BUS_FMT_& },/;' < $(in) > $(out)",
++}
++
++genrule {
++    name: "media_bus_format_codes",
++    srcs: ["include/linux/media-bus-format.h"],
++    out: ["media-bus-format-codes.h"],
++    cmd: "sed -e '/#define MEDIA_BUS_FMT/ ! d; s/.*#define //; /FIXED/ d; s/\t.*//; s/.*/ &,/;' < $(in) > $(out)",
++}
+diff --git a/android-config.h b/android-config.h
+index 9f12b8fc..11e68023 100644
+--- a/android-config.h
++++ b/android-config.h
+@@ -149,7 +149,7 @@
+ #include <stdlib.h>
+ 
+ /* Find the first occurrence of C in S or the final NUL byte.  */
+-static inline char *strchrnul (const char *s, int c_in)
++inline const char *strchrnul (const char *s, int c_in)
+ {
+   const unsigned char *char_ptr;
+   const unsigned long int *longword_ptr;
+@@ -318,8 +318,7 @@ static inline char *strchrnul (const char *s, int c_in)
+    not part of TOKENS return in *VALUEP beginning of unknown
+    suboption.  On exit *OPTIONP is set to the beginning of the next
+    token or at the terminating NUL character.  */
+-static inline int
+-getsubopt (char **optionp, char *const *tokens, char **valuep)
++inline int getsubopt (char **optionp, char *const *tokens, char **valuep)
+ {
+   char *endp, *vstart;
+   int cnt;
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 379629be..c6111ea8 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -2,5 +2,6 @@
+ #define __linux_compiler_h
+ 
+ #define __user
++#define __force
+ 
+ #endif
+diff --git a/utils/Android.bp b/utils/Android.bp
+new file mode 100644
+index 00000000..837841b2
+--- /dev/null
++++ b/utils/Android.bp
+@@ -0,0 +1,107 @@
++//
++// Copyright (C) 2023 The Android Open Source Project
++// Copyright (C) 2023 STMicroelectronics
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++
++cc_library_static {
++    name: "libmediactl",
++    vendor: true,
++    srcs: [
++        "media-ctl/libmediactl.c",
++    ],
++    static_libs: ["libv4lutils_headers"],
++    local_include_dirs: [
++        "media-ctl",
++    ],
++}
++
++cc_library_static {
++    name: "libv4l2subdev",
++    vendor: true,
++    srcs: [
++        "media-ctl/libv4l2subdev.c",
++    ],
++    static_libs: ["libv4lutils_headers"],
++    generated_headers: [
++        "media_bus_format_names",
++        "media_bus_format_codes",
++    ],
++    local_include_dirs: [
++        "media-ctl",
++    ],
++}
++
++cc_binary {
++    name: "media-ctl",
++    vendor: true,
++    srcs: [
++        "media-ctl/media-ctl.c",
++        "media-ctl/options.c"
++    ],
++    local_include_dirs: [
++        "media-ctl",
++    ],
++    static_libs: [
++        "libmediactl",
++        "libv4l2subdev",
++        "libv4lutils_headers"
++    ],
++}
++
++cc_binary {
++    name: "v4l2-ctl",
++    vendor: true,
++
++    cflags: ["-DNO_LIBV4L2"],
++
++    local_include_dirs: [
++        "v4l2-ctl",
++        "common",
++    ],
++    generated_headers: [
++        "media_bus_format_names",
++    ],
++
++    srcs: [
++        "v4l2-ctl/v4l2-ctl.cpp",
++        "v4l2-ctl/v4l2-ctl-common.cpp",
++        "v4l2-ctl/v4l2-ctl-tuner.cpp",
++        "v4l2-ctl/v4l2-ctl-io.cpp",
++        "v4l2-ctl/v4l2-ctl-stds.cpp",
++        "v4l2-ctl/v4l2-ctl-vidcap.cpp",
++        "v4l2-ctl/v4l2-ctl-vidout.cpp",
++        "v4l2-ctl/v4l2-ctl-overlay.cpp",
++        "v4l2-ctl/v4l2-ctl-vbi.cpp",
++        "v4l2-ctl/v4l2-ctl-selection.cpp",
++        "v4l2-ctl/v4l2-ctl-misc.cpp",
++        "v4l2-ctl/v4l2-ctl-streaming.cpp",
++        "v4l2-ctl/v4l2-ctl-sdr.cpp",
++        "v4l2-ctl/v4l2-ctl-edid.cpp",
++        "v4l2-ctl/v4l2-ctl-modes.cpp",
++        "v4l2-ctl/v4l2-ctl-meta.cpp",
++        "v4l2-ctl/v4l2-ctl-subdev.cpp",
++        "v4l2-ctl/v4l2-info.cpp",
++        "common/media-info.cpp",
++        "common/v4l2-tpg-colors.c",
++        "common/v4l2-tpg-core.c",
++        "common/v4l-stream.c",
++        "common/codec-fwht.c",
++        "common/codec-v4l2-fwht.c",
++    ],
++
++    static_libs: [
++        "libv4lutils_headers"
++    ],
++}
+diff --git a/utils/media-ctl/libmediactl.c b/utils/media-ctl/libmediactl.c
+index 1fd6525b..a18b063e 100644
+--- a/utils/media-ctl/libmediactl.c
++++ b/utils/media-ctl/libmediactl.c
+@@ -19,8 +19,6 @@
+  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+-#include "config.h"
+-
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
+diff --git a/utils/media-ctl/options.c b/utils/media-ctl/options.c
+index 6d30d3dc..de034531 100644
+--- a/utils/media-ctl/options.c
++++ b/utils/media-ctl/options.c
+@@ -33,6 +33,12 @@
+ #include <linux/media.h>
+ #include <linux/videodev2.h>
+ 
++#ifdef ANDROID
++#include <android-config.h>
++#else
++#include <config.h>
++#endif
++
+ #include "options.h"
+ #include "v4l2subdev.h"
+ 
+diff --git a/utils/media-ctl/options.h b/utils/media-ctl/options.h
+index b1751f56..7e0556fc 100644
+--- a/utils/media-ctl/options.h
++++ b/utils/media-ctl/options.h
+@@ -22,8 +22,6 @@
+ #ifndef __OPTIONS_H
+ #define __OPTIONS_H
+ 
+-#include <config.h>
+-
+ struct media_options
+ {
+ 	const char *devname;
+-- 
+2.17.1
+

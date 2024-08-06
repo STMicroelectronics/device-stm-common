@@ -1,0 +1,7 @@
+allow vold kernel:system module_request;
+allow vold sysfs_blockinfo:file write;
+
+# allow vold to trim /mnt/vendor/teefs by sending ioctl FITRIM
+allow vold teefs_file:dir { ioctl open read };
+
+dontaudit vold self:capability dac_read_search;

@@ -1,0 +1,22 @@
+# initdriver executable
+type initdriver, domain;
+type initdriver_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(initdriver)
+
+allow initdriver kmsg_device:chr_file { append open };
+allow initdriver self:capability sys_module;
+allow initdriver vendor_kernel_modules:system module_load;
+allow initdriver vendor_toolbox_exec:file execute_no_trans;
+
+# added waiting clarification of kernel configuration generating this need
+allow initdriver self:key write;
+
+# Set the sys.vendor.modules.ready property
+set_prop(initdriver, vendor_initdriver_prop)
+
+userdebug_or_eng(`
+allow initdriver debugfs_clk:dir search;
+allow initdriver debugfs_pinctrl:dir search;
+allow initdriver debugfs_regulator:dir search;
+')

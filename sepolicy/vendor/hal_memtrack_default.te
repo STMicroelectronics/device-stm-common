@@ -1,0 +1,6 @@
+r_dir_file(hal_memtrack_default, sysfs_rifsc)
+r_dir_file(hal_memtrack_default, sysfs_gc)
+
+userdebug_or_eng(`
+  dontaudit hal_memtrack_default self:lockdown integrity;
+')

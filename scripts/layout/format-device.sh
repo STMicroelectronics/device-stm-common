@@ -19,9 +19,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.3"
+SCRIPT_VERSION="1.4"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -35,11 +35,11 @@ fi
 \pushd ${TOP_PATH} >/dev/null 2>&1
 
 PART_LAYOUT_NAME="android_layout.config"
-PART_LAYOUT_DIR="device/stm/stm32mp1/layout"
+PART_LAYOUT_DIR="device/stm/stm32mp2/layout"
 PART_LAYOUT_CONFIG=${TOP_PATH}/${PART_LAYOUT_DIR}/${PART_LAYOUT_NAME}
 
 LOCAL_CONFIG_NAME="local.config"
-LOCAL_CONFIG_FILE=${TOP_PATH}/device/stm/stm32mp1/configs/${LOCAL_CONFIG_NAME}
+LOCAL_CONFIG_FILE=${TOP_PATH}/device/stm/stm32mp2/configs/${LOCAL_CONFIG_NAME}
 
 PART_LAYOUT_START=34
 PART_LAYOUT_START_BYTES=$(( ${PART_LAYOUT_START} * 512 ))
@@ -53,8 +53,8 @@ BOOT_MODE_LIST=( "optee" )
 target_device=""
 target_disk_type="sd"
 
-if [ -n "${STM32MP1_DISK_SIZE+1}" ]; then
-  target_disk_size=${STM32MP1_DISK_SIZE}
+if [ -n "${STM32MP2_DISK_SIZE+1}" ]; then
+  target_disk_size=${STM32MP2_DISK_SIZE}
 else
   target_disk_size="4GiB"
 fi
@@ -78,8 +78,12 @@ total_free_space=0
 do_raw_image=0
 part_image_path=${ANDROID_PRODUCT_OUT}
 
+do_hybrid=0
+
 # By default redirect stdout and stderr to /dev/null
 redirect_out="/dev/null"
+
+tmp_version="nodate"
 
 #######################################
 # Functions
@@ -209,6 +213,7 @@ usage()
   echo "  -s/--size <disk-size>: set requested disk size [4GiB or 8GiB] (default: 4GiB)"
   echo "  -c/--config <config-file-path>: set used partition configuration file (default: ${PART_LAYOUT_CONFIG})"
   echo "  --verbose: enable verbosity (debug purpose)"
+  echo "  --hybrid: format only partitions set to hybrid without resize value"
   empty_line
 }
 
@@ -354,7 +359,7 @@ get_disk_info()
   local l_device_size_sector
   local l_sector_size
 
-  \sgdisk --print ${target_device} > /tmp/disk_info
+  \sgdisk --print ${target_device} > /tmp/disk_info-${tmp_version}
   if [ $? -ne 0 ]; then
     error "Not possible to read device ${target_device} info"
     \popd >/dev/null 2>&1
@@ -376,8 +381,8 @@ get_disk_info()
         fi
       fi
     fi
-  done < /tmp/disk_info
-  \rm -rf /tmp/disk_info
+  done < /tmp/disk_info-${tmp_version}
+  \rm -rf /tmp/disk_info-${tmp_version}
 
   device_full_size_bytes=$[ l_device_size_sector * l_sector_size ]
   device_full_size=$[ device_full_size_bytes/1024/1024 ]M
@@ -414,6 +419,10 @@ while test "$1" != ""; do
     "-s"|"--size" )
       target_disk_size="$2"
       shift # past argument
+      ;;
+
+    "--hybrid" )
+      do_hybrid=1
       ;;
 
     "-c"|"--config" )
@@ -480,6 +489,9 @@ if [ ! -e "${target_device}" ]; then
   \popd >/dev/null 2>&1
   exit 1
 fi
+
+# Use date to set unique tmp file name
+tmp_version=`date +%Y-%m-%d_%H-%M`
 
 # request confirmation before formating the device
 echo "Format device ${target_device}"
@@ -580,6 +592,9 @@ while IFS='' read -r line || [[ -n $line ]]; do
         if [ -n "${tmp_suffix}" ]; then
           part_suffix_1=${tmp_suffix: 0: 2}
           part_suffix_2=${tmp_suffix: -2}
+        else
+          part_suffix_1="_a"
+          part_suffix_2="_b"
         fi
       else
         part_suffix_1=""
@@ -587,6 +602,23 @@ while IFS='' read -r line || [[ -n $line ]]; do
       fi
 
       if [[ ${part_prefix} != "LAST_" ]] && [[ ! ${part_name} =~ "MEMORY_MAX_SIZE" ]]; then
+
+        # in case of hybrid, format only partition with hybrid tag
+        if [ ${do_hybrid} -eq 1 ]; then
+          tmp_hybrid=($(echo $line | awk '{ print $5 }'))
+          tmp_hybrid_size=($(echo $line | awk '{ print $6 }'))
+          if [ -n "${tmp_hybrid}" ]; then
+            if [ ${tmp_hybrid} != "hybrid" ]; then
+              continue
+            else
+              if [ ! -z "${tmp_hybrid_size}" ]; then
+                continue
+              fi
+            fi
+          else
+            continue
+          fi
+        fi
 
         if [[ ${part_name} =~ "TEE" ]] && [[ ${target_boot_mode} == "optee" ]] || [[ ! ${part_name} =~ "TEE" ]]; then
           check_part_size ${part_size} ${part_nb}

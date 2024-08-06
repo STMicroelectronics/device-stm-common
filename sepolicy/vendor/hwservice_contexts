@@ -1,0 +1,2 @@
+vendor.st.copro::ICopro                             u:object_r:hal_copro_hwservice:s0
+vendor.st.copro::ICoproSerialPortHal                u:object_r:hal_coproserial_hwservice:s0

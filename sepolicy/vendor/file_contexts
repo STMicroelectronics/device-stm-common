@@ -1,0 +1,87 @@
+# DEVICES
+
+# Blocks
+/dev/block/by-name/boot_[ab]                    u:object_r:boot_block_device:s0
+/dev/block/by-name/dt_[ab]                      u:object_r:boot_block_device:s0
+/dev/block/by-name/super                        u:object_r:super_block_device:s0
+/dev/block/by-name/userdata                     u:object_r:userdata_block_device:s0
+/dev/block/by-name/metadata                     u:object_r:metadata_block_device:s0
+/dev/block/by-name/teefs                        u:object_r:teefs_block_device:s0
+/dev/block/by-name/misc                         u:object_r:misc_block_device:s0
+/dev/block/mmcblk1                              u:object_r:root_block_device:s0
+/dev/mmcblk1rpmb                                u:object_r:rpmb_block_device:s0
+/dev/block/zram0                                u:object_r:swap_block_device:s0
+/dev/block/sd[a-zA-Z]+[0-9]*                    u:object_r:removable_device:s0
+
+# Grahics
+/dev/graphics/galcore                           u:object_r:gpu_device:s0
+/dev/galcore                                    u:object_r:gpu_device:s0
+/dev/dri                                        u:object_r:gpu_device:s0
+/dev/dri/renderD[0-9]*                          u:object_r:gpu_device:s0
+/dev/dri/card[0-9]                              u:object_r:graphics_device:s0
+
+# OP-TEE
+/dev/tee0                                       u:object_r:tee_device:s0
+/dev/teepriv0                                   u:object_r:tee_device:s0
+
+# Copro
+/dev/ttyRPMSG0                                  u:object_r:rpmsg_device:s0
+
+# Serial
+/dev/ttySTM0                                    u:object_r:tty_device:s0
+
+# Tune
+/dev/stune(/.*)*                                u:object_r:cgroup:s0
+/dev/cpuset(/.*)*                               u:object_r:cgroup:s0
+
+# Media
+/dev/media([0-9])+                              u:object_r:video_device:s0
+/dev/v4l-subdev([0-9])+                         u:object_r:video_device:s0
+
+# VENDOR
+
+# Init
+/vendor/bin/initdriver                                                    u:object_r:initdriver_exec:s0
+/vendor/bin/camerasetup                                                   u:object_r:camerasetup_exec:s0
+/vendor/bin/isp                                                           u:object_r:camerasetup_exec:s0
+
+# Kernel modules
+/vendor/lib/modules(/.*)?                                                 u:object_r:vendor_kernel_modules:s0
+/vendor/lib64/modules(/.*)?                                               u:object_r:vendor_kernel_modules:s0
+
+# OP-TEE
+/vendor/bin/tee-supplicant                                                u:object_r:tee_exec:s0
+/vendor/bin/xtest                                                         u:object_r:tee_exec:s0
+/vendor/bin/hw/wait_for_keymaster_optee                                   u:object_r:wait_for_keymaster_optee_exec:s0
+/mnt/vendor/teefs(/.*)?                                                   u:object_r:teefs_file:s0
+/teefs(/.*)?                                                              u:object_r:teefs_file:s0
+/mnt/vendor/teefs/optee(/.*)?                                             u:object_r:tee_data_file:s0
+/data/vendor/tee(/.*)?                                                    u:object_r:tee_data_file:s0
+
+# Media
+/vendor/bin/media-ctl                                                     u:object_r:mediactl_exec:s0
+/vendor/bin/v4l2-ctl                                                      u:object_r:mediactl_exec:s0
+
+# Graphical libraries are same_process_hal_file
+/vendor/lib64/libVSC\.so                                                  u:object_r:same_process_hal_file:s0
+/vendor/lib64/libGAL\.so                                                  u:object_r:same_process_hal_file:s0
+/vendor/lib64/hw/gralloc\.stm\.so                                         u:object_r:same_process_hal_file:s0
+/vendor/lib64/libdrm_vivante\.so                                          u:object_r:same_process_hal_file:s0
+/vendor/lib64/libdrm\.so                                                  u:object_r:same_process_hal_file:s0
+/vendor/lib64/libGLSLC\.so                                                u:object_r:same_process_hal_file:s0
+
+# HAL implementation
+/vendor/bin/hw/android\.hardware\.keymaster@3\.0-service\.optee           u:object_r:hal_keymaster_optee_exec:s0
+/vendor/bin/hw/android\.hardware\.gatekeeper@1\.0-service\.optee          u:object_r:hal_gatekeeper_optee_exec:s0
+/vendor/bin/hw/android\.hardware\.health-service\.stm32mpu\.emmc          u:object_r:hal_health_default_exec:s0
+/vendor/bin/hw/android\.hardware\.health-service\.stm32mpu\.sd            u:object_r:hal_health_default_exec:s0
+/vendor/bin/hw/android\.hardware\.memtrack-service\.stm32mpu              u:object_r:hal_memtrack_default_exec:s0
+/vendor/bin/hw/android\.hardware\.usb-service\.stm32mpu                   u:object_r:hal_usb_default_exec:s0
+/vendor/bin/hw/android\.hardware\.usb.gadget@1\.2-service\.stm32mpu       u:object_r:hal_usb_default_exec:s0
+/vendor/bin/hw/android\.hardware\.lights-service\.stm32mpu                u:object_r:hal_light_default_exec:s0
+/vendor/bin/hw/android\.hardware\.camera\.provider-service\.stm32mpu      u:object_r:hal_camera_default_exec:s0
+/vendor/bin/hw/android\.hardware\.copro@1\.0-service\.stm32mpu            u:object_r:hal_copro_default_exec:s0
+/vendor/bin/hw/android\.hardware\.thermal@2\.0-service\.stm32mpu          u:object_r:hal_thermal_default_exec:s0
+/vendor/bin/hw/android\.hardware\.oemlock@1.0-service\.stm32mpu           u:object_r:hal_oemlock_default_exec:s0
+/vendor/bin/hw/android\.hardware\.graphics.composer3-service\.stm32mpu    u:object_r:hal_graphics_composer_default_exec:s0
+/vendor/bin/hw/android\.hardware\.media\.c2@1\.0-service-v4l2(.*)?        u:object_r:mediacodec_exec:s0

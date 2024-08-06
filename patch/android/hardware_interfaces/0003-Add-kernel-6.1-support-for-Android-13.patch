@@ -1,0 +1,33 @@
+From c1adab5812090675099375915c800463e546f493 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 23 Oct 2023 11:43:25 +0200
+Subject: [PATCH 3/3] Add kernel 6.1 support for Android 13
+
+Change-Id: I6db16dbd582138ebb2c7daae4dfac8ded90c745a
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ compatibility_matrices/Android.bp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/compatibility_matrices/Android.bp b/compatibility_matrices/Android.bp
+index 422b37e68c..5510e7ffec 100644
+--- a/compatibility_matrices/Android.bp
++++ b/compatibility_matrices/Android.bp
+@@ -82,6 +82,7 @@ vintf_compatibility_matrix {
+     kernel_configs: [
+         "kernel_config_t_5.10",
+         "kernel_config_t_5.15",
++        "kernel_config_t_6.1",
+     ],
+ }
+ 
+@@ -95,5 +96,6 @@ vintf_compatibility_matrix {
+     kernel_configs: [
+         "kernel_config_current_5.10",
+         "kernel_config_current_5.15",
++        "kernel_config_current_6.1",
+     ],
+ }
+-- 
+2.34.1
+

@@ -1,2 +1,0 @@
-type hal_copro_hwservice, hwservice_manager_type;
-type hal_coproserial_hwservice, hwservice_manager_type;

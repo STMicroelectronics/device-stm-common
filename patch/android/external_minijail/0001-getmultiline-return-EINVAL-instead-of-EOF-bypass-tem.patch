@@ -1,0 +1,36 @@
+From 745cf209e8c17a06d68f6b161e9d74f25e6c7b24 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Wed, 10 Aug 2022 17:52:47 +0200
+Subject: [PATCH] getmultiline return EINVAL instead of EOF, bypass temporarily
+
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Change-Id: I5c0e81ab6f4d5bfd3fd50cc9a99a4ac2c2dc6eec
+---
+ syscall_filter.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/syscall_filter.c b/syscall_filter.c
+index de5441c..8f90c08 100644
+--- a/syscall_filter.c
++++ b/syscall_filter.c
+@@ -743,13 +743,15 @@ int compile_file(const char *filename, FILE *policy_file,
+ 		/* Reuse |line| in the next getline() call. */
+ 	}
+ 	/* getline(3) returned -1. This can mean EOF or the below errors. */
+-	if (errno == EINVAL || errno == ENOMEM) {
++	if (errno == ENOMEM) {
+ 		if (*arg_blocks) {
+ 			free_block_list(*arg_blocks);
+ 			*arg_blocks = NULL;
+ 		}
+-		warn("getmultiline() failed");
++		warn("getmultiline() failed ENOMEM");
+ 		ret = -1;
++	} else if (errno == EINVAL) {
++		warn("getmultiline() failed EINVAL, bypass temporarily");
+ 	}
+ 
+ out:
+-- 
+2.17.1
+

@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.1"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -34,11 +34,14 @@ fi
 
 \pushd ${TOP_PATH} >/dev/null 2>&1
 
-TOOLCHAIN_PATH="${TOP_PATH}/prebuilts/gcc/linux-x86/arm/"
-TOOLCHAIN_FAMILY_VERSION="9.2-2019.12"
+# ARM developer site : https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+
+TOOLCHAIN_PATH="${TOP_PATH}/prebuilts/arm-gnu-toolchain/"
+TOOLCHAIN_FAMILY_VERSION="13.2.rel1"
+
 TOOLCHAIN_MACHINE=`uname -i`
 TOOLCHAIN_VERSION=${TOOLCHAIN_FAMILY_VERSION}
-TOOLCHAIN_NAME="gcc-arm-${TOOLCHAIN_VERSION}-${TOOLCHAIN_MACHINE}-arm-none-eabi"
+TOOLCHAIN_NAME="arm-gnu-toolchain-${TOOLCHAIN_VERSION}-${TOOLCHAIN_MACHINE}-aarch64-none-linux-gnu"
 TOOLCHAIN_FILE_NAME="${TOOLCHAIN_NAME}.tar.xz"
 
 #######################################
@@ -169,7 +172,7 @@ done
 
 if test `uname -i` != "x86_64"
 then
-  warning "Your computer is not 64 bits"
+  warning "Your computer is not compatible with x86 required configuration"
 fi
 
 if [[ ${toolchain_mirror} == 1 ]]; then
@@ -181,7 +184,7 @@ if [[ ${toolchain_mirror} == 1 ]]; then
   else
     \mkdir -p ${toolchain_mirror_path} >/dev/null 2>&1
     \pushd ${toolchain_mirror_path} >/dev/null 2>&1
-    \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
+    \wget https://developer.arm.com/-/media/Files/downloads/gnu/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
     \popd >/dev/null 2>&1
 
     echo "The toolchain has been loaded in mirror directory ${toolchain_mirror_path}"
@@ -192,18 +195,23 @@ if [[ ${toolchain_mirror} == 1 ]]; then
   fi
 else
 
-  if test -x ${TOOLCHAIN_PATH}/${TOOLCHAIN_NAME}/bin/arm-none-eabi-gcc
+  if [[ ! -d ${TOOLCHAIN_PATH} ]]; then
+    mkdir -p ${TOOLCHAIN_PATH}
+  fi
+
+  \pushd ${TOOLCHAIN_PATH} >/dev/null 2>&1
+
+  if test -x ${TOOLCHAIN_PATH}/${TOOLCHAIN_NAME}/bin/aarch64-none-linux-gnu-gcc
   then
     green "The toolchain has been already installed successfully"
   else
-    \pushd ${TOOLCHAIN_PATH}
     blue "The ${TOOLCHAIN_VERSION} toochain has not been installed : Installing..."
 
     if [ -f ${TOOLCHAIN_MIRROR}/${TOOLCHAIN_FILE_NAME} ]; then
       \cp ${TOOLCHAIN_MIRROR}/${TOOLCHAIN_FILE_NAME} .
     else
       warning "The toolchain mirror directory is not defined, it's recommended to create it"
-      \wget https://developer.arm.com/-/media/Files/downloads/gnu-a/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
+      \wget https://developer.arm.com/-/media/Files/downloads/gnu/${TOOLCHAIN_FAMILY_VERSION}/binrel/${TOOLCHAIN_FILE_NAME}
     fi
 
     echo "Uncompressing toochain archive.... "
@@ -212,8 +220,10 @@ else
     echo "Deleting toochain archive.... "
     \rm ${TOOLCHAIN_FILE_NAME}
 
-    \popd >/dev/null 2>&1
   fi
+
+  \popd >/dev/null 2>&1
+
 fi
 
 \popd >/dev/null 2>&1

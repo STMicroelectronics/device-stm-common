@@ -1,0 +1,9 @@
+gpu_access(surfaceflinger);
+# get_prop(surfaceflinger, vendor_default_prop)
+
+allow surfaceflinger hal_graphics_composer_default:dir search;
+allow surfaceflinger hal_graphics_composer_default:file r_file_perms;
+
+r_dir_file(surfaceflinger, sysfs_rifsc)
+r_dir_file(surfaceflinger, sysfs_gc)
+r_dir_file(surfaceflinger, sysfs_display)

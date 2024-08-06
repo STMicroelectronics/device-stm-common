@@ -1,0 +1,21 @@
+allow vendor_init serialno_prop:file { map };
+
+set_prop(vendor_init, vendor_allocator_prop)
+set_prop(vendor_init, vendor_composer_prop)
+set_prop(vendor_init, system_prop)
+
+allow vendor_init self:capability { sys_module };
+allow vendor_init vendor_kernel_modules:system module_load;
+allow vendor_init kmsg_device:chr_file rw_file_perms;
+allow vendor_init proc_swappiness:file w_file_perms;
+allow vendor_init proc_dirty:file w_file_perms;
+allow vendor_init proc_cache_pressure:file w_file_perms;
+
+allow vendor_init cgroup:file rw_file_perms;
+
+dontaudit vendor_init self:capability dac_read_search;
+
+# Everything is labeled as rootfs in recovery mode.
+recovery_only(`
+  allow vendor_init rootfs:dir { r_dir_perms };
+')

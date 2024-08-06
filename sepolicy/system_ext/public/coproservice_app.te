@@ -1,0 +1,2 @@
+# Domain to run Copro Service (com.android.coproservice)
+type coproservice_app, domain, coredomain;

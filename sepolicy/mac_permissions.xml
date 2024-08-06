@@ -1,5 +1,0 @@
-<policy>
-    <package name="com.android.coproservice">
-        <seinfo value="coproservice" />
-    </package>
-</policy>

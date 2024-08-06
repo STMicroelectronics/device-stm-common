@@ -1,22 +1,17 @@
-# stm32mp1 #
+# stm32mp2 #
 
-This module is used to configure the STM32MP1 distribution for Android.
-It is part of the STMicroelectronics delivery for Android (see the [delivery][] for more information).
-
-[delivery]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v2.0.0
+This module is used to configure the STM32MP2 Embedded Software distribution for Android:tm:.
+It is part of the STMicroelectronics delivery for Android.
 
 ## Description ##
 
-This module version is the updated version for STM32MP15 distribution for Android V2.0
+This module version is the updated version for STM32MP25 OpenSTDroid V5.0
 Please see the release notes for more details.
 
 ## Documentation ##
 
 * The [release notes][] provide information on the release.
-* The [distribution package][] provides detailed information on how to use this delivery.
-
-[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32MP15_distribution_for_Android_release_note_-_v2.0.0
-[distribution package]: https://wiki.st.com/stm32mpu/wiki/STM32MP1_Distribution_Package_for_Android
+[release notes]: https://wiki.st.com/stm32mpu/wiki/STM32_MPU_OpenSTDroid_release_note_-_v5.1.0
 
 ## Dependencies ##
 
@@ -24,21 +19,22 @@ This module can't be used alone. It is part of the STMicroelectronics delivery f
 
 ## Containing ##
 
-This module contains several files and directories used to compile and configure the STM32MPU distribution for Android.
+This module contains several files and directories used to compile and configure the STM32MP2 Embedded Software distribution for Android.
 
 **Boards**
-* `./eval`: STM32MP15 Evaluation boards configuraton (read following [README](./eval/README.md) file for more details)
+* `./eval`: STM32MP25 EVAL board configuraton (read following [README](./eval/README.md) file for more details)
 
 **Common Makefiles**
-* `BoardConfigCommon.mk`: common STM32MP1 board configuration makefile
-* `./build/dt.mk`: makefile used to generate dt partition image (including device tree)
-* `./build/fsbl.mk`: makefile used to generate fsbl partition image (including the primary bootloader)
-* `./build/ssbl.mk`: makefile used to generate ssbl partition image (including the secondary bootloader)
-* `./build/misc.mk`: makefile used to generate misc partition image (built using bootcontrol dedicated tool)
-* `./build/splash.mk`: makefile used to generate splash partition image (including spash screen bitmap)
-* `./build/tee.mk`: makefile used to generate tee partitions images (including the tee OS)
-* `./build/teefs.mk`: makefile used to generate an empty F2FS partition image (tee secure storage usage)
-* `./kernel.mk`: makefile used to includes kernel modules in vendor partition image
+* `BoardConfigCommon.mk`: common STM32MP2 board configuration makefile
+* `./build/tasks/dt.mk`: makefile used to generate dt partition image (including device tree)
+* `./build/tasks/fip.mk`: makefile used to generate fip partition image (including the secondary bootloader and tee)
+* `./build/tasks/fsbl.mk`: makefile used to generate fsbl partition image (including the primary bootloader)
+* `./build/tasks/ssbl.mk`: makefile used to generate ssbl partition image (including the secondary bootloader)
+* `./build/tasks/metadata.mk`: makefile used to generate metadata partition image
+* `./build/tasks/misc.mk`: makefile used to generate misc partition image (built using bootcontrol dedicated tool)
+* `./build/tasks/splash.mk`: makefile used to generate splash partition image (including spash screen bitmap)
+* `./build/tasks/tee.mk`: makefile used to generate tee partitions images (including the tee OS)
+* `./build/tasks/teefs.mk`: makefile used to generate an empty F2FS partition image (tee secure storage usage)
 
 **Scripts**
 * `vendorsetup.sh`: script executed automatically when execute `source ./build/envsetup.sh`
@@ -51,11 +47,10 @@ This module contains several files and directories used to compile and configure
 * `./scripts/layout/create-disk.sh`: script used to generate an micro SD card disk image
 * `./scripts/layout/flash-device.sh`: script to provision the device (with both DFU and FASTBOOT connections)
 * `./scripts/layout/build_tsv.py`: Python script to generate STM32CubeProgrammer layout files based on android_layout.config
-* `./scripts/prebuilt/update_prebuilt.sh`: script to update prebuilt images for kernel, bootloader and tee
-* `./scripts/setup/stm32mp1setup.sh`: script to setup Android distribution for STM32MP1
-* `./scripts/setup/stm32mp1clear.sh`: script to clear STM32MP1 setup for Android
-* `./scripts/setup/bspsetup.sh`: script to setup Android distribution for STM32MP1 BSP (ex: kernel, bootloader...)
-* `./scripts/setup/bspclear.sh`: script to clear STM32MP1 setup BSP (ex: kernel, bootloader...) for Android
+* `./scripts/setup/stm32mp2setup.sh`: script to setup Android distribution for STM32MP2
+* `./scripts/setup/stm32mp2clear.sh`: script to clear STM32MP2 setup for Android
+* `./scripts/setup/bspsetup.sh`: script to setup Android distribution for STM32MP2 BSP (ex: kernel, bootloader...)
+* `./scripts/setup/bspclear.sh`: script to clear STM32MP2 setup BSP (ex: kernel, bootloader...) for Android
 * `./scripts/starter/generate_starterpackage.sh`: script to generate starterpackage (based on starter.config file)
 * `./scripts/toolchain/load_toolchain.sh`: script to load toolchain used for the BSP (ex: kernel, bootloader...)
 
@@ -69,27 +64,24 @@ This module contains several files and directories used to compile and configure
 * `./configs/template.config`: template file used to generate local.config
 
 **Core**
-* `./core/initprop`: initprop source code (used to initialize proprietary properties)
 * `./core/miscgen`: miscgen source code (used to generate misc raw partition image)
-* `./core/devmem`: devmem source code (used for debug purpose)
 * `./splash/stmicroelectronics.bmp`: splash screen bitmap
 
-**Periherals**
-* `./peripheral/allocator`: allocator HAL header files (read following [README](./peripheral/allocator/README.md) file for more details)
-* `./peripheral/audio`: audio primary HAL source code (read following [README](./peripheral/audio/README.md) file for more details)
-* `./peripheral/camera`: camera HAL source code (read following [README](./peripheral/camera/README.md) file for more details)
-* `./peripheral/composer`: composer HAL source code (read following [README](./peripheral/composer/README.md) file for more details)
-* `./peripheral/copro`: proprietary copro hardware service source code (read following [README](./peripheral/copro/README.md) file for more details)
-* `./peripheral/health`: health hardware service source code (read following [README](./peripheral/health/README.md) file for more details)
-* `./peripheral/lights`: light HAL source code (read following [README](./peripheral/lights/README.md) file for more details)
-* `./peripheral/memtrack`: memtrack HAL source code (read following [README](./peripheral/memtrack/README.md) file for more details)
-* `./peripheral/oemlock`: oemlock HAL source code (stub) (read following [README](./peripheral/oemlock/README.md) file for more details)
-* `./peripheral/thermal`: thermal hardware service source code (read following [README](./peripheral/thermal/README.md) file for more details)
-* `./peripheral/usb`: usb hardware service source code (read following [README](./peripheral/usb/README.md) file for more details)
-* `./peripheral/wifi`: wifi HAL library source code (read following [README](./peripheral/wifi/README.md) file for more details)
+**Hardware**
+* `./hardware/allocator`: allocator HAL header files (read following [README](./hardware/allocator/README.md) file for more details)
+* `./hardware/audio`: audio primary HAL source code (read following [README](./hardware/audio/README.md) file for more details)
+* `./hardware/camera`: camera HAL source code (read following [README](./hardware/camera/README.md) file for more details)
+* `./hardware/composer`: composer HAL source code (read following [README](./hardware/composer/README.md) file for more details)
+* `./hardware/health`: health hardware service source code (read following [README](./hardware/health/README.md) file for more details)
+* `./hardware/lights`: light HAL source code (read following [README](./hardware/lights/README.md) file for more details)
+* `./hardware/memtrack`: memtrack HAL source code (read following [README](./hardware/memtrack/README.md) file for more details)
+* `./hardware/oemlock`: oemlock HAL source code (stub) (read following [README](./hardware/oemlock/README.md) file for more details)
+* `./hardware/thermal`: thermal hardware service source code (read following [README](./hardware/thermal/README.md) file for more details)
+* `./hardware/usb`: usb hardware service source code (read following [README](./hardware/usb/README.md) file for more details)
+* `./hardware/wifi`: wifi HAL library source code (read following [README](./hardware/wifi/README.md) file for more details)
 
 **Sepolicy**
-* `./sepolicy`: sepolicy for STM32MP1
+* `./sepolicy`: sepolicy for STM32MP2
 
 **Tee**
 * `./kmgk`: keymaster and gatekeeper source code (including OP-TEE Trust Applications)

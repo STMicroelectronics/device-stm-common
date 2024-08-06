@@ -1,2 +1,0 @@
-gpu_access(bootanim);
-dontaudit bootanim vendor_file:file { read open getattr execute map };

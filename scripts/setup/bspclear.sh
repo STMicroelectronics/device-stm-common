@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Clear stm32mp1 bsp setup configuration
+# Clear stm32mp2 bsp setup configuration
 
 # Copyright (C)  2019. STMicroelectronics
 #
@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.0"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -37,9 +37,9 @@ fi
 COMMON_PATH="${TOP_PATH}/device/stm/${SOC_FAMILY}"
 PATH_PATH="${COMMON_PATH}/scripts"
 
-TOOLCHAIN_PATH="${TOP_PATH}/prebuilts/gcc/linux-x86/arm"
-TOOLCHAIN_VERSION="8.2-2019.01"
-TOOLCHAIN_NAME="gcc-arm-${TOOLCHAIN_VERSION}-x86_64-arm-eabi"
+TOOLCHAIN_PATH="${TOP_PATH}/prebuilts/gcc/linux-x86/arm64"
+TOOLCHAIN_VERSION="10.3-2021.07"
+TOOLCHAIN_NAME="gcc-arm-${TOOLCHAIN_VERSION}-x86_64-aarch64-none-linux-gnu"
 
 #######################################
 # Variables

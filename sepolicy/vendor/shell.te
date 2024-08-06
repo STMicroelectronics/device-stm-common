@@ -1,0 +1,125 @@
+allow shell postinstall_mnt_dir:dir getattr;
+allow shell dumpstate_exec:file { execute getattr };
+
+allow shell self:udp_socket ioctl;
+allow shell self:fifo_file ioctl;
+allow shell shell_data_file:file relabelfrom;
+
+allow shell {
+  teefs_file
+  init_exec
+  cache_file
+}:lnk_file { getattr read };
+
+allow shell {
+  rootfs
+  init_exec
+  vendor_file
+  overlayfs_file
+}:file { getattr read };
+
+allow shell {
+  proc_iomem
+  proc_keys
+  proc_kmsg
+  proc_misc
+  proc_fb
+  proc_mtd
+  proc_locks
+  proc_tty_drivers
+}:file { getattr open read };
+
+get_prop(shell, persistent_properties_ready_prop)
+get_prop(shell, safemode_prop)
+get_prop(shell, mmc_prop)
+get_prop(shell, wifi_prop)
+get_prop(shell, device_logging_prop)
+get_prop(shell, device_config_runtime_native_boot_prop)
+get_prop(shell, apk_verity_prop)
+get_prop(shell, vendor_allocator_prop)
+get_prop(shell, vendor_graphics_prop)
+get_prop(shell, qemu_sf_lcd_density_prop)
+
+get_prop(shell apexd_prop)
+get_prop(shell boottime_prop)
+get_prop(shell boottime_public_prop)
+get_prop(shell bpf_progs_loaded_prop)
+get_prop(shell cold_boot_done_prop)
+get_prop(shell cpu_variant_prop)
+get_prop(shell ctl_adbd_prop)
+get_prop(shell ctl_apexd_prop)
+get_prop(shell ctl_bootanim_prop)
+get_prop(shell ctl_console_prop)
+get_prop(shell ctl_default_prop)
+get_prop(shell ctl_fuse_prop)
+get_prop(shell ctl_interface_restart_prop)
+get_prop(shell ctl_interface_start_prop)
+get_prop(shell ctl_interface_stop_prop)
+get_prop(shell ctl_mdnsd_prop)
+get_prop(shell ctl_restart_prop)
+get_prop(shell ctl_rildaemon_prop)
+get_prop(shell ctl_sigstop_prop)
+get_prop(shell ctl_start_prop)
+get_prop(shell ctl_stop_prop)
+get_prop(shell device_config_activity_manager_native_boot_prop)
+get_prop(shell device_config_boot_count_prop)
+get_prop(shell dumpstate_options_prop)
+get_prop(shell exported_overlay_prop)
+get_prop(shell incremental_prop)
+get_prop(shell llkd_prop)
+get_prop(shell lmkd_prop)
+get_prop(shell lowpan_prop)
+get_prop(shell overlay_prop)
+get_prop(shell surfaceflinger_display_prop)
+get_prop(shell system_lmk_prop)
+get_prop(shell system_trace_prop)
+get_prop(shell test_boot_reason_prop)
+get_prop(shell theme_prop)
+get_prop(shell time_prop)
+get_prop(shell traced_lazy_prop)
+get_prop(shell virtual_ab_prop)
+
+recovery_only(`
+allow shell kmsg_device:chr_file { open read };
+')
+
+userdebug_or_eng(`
+allow shell debugfs_wakeup_sources:file getattr;
+')
+
+dontaudit shell {
+  system_jvmti_agent_prop
+  net_dns_prop
+  storage_config_prop
+  firstboot_prop
+  bluetooth_prop
+  bluetooth_a2dp_offload_prop
+  bluetooth_audio_hal_prop
+  exported_bluetooth_prop
+  vendor_logging_prop
+  vendor_initdriver_prop
+  vendor_wifi_prop
+  vendor_km_optee_prop
+  vendor_composer_prop
+  vendor_camera_prop
+  vendor_audio_prop
+  rebootescrow_hal_prop
+  vehicle_hal_prop
+  ab_update_gki_prop
+  aac_drc_prop
+  adaptive_haptics_prop
+  apexd_config_prop
+}:file { getattr map open };
+
+dontaudit shell {
+  linkerconfig_file
+  mirror_data_file
+  user_profile_data_file
+  system_bootstrap_lib_file
+}:dir getattr;
+
+dontaudit shell {
+  block_device
+  mnt_vendor_file
+  system_bootstrap_lib_file
+}:dir search;

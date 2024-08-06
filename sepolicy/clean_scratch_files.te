@@ -1,6 +1,0 @@
-# clean_scratch_files service
-type clean_scratch_files, domain;
-type clean_scratch_files_exec, system_file_type, exec_type, file_type;
-typeattribute clean_scratch_files coredomain;
-
-init_daemon_domain(clean_scratch_files)

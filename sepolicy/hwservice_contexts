@@ -1,2 +1,0 @@
-android.hardware.copro::ICopro                             u:object_r:hal_copro_hwservice:s0
-android.hardware.copro::ICoproSerialPortHal                u:object_r:hal_coproserial_hwservice:s0

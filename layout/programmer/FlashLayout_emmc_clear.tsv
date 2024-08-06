@@ -1,6 +1,7 @@
 #opt	Id		Name		Type		IP		Offset		Binary
 -		0x01	fsbl-prog	Binary		none	0x0			fsbl-programmer.img
--		0x03	ssbl-prog	Binary		none	0x0			ssbl-programmer.img
+-		0x02	fip-prog	Binary		none	0x00000000	fip-ddr-programmer.img
+-		0x03	ssbl-prog	Binary		none	0x00000000	fip.img
 PED		0x08	emmcboot1	Binary		mmc1	boot1		none
 PED		0x09	emmcboot2	Binary		mmc1	boot2		none
 PED		0x30	emmcall		RawImage	mmc1	0x0			none

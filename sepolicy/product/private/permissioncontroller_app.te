@@ -1,1 +1,2 @@
 gpu_access(permissioncontroller_app)
+# get_prop(permissioncontroller_app, vendor_default_prop)

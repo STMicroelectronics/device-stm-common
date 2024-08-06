@@ -1,0 +1,35 @@
+From d557dd85566d9b98c701e25a8c3ff048d6bb85f6 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Tue, 8 Aug 2023 15:04:05 +0200
+Subject: [PATCH] Avoid spammy trace on bpf loader
+
+Change-Id: Ica3d5fbc1461b981f62bf1dcf51449140e08b95d
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ libbpf_android/Loader.cpp | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/libbpf_android/Loader.cpp b/libbpf_android/Loader.cpp
+index 1c462dd..cd55faf 100644
+--- a/libbpf_android/Loader.cpp
++++ b/libbpf_android/Loader.cpp
+@@ -930,10 +930,12 @@ static void applyRelo(void* insnsPtr, Elf64_Addr offset, int fd) {
+     insnIndex = offset / sizeof(struct bpf_insn);
+     insn = &insns[insnIndex];
+ 
+-    ALOGD(
+-        "applying relo to instruction at byte offset: %d, \
+-	       insn offset %d , insn %lx\n",
+-        (int)offset, (int)insnIndex, *(unsigned long*)insn);
++    // Occasionally might be useful for relocation debugging, but pretty spammy
++    if (0) {
++        ALOGD("applying relo to instruction at byte offset: %d, \
++               insn offset %d , insn %lx",
++            (int)offset, (int)insnIndex, *(unsigned long*)insn);
++    }
+ 
+     if (insn->code != (BPF_LD | BPF_IMM | BPF_DW)) {
+         ALOGE("Dumping all instructions till ins %d", insnIndex);
+-- 
+2.17.1
+

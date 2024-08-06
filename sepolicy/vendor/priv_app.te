@@ -1,0 +1,4 @@
+gpu_access(priv_app);
+# get_prop(priv_app, vendor_default_prop)
+
+dontaudit priv_app vendor_file:file { read open getattr execute map };

@@ -1,0 +1,624 @@
+From c2d9fa943003c1394d9b05a0e568f8426571a3d7 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 5 Aug 2024 08:35:49 +0200
+Subject: [PATCH 2/3] Remove unnecessary setting panels and associated
+ controllers
+
+Bluetooth is not available on the device.
+Settings application can crash in this case.
+
+Change-Id: Ic24c7be04b830b6206556e560a93fa657d24123d
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ res/values/strings.xml                        |  6 +-
+ res/xml/connected_devices.xml                 |  6 --
+ res/xml/display_settings.xml                  | 35 -----------
+ res/xml/network_and_internet.xml              | 27 ---------
+ res/xml/top_level_settings.xml                | 30 ----------
+ .../settings/AllInOneTetherSettings.java      |  9 ---
+ src/com/android/settings/DisplaySettings.java |  1 -
+ .../ConnectedDeviceDashboardFragment.java     | 14 -----
+ .../ConnectedDeviceGroupController.java       | 23 +------
+ ...ouslyConnectedDeviceDashboardFragment.java |  8 +--
+ ...lyConnectedDevicePreferenceController.java | 60 ++++---------------
+ .../SavedDeviceGroupController.java           | 13 +---
+ ...ectedAudioDevicesPreferenceController.java |  8 +--
+ 13 files changed, 23 insertions(+), 217 deletions(-)
+
+diff --git a/res/values/strings.xml b/res/values/strings.xml
+index 1e48a974afa..34596d594e3 100644
+--- a/res/values/strings.xml
++++ b/res/values/strings.xml
+@@ -8585,7 +8585,7 @@
+     <!-- Title for setting tile leading to Connected devices settings [CHAR LIMIT=40]-->
+     <string name="connected_devices_dashboard_title">Connected devices</string>
+     <!-- Summary for Connected devices settings, explaining default settings under it [CHAR LIMIT=NONE]-->
+-    <string name="connected_devices_dashboard_default_summary">Bluetooth, pairing</string>
++    <string name="connected_devices_dashboard_default_summary">USB</string>
+     <!-- Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+     <string name="connected_devices_dashboard_summary">Bluetooth, driving mode, NFC</string>
+     <!-- Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+@@ -8593,7 +8593,7 @@
+     <!-- Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+     <string name="connected_devices_dashboard_no_driving_mode_summary">Bluetooth, NFC</string>
+     <!-- Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+-    <string name="connected_devices_dashboard_no_driving_mode_no_nfc_summary">Bluetooth</string>
++    <string name="connected_devices_dashboard_no_driving_mode_no_nfc_summary">USB</string>
+     <!--Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+     <string name="connected_devices_dashboard_android_auto_summary">Bluetooth, Android Auto, driving mode, NFC</string><!--
+     Summary for Connected devices settings, explaning a few important settings under it [CHAR LIMIT=NONE]-->
+@@ -13933,7 +13933,7 @@
+     <string name="keywords_media_controls">media</string>
+ 
+     <!-- Summary for see all preference when bluetooth is disable [CHAR LIMIT=none]-->
+-    <string name="connected_device_see_all_summary">Bluetooth will turn on</string>
++    <string name="connected_device_see_all_summary">No Bluetooth</string>
+ 
+     <!-- Switch text for bluetooth feature being on [CHAR LIMIT=NONE] -->
+     <string name="bluetooth_setting_on">On</string>
+diff --git a/res/xml/connected_devices.xml b/res/xml/connected_devices.xml
+index a0e0a1f26d6..b232dc6025a 100644
+--- a/res/xml/connected_devices.xml
++++ b/res/xml/connected_devices.xml
+@@ -20,12 +20,6 @@
+     android:key="connected_devices_screen"
+     android:title="@string/connected_devices_dashboard_title">
+ 
+-    <com.android.settings.slices.SlicePreference
+-        android:key="bt_nearby_slice"
+-        android:title="@string/summary_placeholder"
+-        settings:controller="com.android.settings.slices.SlicePreferenceController"
+-        settings:allowDividerBelow="true"/>
+-
+     <PreferenceCategory
+         android:key="available_device_list"
+         android:title="@string/connected_device_media_device_title"
+diff --git a/res/xml/display_settings.xml b/res/xml/display_settings.xml
+index ad5236ecbd3..2ca70b589d3 100644
+--- a/res/xml/display_settings.xml
++++ b/res/xml/display_settings.xml
+@@ -137,40 +137,5 @@
+             android:summary="@string/peak_refresh_rate_summary"
+             settings:controller="com.android.settings.display.PeakRefreshRatePreferenceController"/>
+ 
+-        <SwitchPreference
+-            android:key="show_operator_name"
+-            android:title="@string/show_operator_name_title"
+-            android:summary="@string/show_operator_name_summary"/>
+-
+-        <Preference
+-            android:key="screensaver"
+-            android:title="@string/screensaver_settings_title"
+-            android:fragment="com.android.settings.dream.DreamSettings"
+-            settings:keywords="@string/keywords_screensaver"
+-            settings:controller="com.android.settings.display.ScreenSaverPreferenceController"/>
+-
+-        <SwitchPreference
+-            android:key="camera_gesture"
+-            android:title="@string/camera_gesture_title"
+-            android:summary="@string/camera_gesture_desc"/>
+-
+-        <SwitchPreference
+-            android:key="lift_to_wake"
+-            android:title="@string/lift_to_wake_title"/>
+-
+-        <SwitchPreference
+-            android:key="tap_to_wake"
+-            android:title="@string/tap_to_wake"
+-            android:summary="@string/tap_to_wake_summary"/>
+-
+-        <ListPreference
+-            android:key="theme"
+-            android:title="@string/device_theme"
+-            android:summary="@string/summary_placeholder"/>
+-
+-        <Preference
+-            android:key="vr_display_pref"
+-            android:title="@string/display_vr_pref_title"
+-            android:fragment="com.android.settings.display.VrDisplayPreferencePicker"/>
+     </PreferenceCategory>
+ </PreferenceScreen>
+diff --git a/res/xml/network_and_internet.xml b/res/xml/network_and_internet.xml
+index 2162c96eb8a..ba1bb281d87 100644
+--- a/res/xml/network_and_internet.xml
++++ b/res/xml/network_and_internet.xml
+@@ -42,33 +42,6 @@
+             android:targetClass="Settings$WifiSettingsActivity" />
+     </com.android.settingslib.PrimarySwitchPreference>
+ 
+-    <com.android.settings.widget.AddPreference
+-        android:key="mobile_network_list"
+-        android:title="@string/network_settings_title"
+-        android:summary="@string/summary_placeholder"
+-        android:icon="@drawable/ic_network_cell"
+-        android:order="-15"
+-        settings:keywords="@string/keywords_more_mobile_networks"
+-        settings:userRestriction="no_config_mobile_networks"
+-        settings:useAdminDisabledSummary="true" />
+-
+-    <com.android.settingslib.RestrictedSwitchPreference
+-        android:key="airplane_mode"
+-        android:title="@string/airplane_mode"
+-        android:icon="@drawable/ic_airplanemode_active"
+-        android:disableDependentsState="true"
+-        android:order="-5"
+-        settings:controller="com.android.settings.network.AirplaneModePreferenceController"
+-        settings:userRestriction="no_airplane_mode"/>
+-
+-    <com.android.settingslib.RestrictedPreference
+-        android:key="manage_mobile_plan"
+-        android:title="@string/manage_mobile_plan_title"
+-        android:persistent="false"
+-        android:order="19"
+-        settings:userRestriction="no_config_mobile_networks"
+-        settings:useAdminDisabledSummary="true" />
+-
+     <com.android.settingslib.RestrictedPreference
+         android:fragment="com.android.settings.TetherSettings"
+         android:key="tether_settings"
+diff --git a/res/xml/top_level_settings.xml b/res/xml/top_level_settings.xml
+index d050a1f2747..286b6d59458 100644
+--- a/res/xml/top_level_settings.xml
++++ b/res/xml/top_level_settings.xml
+@@ -155,36 +155,6 @@
+         settings:highlightableMenuKey="@string/menu_key_privacy"
+         settings:controller="com.android.settings.privacy.TopLevelPrivacyEntryPreferenceController"/>
+ 
+-    <com.android.settings.widget.HomepagePreference
+-        android:fragment="com.android.settings.location.LocationSettings"
+-        android:icon="@drawable/ic_settings_location"
+-        android:key="top_level_location"
+-        android:order="-30"
+-        android:title="@string/location_settings_title"
+-        android:summary="@string/location_settings_loading_app_permission_stats"
+-        settings:highlightableMenuKey="@string/menu_key_location"
+-        settings:controller="com.android.settings.location.TopLevelLocationPreferenceController"/>
+-
+-    <com.android.settings.widget.HomepagePreference
+-        android:key="top_level_emergency"
+-        android:title="@string/emergency_settings_preference_title"
+-        android:summary="@string/emergency_dashboard_summary"
+-        android:icon="@drawable/ic_settings_emergency"
+-        android:order="-20"
+-        android:fragment="com.android.settings.emergency.EmergencyDashboardFragment"
+-        settings:isPreferenceVisible="@bool/config_show_emergency_settings"
+-        settings:highlightableMenuKey="@string/menu_key_emergency"/>
+-
+-    <com.android.settings.widget.HomepagePreference
+-        android:fragment="com.android.settings.accounts.AccountDashboardFragment"
+-        android:icon="@drawable/ic_settings_accounts"
+-        android:key="top_level_accounts"
+-        android:order="-10"
+-        android:title="@string/account_dashboard_title"
+-        android:summary="@string/summary_placeholder"
+-        settings:highlightableMenuKey="@string/menu_key_accounts"
+-        settings:controller="com.android.settings.accounts.TopLevelAccountEntryPreferenceController"/>
+-
+     <com.android.settings.widget.HomepagePreference
+         android:fragment="com.android.settings.system.SystemDashboardFragment"
+         android:icon="@drawable/ic_settings_system_dashboard_white"
+diff --git a/src/com/android/settings/AllInOneTetherSettings.java b/src/com/android/settings/AllInOneTetherSettings.java
+index f98fdc1d234..11647e3f629 100644
+--- a/src/com/android/settings/AllInOneTetherSettings.java
++++ b/src/com/android/settings/AllInOneTetherSettings.java
+@@ -21,7 +21,6 @@ import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
+ import static android.net.wifi.WifiManager.WIFI_AP_STATE_CHANGED_ACTION;
+ 
+ import android.app.settings.SettingsEnums;
+-import android.bluetooth.BluetoothAdapter;
+ import android.bluetooth.BluetoothPan;
+ import android.bluetooth.BluetoothProfile;
+ import android.content.BroadcastReceiver;
+@@ -43,7 +42,6 @@ import androidx.preference.PreferenceGroup;
+ import com.android.settings.core.FeatureFlags;
+ import com.android.settings.dashboard.RestrictedDashboardFragment;
+ import com.android.settings.datausage.DataSaverBackend;
+-import com.android.settings.network.BluetoothTetherPreferenceController;
+ import com.android.settings.network.EthernetTetherPreferenceController;
+ import com.android.settings.network.TetherEnabler;
+ import com.android.settings.network.UsbTetherPreferenceController;
+@@ -188,7 +186,6 @@ public class AllInOneTetherSettings extends RestrictedDashboardFragment
+         mPasswordPreferenceController = use(WifiTetherPasswordPreferenceController.class);
+         mApBandPreferenceController = use(WifiTetherApBandPreferenceController.class);
+         getSettingsLifecycle().addObserver(use(UsbTetherPreferenceController.class));
+-        getSettingsLifecycle().addObserver(use(BluetoothTetherPreferenceController.class));
+         getSettingsLifecycle().addObserver(use(EthernetTetherPreferenceController.class));
+         getSettingsLifecycle().addObserver(use(WifiTetherDisablePreferenceController.class));
+     }
+@@ -222,17 +219,11 @@ public class AllInOneTetherSettings extends RestrictedDashboardFragment
+         // Assume we are in a SettingsActivity. This is only safe because we currently use
+         // SettingsActivity as base for all preference fragments.
+         final SettingsActivity activity = (SettingsActivity) getActivity();
+-        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+-        if (adapter != null) {
+-            adapter.getProfileProxy(activity.getApplicationContext(), mProfileServiceListener,
+-                    BluetoothProfile.PAN);
+-        }
+         final SettingsMainSwitchBar mainSwitch = activity.getSwitchBar();
+         mTetherEnabler = new TetherEnabler(activity,
+                 new MainSwitchBarController(mainSwitch), mBluetoothPan);
+         getSettingsLifecycle().addObserver(mTetherEnabler);
+         use(UsbTetherPreferenceController.class).setTetherEnabler(mTetherEnabler);
+-        use(BluetoothTetherPreferenceController.class).setTetherEnabler(mTetherEnabler);
+         use(EthernetTetherPreferenceController.class).setTetherEnabler(mTetherEnabler);
+         use(WifiTetherDisablePreferenceController.class).setTetherEnabler(mTetherEnabler);
+         mainSwitch.show();
+diff --git a/src/com/android/settings/DisplaySettings.java b/src/com/android/settings/DisplaySettings.java
+index 97b9aae0cd1..f73be843656 100644
+--- a/src/com/android/settings/DisplaySettings.java
++++ b/src/com/android/settings/DisplaySettings.java
+@@ -76,7 +76,6 @@ public class DisplaySettings extends DashboardFragment {
+         controllers.add(new CameraGesturePreferenceController(context));
+         controllers.add(new LiftToWakePreferenceController(context));
+         controllers.add(new TapToWakePreferenceController(context));
+-        controllers.add(new VrDisplayPreferenceController(context));
+         controllers.add(new ShowOperatorNamePreferenceController(context));
+         controllers.add(new ThemePreferenceController(context));
+         controllers.add(new BrightnessLevelPreferenceController(context, lifecycle));
+diff --git a/src/com/android/settings/connecteddevice/ConnectedDeviceDashboardFragment.java b/src/com/android/settings/connecteddevice/ConnectedDeviceDashboardFragment.java
+index ea8a5f560f9..b796b976b76 100644
+--- a/src/com/android/settings/connecteddevice/ConnectedDeviceDashboardFragment.java
++++ b/src/com/android/settings/connecteddevice/ConnectedDeviceDashboardFragment.java
+@@ -69,23 +69,9 @@ public class ConnectedDeviceDashboardFragment extends DashboardFragment {
+     @Override
+     public void onAttach(Context context) {
+         super.onAttach(context);
+-        final boolean nearbyEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI,
+-                SettingsUIDeviceConfig.BT_NEAR_BY_SUGGESTION_ENABLED, true);
+-        String callingAppPackageName = ((SettingsActivity) getActivity())
+-                .getInitialCallingPackage();
+-        String action = getIntent() != null ? getIntent().getAction() : "";
+-        if (DEBUG) {
+-            Log.d(TAG, "onAttach() calling package name is : " + callingAppPackageName
+-                    + ", action : " + action);
+-        }
+         use(AvailableMediaDeviceGroupController.class).init(this);
+         use(ConnectedDeviceGroupController.class).init(this);
+         use(PreviouslyConnectedDevicePreferenceController.class).init(this);
+-        use(SlicePreferenceController.class).setSliceUri(nearbyEnabled
+-                ? Uri.parse(getString(R.string.config_nearby_devices_slice_uri))
+-                : null);
+-        use(DiscoverableFooterPreferenceController.class)
+-                .setAlwaysDiscoverable(isAlwaysDiscoverable(callingAppPackageName, action));
+     }
+ 
+     @VisibleForTesting
+diff --git a/src/com/android/settings/connecteddevice/ConnectedDeviceGroupController.java b/src/com/android/settings/connecteddevice/ConnectedDeviceGroupController.java
+index 61195c99c83..6c6aaf0482c 100644
+--- a/src/com/android/settings/connecteddevice/ConnectedDeviceGroupController.java
++++ b/src/com/android/settings/connecteddevice/ConnectedDeviceGroupController.java
+@@ -24,7 +24,6 @@ import androidx.preference.PreferenceGroup;
+ import androidx.preference.PreferenceScreen;
+ 
+ import com.android.settings.bluetooth.BluetoothDeviceUpdater;
+-import com.android.settings.bluetooth.ConnectedBluetoothDeviceUpdater;
+ import com.android.settings.connecteddevice.dock.DockUpdater;
+ import com.android.settings.connecteddevice.usb.ConnectedUsbDeviceUpdater;
+ import com.android.settings.core.BasePreferenceController;
+@@ -48,7 +47,6 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+ 
+     @VisibleForTesting
+     PreferenceGroup mPreferenceGroup;
+-    private BluetoothDeviceUpdater mBluetoothDeviceUpdater;
+     private ConnectedUsbDeviceUpdater mConnectedUsbDeviceUpdater;
+     private DockUpdater mConnectedDockUpdater;
+     private final PackageManager mPackageManager;
+@@ -60,11 +58,6 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+ 
+     @Override
+     public void onStart() {
+-        if (mBluetoothDeviceUpdater != null) {
+-            mBluetoothDeviceUpdater.registerCallback();
+-            mBluetoothDeviceUpdater.refreshPreference();
+-        }
+-
+         if (mConnectedUsbDeviceUpdater != null) {
+             mConnectedUsbDeviceUpdater.registerCallback();
+         }
+@@ -74,10 +67,6 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+ 
+     @Override
+     public void onStop() {
+-        if (mBluetoothDeviceUpdater != null) {
+-            mBluetoothDeviceUpdater.unregisterCallback();
+-        }
+-
+         if (mConnectedUsbDeviceUpdater != null) {
+             mConnectedUsbDeviceUpdater.unregisterCallback();
+         }
+@@ -94,10 +83,6 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+ 
+         if (isAvailable()) {
+             final Context context = screen.getContext();
+-            if (mBluetoothDeviceUpdater != null) {
+-                mBluetoothDeviceUpdater.setPrefContext(context);
+-                mBluetoothDeviceUpdater.forceUpdate();
+-            }
+ 
+             if (mConnectedUsbDeviceUpdater != null) {
+                 mConnectedUsbDeviceUpdater.initUsbPreference(context);
+@@ -110,8 +95,7 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+ 
+     @Override
+     public int getAvailabilityStatus() {
+-        return (hasBluetoothFeature()
+-                || hasUsbFeature()
++        return (hasUsbFeature()
+                 || mConnectedDockUpdater != null)
+                 ? AVAILABLE_UNSEARCHABLE
+                 : UNSUPPORTED_ON_DEVICE;
+@@ -143,7 +127,6 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+             ConnectedUsbDeviceUpdater connectedUsbDeviceUpdater,
+             DockUpdater connectedDockUpdater) {
+ 
+-        mBluetoothDeviceUpdater = bluetoothDeviceUpdater;
+         mConnectedUsbDeviceUpdater = connectedUsbDeviceUpdater;
+         mConnectedDockUpdater = connectedDockUpdater;
+     }
+@@ -154,9 +137,7 @@ public class ConnectedDeviceGroupController extends BasePreferenceController
+                 FeatureFactory.getFactory(context).getDockUpdaterFeatureProvider();
+         final DockUpdater connectedDockUpdater =
+                 dockUpdaterFeatureProvider.getConnectedDockUpdater(context, this);
+-        init(hasBluetoothFeature()
+-                        ? new ConnectedBluetoothDeviceUpdater(context, fragment, this)
+-                        : null,
++        init(null,
+                 hasUsbFeature()
+                         ? new ConnectedUsbDeviceUpdater(context, fragment, this)
+                         : null,
+diff --git a/src/com/android/settings/connecteddevice/PreviouslyConnectedDeviceDashboardFragment.java b/src/com/android/settings/connecteddevice/PreviouslyConnectedDeviceDashboardFragment.java
+index 05a17cc9a9f..516304ee77b 100644
+--- a/src/com/android/settings/connecteddevice/PreviouslyConnectedDeviceDashboardFragment.java
++++ b/src/com/android/settings/connecteddevice/PreviouslyConnectedDeviceDashboardFragment.java
+@@ -62,8 +62,6 @@ public class PreviouslyConnectedDeviceDashboardFragment extends DashboardFragmen
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-
+-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+     }
+ 
+     @Override
+@@ -75,14 +73,10 @@ public class PreviouslyConnectedDeviceDashboardFragment extends DashboardFragmen
+     @Override
+     public void onStart() {
+         super.onStart();
+-        enableBluetoothIfNecessary();
+     }
+ 
+     @VisibleForTesting
+     void enableBluetoothIfNecessary() {
+-        if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
+-            mBluetoothAdapter.enable();
+-        }
+     }
+ 
+     /**
+@@ -90,4 +84,4 @@ public class PreviouslyConnectedDeviceDashboardFragment extends DashboardFragmen
+      */
+     public static final BaseSearchIndexProvider SEARCH_INDEX_DATA_PROVIDER =
+             new BaseSearchIndexProvider(R.xml.previously_connected_devices);
+-}
+\ No newline at end of file
++}
+diff --git a/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java b/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
+index afeca512815..99c8c339951 100644
+--- a/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
++++ b/src/com/android/settings/connecteddevice/PreviouslyConnectedDevicePreferenceController.java
+@@ -77,17 +77,13 @@ public class PreviouslyConnectedDevicePreferenceController extends BasePreferenc
+ 
+     public PreviouslyConnectedDevicePreferenceController(Context context, String preferenceKey) {
+         super(context, preferenceKey);
+-
+         mSavedDockUpdater = FeatureFactory.getFactory(
+                 context).getDockUpdaterFeatureProvider().getSavedDockUpdater(context, this);
+-        mIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+     }
+ 
+     @Override
+     public int getAvailabilityStatus() {
+-        return (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
+-                || mSavedDockUpdater != null)
++        return (mSavedDockUpdater != null)
+                 ? AVAILABLE
+                 : CONDITIONALLY_UNAVAILABLE;
+     }
+@@ -101,61 +97,36 @@ public class PreviouslyConnectedDevicePreferenceController extends BasePreferenc
+ 
+         if (isAvailable()) {
+             final Context context = screen.getContext();
+-            mBluetoothDeviceUpdater.setPrefContext(context);
+             mSavedDockUpdater.setPreferenceContext(context);
+-            mBluetoothDeviceUpdater.forceUpdate();
+         }
+     }
+ 
+     @Override
+     public void onStart() {
+-        mBluetoothDeviceUpdater.registerCallback();
+         mSavedDockUpdater.registerCallback();
+-        mContext.registerReceiver(mReceiver, mIntentFilter,
+-                Context.RECEIVER_EXPORTED_UNAUDITED);
+-        mBluetoothDeviceUpdater.refreshPreference();
+     }
+ 
+     @Override
+     public void onStop() {
+-        mBluetoothDeviceUpdater.unregisterCallback();
+         mSavedDockUpdater.unregisterCallback();
+-        mContext.unregisterReceiver(mReceiver);
+     }
+ 
+     public void init(DashboardFragment fragment) {
+-        mBluetoothDeviceUpdater = new SavedBluetoothDeviceUpdater(fragment.getContext(),
+-                fragment, PreviouslyConnectedDevicePreferenceController.this);
+     }
+ 
+     @Override
+     public void onDeviceAdded(Preference preference) {
+-        final List<BluetoothDevice> bluetoothDevices =
+-                mBluetoothAdapter.getMostRecentlyConnectedDevices();
+-        final int index = preference instanceof BluetoothDevicePreference
+-                ? bluetoothDevices.indexOf(((BluetoothDevicePreference) preference)
+-                .getBluetoothDevice().getDevice()) : DOCK_DEVICE_INDEX;
+-        if (DEBUG) {
+-            Log.d(TAG, "onDeviceAdded() " + preference.getTitle() + ", index of : " + index);
+-            for (BluetoothDevice device : bluetoothDevices) {
+-                Log.d(TAG, "onDeviceAdded() most recently device : " + device.getName());
+-            }
+-        }
+-        addPreference(index, preference);
+-        updatePreferenceVisibility();
++        if (!(preference instanceof BluetoothDevicePreference)) {
++            addPreference(DOCK_DEVICE_INDEX, preference);
++            updatePreferenceVisibility();
++         }
+     }
+ 
+     private void addPreference(int index, Preference preference) {
+-        if (preference instanceof BluetoothDevicePreference) {
+-            if (index >= 0 && mDevicesList.size() >= index) {
+-                mDevicesList.add(index, preference);
+-            } else {
+-                mDevicesList.add(preference);
+-            }
+-        } else {
++        if (!(preference instanceof BluetoothDevicePreference)) {
+             mDockDevicesList.add(preference);
++            addPreference();
+         }
+-        addPreference();
+     }
+ 
+     private void addPreference() {
+@@ -193,14 +164,11 @@ public class PreviouslyConnectedDevicePreferenceController extends BasePreferenc
+ 
+     @Override
+     public void onDeviceRemoved(Preference preference) {
+-        if (preference instanceof BluetoothDevicePreference) {
+-            mDevicesList.remove(preference);
+-        } else {
++        if (!(preference instanceof BluetoothDevicePreference)) {
+             mDockDevicesList.remove(preference);
++            addPreference();
++            updatePreferenceVisibility();
+         }
+-
+-        addPreference();
+-        updatePreferenceVisibility();
+     }
+ 
+     @VisibleForTesting
+@@ -220,11 +188,7 @@ public class PreviouslyConnectedDevicePreferenceController extends BasePreferenc
+ 
+     @VisibleForTesting
+     void updatePreferenceVisibility() {
+-        if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
+-            mSeeAllPreference.setSummary("");
+-        } else {
+-            mSeeAllPreference.setSummary(
+-                    mContext.getString(R.string.connected_device_see_all_summary));
+-        }
++         mSeeAllPreference.setSummary(
++                mContext.getString(R.string.connected_device_see_all_summary));
+     }
+ }
+diff --git a/src/com/android/settings/connecteddevice/SavedDeviceGroupController.java b/src/com/android/settings/connecteddevice/SavedDeviceGroupController.java
+index df721f18bcd..3404670113e 100644
+--- a/src/com/android/settings/connecteddevice/SavedDeviceGroupController.java
++++ b/src/com/android/settings/connecteddevice/SavedDeviceGroupController.java
+@@ -24,7 +24,6 @@ import androidx.preference.PreferenceGroup;
+ import androidx.preference.PreferenceScreen;
+ 
+ import com.android.settings.bluetooth.BluetoothDeviceUpdater;
+-import com.android.settings.bluetooth.SavedBluetoothDeviceUpdater;
+ import com.android.settings.connecteddevice.dock.DockUpdater;
+ import com.android.settings.core.BasePreferenceController;
+ import com.android.settings.core.PreferenceControllerMixin;
+@@ -47,7 +46,6 @@ public class SavedDeviceGroupController extends BasePreferenceController
+ 
+     @VisibleForTesting
+     PreferenceGroup mPreferenceGroup;
+-    private BluetoothDeviceUpdater mBluetoothDeviceUpdater;
+     private DockUpdater mSavedDockUpdater;
+ 
+     public SavedDeviceGroupController(Context context) {
+@@ -61,14 +59,11 @@ public class SavedDeviceGroupController extends BasePreferenceController
+ 
+     @Override
+     public void onStart() {
+-        mBluetoothDeviceUpdater.registerCallback();
+         mSavedDockUpdater.registerCallback();
+-        mBluetoothDeviceUpdater.refreshPreference();
+     }
+ 
+     @Override
+     public void onStop() {
+-        mBluetoothDeviceUpdater.unregisterCallback();
+         mSavedDockUpdater.unregisterCallback();
+     }
+ 
+@@ -79,8 +74,6 @@ public class SavedDeviceGroupController extends BasePreferenceController
+ 
+         if (isAvailable()) {
+             final Context context = screen.getContext();
+-            mBluetoothDeviceUpdater.setPrefContext(context);
+-            mBluetoothDeviceUpdater.forceUpdate();
+             mSavedDockUpdater.setPreferenceContext(context);
+             mSavedDockUpdater.forceUpdate();
+         }
+@@ -88,8 +81,7 @@ public class SavedDeviceGroupController extends BasePreferenceController
+ 
+     @Override
+     public int getAvailabilityStatus() {
+-        return (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
+-                || mSavedDockUpdater != null)
++        return (mSavedDockUpdater != null)
+                 ? AVAILABLE
+                 : UNSUPPORTED_ON_DEVICE;
+     }
+@@ -116,13 +108,10 @@ public class SavedDeviceGroupController extends BasePreferenceController
+     }
+ 
+     public void init(DashboardFragment fragment) {
+-        mBluetoothDeviceUpdater = new SavedBluetoothDeviceUpdater(fragment.getContext(),
+-                fragment, SavedDeviceGroupController.this);
+     }
+ 
+     @VisibleForTesting
+     public void setBluetoothDeviceUpdater(BluetoothDeviceUpdater bluetoothDeviceUpdater) {
+-        mBluetoothDeviceUpdater = bluetoothDeviceUpdater;
+     }
+ 
+     @VisibleForTesting
+diff --git a/src/com/android/settings/development/BluetoothMaxConnectedAudioDevicesPreferenceController.java b/src/com/android/settings/development/BluetoothMaxConnectedAudioDevicesPreferenceController.java
+index a1467c80ac5..d56609ad6fc 100644
+--- a/src/com/android/settings/development/BluetoothMaxConnectedAudioDevicesPreferenceController.java
++++ b/src/com/android/settings/development/BluetoothMaxConnectedAudioDevicesPreferenceController.java
+@@ -16,7 +16,7 @@
+ 
+ package com.android.settings.development;
+ 
+-import android.bluetooth.BluetoothManager;
++// import android.bluetooth.BluetoothManager;
+ import android.content.Context;
+ import android.os.SystemProperties;
+ 
+@@ -44,10 +44,10 @@ public class BluetoothMaxConnectedAudioDevicesPreferenceController extends
+     public BluetoothMaxConnectedAudioDevicesPreferenceController(Context context) {
+         super(context);
+ 
+-        final BluetoothManager bluetoothManager = context.getSystemService(BluetoothManager.class);
++//        final BluetoothManager bluetoothManager = context.getSystemService(BluetoothManager.class);
+ 
+-        mDefaultMaxConnectedAudioDevices =
+-              bluetoothManager.getAdapter().getMaxConnectedAudioDevices();
++//        mDefaultMaxConnectedAudioDevices =
++//              bluetoothManager.getAdapter().getMaxConnectedAudioDevices();
+     }
+ 
+     @Override
+-- 
+2.34.1
+

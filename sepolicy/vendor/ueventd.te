@@ -1,0 +1,13 @@
+# ueventd
+allow ueventd rpmsg_device:chr_file { relabelfrom relabelto };
+allow ueventd input_device:chr_file { relabelfrom relabelto };
+allow ueventd usb_device:chr_file { relabelfrom relabelto };
+allow ueventd console_device:chr_file { relabelfrom relabelto };
+allow ueventd tmpfs:chr_file { relabelfrom relabelto };
+allow ueventd metadata_file:dir search;
+
+recovery_only(`
+allow ueventd self:capability sys_nice;
+')
+
+dontaudit ueventd gsi_metadata_file:dir search;

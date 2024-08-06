@@ -1,0 +1,40 @@
+From 9f125399569b3eb1b55f4e94ce967e63b98c3eb9 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Tue, 12 Mar 2024 17:51:44 +0100
+Subject: [PATCH] Missing permission to call getRootTaskInfo
+
+Change-Id: I8728ec3c8892f005454ea6d2de01e68519c67cbb
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ .../android/quickstep/RecentsAnimationDeviceState.java    | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/quickstep/src/com/android/quickstep/RecentsAnimationDeviceState.java b/quickstep/src/com/android/quickstep/RecentsAnimationDeviceState.java
+index d34153160d..afc4116b45 100644
+--- a/quickstep/src/com/android/quickstep/RecentsAnimationDeviceState.java
++++ b/quickstep/src/com/android/quickstep/RecentsAnimationDeviceState.java
+@@ -108,7 +108,7 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener {
+     private boolean mIsOneHandedModeEnabled;
+     private boolean mIsSwipeToNotificationEnabled;
+     private final boolean mIsOneHandedModeSupported;
+-    private boolean mPipIsActive;
++    private boolean mPipIsActive = false;
+ 
+     private boolean mIsUserUnlocked;
+     private final ArrayList<Runnable> mUserUnlockedActions = new ArrayList<>();
+@@ -200,12 +200,6 @@ public class RecentsAnimationDeviceState implements DisplayInfoChangeListener {
+             runOnDestroy(() -> settingsCache.unregister(setupCompleteUri, userSetupChangeListener));
+         }
+ 
+-        try {
+-            mPipIsActive = ActivityTaskManager.getService().getRootTaskInfo(
+-                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED) != null;
+-        } catch (RemoteException e) {
+-            // Do nothing
+-        }
+         mPipListener = new TaskStackChangeListener() {
+             @Override
+             public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
+-- 
+2.34.1
+

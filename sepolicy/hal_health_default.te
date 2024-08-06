@@ -1,2 +1,0 @@
-allow hal_health_default sysfs_blockinfo:dir search;
-allow hal_health_default sysfs_blockinfo:file { getattr open read };

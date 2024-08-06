@@ -1,4 +1,4 @@
-ifneq ($(filter stm32mp1, $(SOC_FAMILY)),)
+ifneq ($(filter stm32mp2, $(SOC_FAMILY)),)
 ifneq ($(TARGET_NO_SPLASHIMAGE), true)
 
 ifeq ($(TARGET_SPLASH_BMP),)

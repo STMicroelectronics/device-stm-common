@@ -1,0 +1,111 @@
+From 245f18856ca6f50649ac0bfab5f05842fca38ae3 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Wed, 13 Mar 2024 14:24:03 +0100
+Subject: [PATCH] Browser ST filter
+
+Change-Id: Ie8acd6d24e0ba4414b736c0bb1bb541548031b65
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ AndroidManifest.xml                                       | 2 +-
+ res/layout/activity_webview_browser.xml                   | 2 ++
+ res/values/colors.xml                                     | 6 ++++++
+ res/values/styles.xml                                     | 8 ++++++++
+ .../chromium/webview_shell/WebViewBrowserActivity.java    | 8 ++++++--
+ 5 files changed, 23 insertions(+), 3 deletions(-)
+ create mode 100755 res/values/colors.xml
+ create mode 100644 res/values/styles.xml
+
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index 930ef25..bc22842 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -31,7 +31,7 @@
+     <application
+         android:icon="@drawable/ic_launcher"
+         android:label="@string/app_name"
+-        android:theme="@android:style/Theme.Light"
++        android:theme="@style/AppTheme"
+         android:networkSecurityConfig="@xml/network_security_config" >
+         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+             android:value="true" />
+diff --git a/res/layout/activity_webview_browser.xml b/res/layout/activity_webview_browser.xml
+index 80464d7..9c834e9 100644
+--- a/res/layout/activity_webview_browser.xml
++++ b/res/layout/activity_webview_browser.xml
+@@ -22,6 +22,7 @@
+             android:layout_weight="1.0"
+             android:singleLine="true"
+             android:inputType="textUri"
++            android:textColor="@color/colorPrimaryDark"
+             android:selectAllOnFocus="true"
+             android:imeOptions="actionGo"
+             android:importantForAutofill="no" />
+@@ -34,6 +35,7 @@
+         <ImageButton
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
++            android:visibility="gone"
+             android:src="@drawable/item_more_black"
+             android:contentDescription="@string/menu_about"
+             android:onClick="showPopup" />
+diff --git a/res/values/colors.xml b/res/values/colors.xml
+new file mode 100755
+index 0000000..ff4ea07
+--- /dev/null
++++ b/res/values/colors.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <color name="colorPrimary">#39A9DC</color>
++    <color name="colorPrimaryDark">#002052</color>
++    <color name="colorAccent">#BBCC00</color>
++</resources>
+diff --git a/res/values/styles.xml b/res/values/styles.xml
+new file mode 100644
+index 0000000..f7398f3
+--- /dev/null
++++ b/res/values/styles.xml
+@@ -0,0 +1,8 @@
++<resources>
++    <!-- Base application theme. -->
++    <style name="AppTheme" parent="@android:style/Theme.Light.NoTitleBar">
++        <!-- Customize your theme here. -->
++        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
++        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
++    </style>
++</resources>
+diff --git a/src/org/chromium/webview_shell/WebViewBrowserActivity.java b/src/org/chromium/webview_shell/WebViewBrowserActivity.java
+index cce295a..d9b3d73 100644
+--- a/src/org/chromium/webview_shell/WebViewBrowserActivity.java
++++ b/src/org/chromium/webview_shell/WebViewBrowserActivity.java
+@@ -322,13 +322,17 @@ public class WebViewBrowserActivity extends Activity implements PopupMenu.OnMenu
+         WebSettings settings = webview.getSettings();
+         initializeSettings(settings);
+ 
++
+         Matcher matcher = WEBVIEW_VERSION_PATTERN.matcher(settings.getUserAgentString());
+         if (matcher.find()) {
+             mWebViewVersion = matcher.group(2);
+         } else {
+             mWebViewVersion = "-";
+         }
+-        setTitle(getResources().getString(R.string.title_activity_browser) + " " + mWebViewVersion);
++
++        // remove title from the app theme
++        // setTitle(getResources().getString(R.string.title_activity_browser) + " " + mWebViewVersion);
++        getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimaryDark));
+ 
+         webview.setWebViewClient(new WebViewClient() {
+             @Override
+@@ -641,7 +645,7 @@ public class WebViewBrowserActivity extends Activity implements PopupMenu.OnMenu
+     }
+ 
+     private void setUrlFail(boolean fail) {
+-        mUrlBar.setTextColor(fail ? Color.RED : Color.BLACK);
++        mUrlBar.setTextColor(fail ? Color.RED : getResources().getColor(R.color.colorPrimaryDark));
+     }
+ 
+     /**
+-- 
+2.34.1
+

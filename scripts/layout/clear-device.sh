@@ -21,7 +21,7 @@
 #######################################
 SCRIPT_VERSION="1.0"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [[ -n "${ANDROID_BUILD_TOP+1}" ]]; then
   COMMON_PATH=${ANDROID_BUILD_TOP}/device/stm/${SOC_FAMILY}
@@ -31,6 +31,11 @@ else
   echo "ERROR: ANDROID_BUILD_TOP env variable not defined, this script shall be executed on TOP directory"
   exit 1
 fi
+
+#######################################
+# Variables
+#######################################
+tmp_version="nodate"
 
 #######################################
 # Functions
@@ -118,6 +123,9 @@ while test "$1" != ""; do
   shift
 done
 
+# Use date to set unique tmp file name
+tmp_version=`date +%Y-%m-%d_%H-%M`
+
 # Be in the folder where images are located
 \pushd ${ANDROID_PRODUCT_OUT} >/dev/null 2>&1
 
@@ -132,9 +140,9 @@ if [ ! -x "${cube_path}" ]; then
   exit 1
 fi
 
-STM32_Programmer_CLI -l usb > /tmp/stm32_programmer_result
-usb_dfu=$(cat /tmp/stm32_programmer_result | grep "Device Index" | awk '{ print $5 }')
-\rm -f /tmp/stm32_programmer_result
+STM32_Programmer_CLI -l usb > /tmp/stm32_programmer_result-${tmp_version}
+usb_dfu=$(cat /tmp/stm32_programmer_result-${tmp_version} | grep "Device Index" | awk '{ print $5 }')
+\rm -f /tmp/stm32_programmer_result-${tmp_version}
 if [ ! ${usb_dfu} ]; then
   error "USB DFU device not found"
   echo "Check that USB cable is plugged and board is well configured in DFU"

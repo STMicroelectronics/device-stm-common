@@ -1,0 +1,10 @@
+# Domain to run Copro Service (com.android.coproservice)
+app_domain(coproservice_app)
+
+# Allow Copro Service to register/access itself with ServiceManager
+add_service(coproservice_app, copro_service)
+
+# Allow Copro Service to be the client of Copro HALs
+hal_client_domain(coproservice_app, hal_copro)
+
+allow coproservice_app system_app_data_file:dir { getattr search };

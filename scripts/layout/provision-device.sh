@@ -19,9 +19,9 @@
 #######################################
 # Constants
 #######################################
-SCRIPT_VERSION="1.2"
+SCRIPT_VERSION="1.3"
 
-SOC_FAMILY="stm32mp1"
+SOC_FAMILY="stm32mp2"
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -35,9 +35,9 @@ fi
 \pushd ${TOP_PATH} >/dev/null 2>&1
 
 PART_LAYOUT_NAME="android_layout.config"
-PART_LAYOUT_DIR="device/stm/stm32mp1/layout"
+PART_LAYOUT_DIR="device/stm/stm32mp2/layout"
 
-# mmc1 for emmc, mmc0 for sd for STM32MP1 boards
+# mmc1 for emmc, mmc0 for sd for STM32MP2 boards
 SD_BOOT_INSTANCE="0"
 EMMC_BOOT_INSTANCE="1"
 
@@ -59,16 +59,24 @@ do_interactive=0
 do_not_ask_confirmation=0
 do_fastboot=0
 do_wrapped=0
+do_userdata_resize=0
+
+do_hybrid=0
+force_flash=0
 
 fastboot_cmd=""
 fastboot_instance_var="boot_instance"
 fastboot_mode_var="boot_mode"
+
+serial_opt=""
 
 force_part=0
 part_value_a=0
 part_value_b=0
 
 backup_image=0
+
+tmp_version="nodate"
 
 provisioning_error=0
 provisioning_error_msg="ERROR: partitioning not performed correctly for the following partitions: "
@@ -172,6 +180,8 @@ usage()
   echo "  -g / --gdb: wrap fsbl image for debug purpose (required for GDB/OpenOCD)"
   echo "  -c <config file> / --config=<config file>: set used partition configuration file (default: ${part_layout_config})"
   echo "  -p <image path> / --path=<image path>: path to images directory which shall be provisioned (default: ${ANDROID_PRODUCT_OUT})"
+  echo "  -s <android serial number> / --serial <android serial number>: number of the device which shall be provisioned"
+  echo "  --hybrid: provision associated images on sdcard or on emmc (hybrid configuration)"
   empty_line
   echo "Command:"
   echo " reboot: force board reboot after download"
@@ -221,15 +231,15 @@ get_boot_device()
   local l_boot_instance="5"
 
   # fastboot return values on stderr (not stdout as expected)
-  \fastboot getvar ${fastboot_instance_var} &> /tmp/bootinstance
+  \fastboot ${serial_opt} getvar ${fastboot_instance_var} &> /tmp/bootinstance-${tmp_version}
 
   while IFS='' read -r l_line || [[ -n ${l_line} ]]; do
     echo ${l_line} | grep "${fastboot_instance_var}:" &> /dev/null
     if [ $? -eq 0 ]; then
       l_boot_instance=($(echo ${l_line} | awk '{ print $2 }'))
     fi
-  done < /tmp/bootinstance
-  \rm -f /tmp/bootinstance
+  done < /tmp/bootinstance-${tmp_version}
+  \rm -f /tmp/bootinstance-${tmp_version}
 
   if [ ${l_boot_instance} == ${EMMC_BOOT_INSTANCE} ]; then
     target_disk_type="emmc"
@@ -258,15 +268,15 @@ get_boot_mode()
   local l_boot_mode="5"
 
   # fastboot return values on stderr (not stdout as expected)
-  \fastboot getvar ${fastboot_mode_var} &> /tmp/bootmode
+  \fastboot ${serial_opt} getvar ${fastboot_mode_var} &> /tmp/bootmode-${tmp_version}
 
   while IFS='' read -r l_line || [[ -n ${l_line} ]]; do
     echo ${l_line} | grep "${fastboot_mode_var}:" &> /dev/null
     if [ $? -eq 0 ]; then
       l_boot_mode=($(echo ${l_line} | awk '{ print $2 }'))
     fi
-  done < /tmp/bootmode
-  \rm -f /tmp/bootmode
+  done < /tmp/bootmode-${tmp_version}
+  \rm -f /tmp/bootmode-${tmp_version}
 
   if [ ${l_boot_mode} == trusted ]; then
     target_boot_mode="trusted"
@@ -294,7 +304,7 @@ if [[ "$0" != "$BASH_SOURCE" ]]; then
 fi
 
 # check the options
-while getopts "hvigyc:p:-:" option; do
+while getopts "hvigyc:ps:-:" option; do
   case "${option}" in
     -)
       # Treat long options
@@ -320,6 +330,12 @@ while getopts "hvigyc:p:-:" option; do
           ;;
         path)
           part_image_path="${OPTARG#*=}"
+          ;;
+        serial)
+          serial_opt="-s $OPTARG"
+          ;;
+        hybrid)
+          do_hybrid=1
           ;;
         gdb)
           if [ ${TARGET_BUILD_VARIANT} == "user" ]; then
@@ -366,6 +382,9 @@ while getopts "hvigyc:p:-:" option; do
     p)
       part_image_path="$OPTARG"
       ;;
+    s)
+      serial_opt="-s $OPTARG"
+      ;;
     *)
       usage
       popd >/dev/null 2>&1
@@ -403,6 +422,9 @@ while test "$1" != ""; do
   esac
   shift
 done
+
+# Use date to set unique tmp file name
+tmp_version=`date +%Y-%m-%d_%H-%M`
 
 # check provisioning method
 if [ -n "${target_device}" ]; then
@@ -468,10 +490,13 @@ else
   echo "   => detected boot mode = ${target_boot_mode}"
 fi
 
-if [ -n "${STM32MP1_DISK_TYPE+1}" ]; then
-  if [ "${target_disk_type}" != "${STM32MP1_DISK_TYPE}" ]; then
-    error "Error, current disk configuration (${STM32MP1_DISK_TYPE}) not compatible with target (${target_disk_type})"
-    exit 1
+# In case of hybrid, allow to provision both disk types
+if [ ${do_hybrid} -eq 0 ]; then
+  if [ -n "${STM32MP2_DISK_TYPE+1}" ]; then
+    if [ "${target_disk_type}" != "${STM32MP2_DISK_TYPE}" ]; then
+      error "Error, current disk configuration (${STM32MP2_DISK_TYPE}) not compatible with target (${target_disk_type})"
+      exit 1
+    fi
   fi
 fi
 
@@ -496,6 +521,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
     part_size=($(echo $line | awk '{ print $2 }'))
     part_nb=($(echo $line | awk '{ print $3 }'))
     part_label=($(echo $line | awk '{ print $4 }'))
+    force_flash=0
 
     # For fsbl and ssbl, use prebuilt image dependeing on boot mode and disk type
     if [ "${part_label}" = "fsbl" ]; then
@@ -520,17 +546,56 @@ while IFS='' read -r line || [[ -n $line ]]; do
 
         part_enable=($(echo $line | awk '{ print $6 }'))
         if [ ! -z  ${part_enable} ]; then
-          req_disk_type=${part_enable}
+          # part_enable can be a value
+          if [ ${part_enable} == "emmc" ] || [ ${part_enable} == "sd" ]; then
+            req_disk_type=${part_enable}
+          else
+            if [ ${do_hybrid} -eq 1 ]; then
+              part_size=${part_enable}
+              force_flash=1
+            fi
+          fi
         fi
 
         part_nb=${part_nb: -1}
         if [ ${part_nb} -eq 2 ]; then
+          # in hybrid configuration, no duplication done for partition in sd
+          if [ ${do_hybrid} -eq 1 ] && [ ${target_disk_type} == "sd" ]; then
+            continue
+          fi
           tmp_suffix=($(echo $line | awk '{ print $5 }'))
           if [ -n "${tmp_suffix}" ]; then
             part_suffix_1=${tmp_suffix: 0: 2}
             part_suffix_2=${tmp_suffix: -2}
+          else
+            part_suffix_1="_a"
+            part_suffix_2="_b"
           fi
         else
+          part_enable=($(echo $line | awk '{ print $5 }'))
+          if [ ! -z "${part_enable}" ]; then
+            if [ ${do_hybrid} -eq 1 ]; then
+              if [ ${part_enable} != "hybrid" ] && [ ${target_disk_type} == "sd" ]; then
+                # bypass sd provisioning for partition without the tag hybrid
+                continue
+              else
+                if [ ${force_flash} -eq 1 ] && [ ${target_disk_type} == "sd" ]; then
+                  continue
+                fi
+              fi
+              if [ ${part_enable} == "hybrid" ] && [ ${target_disk_type} == "emmc" ] && [ ${force_flash} -eq 0 ]; then
+                # bypass emmc provisioning for partition with the tag hybrid
+                continue
+              fi
+            fi
+            if [ ${part_enable} != "hybrid" ]; then
+              req_disk_type=${part_enable}
+            fi
+          else
+            if [ ${do_hybrid} -eq 1 ] && [ ${target_disk_type} == "sd" ]; then
+              continue
+            fi
+          fi
           part_suffix_1=""
           part_suffix_2=""
         fi
@@ -543,9 +608,14 @@ while IFS='' read -r line || [[ -n $line ]]; do
             part_value_b=$((part_value_a))
           fi
         else
-          part_value_a=$((part_value_b+1))
-          part_value_b=$((part_value_a))
-          echo "[${part_value_a}] The partition ${part_label} must be loaded using STM32CubeProgrammer tool"
+          if [[ ${part_name} == "ATF" ]]; then
+            # specific message for TF-A
+            part_value_a=$((part_value_b+1))
+            part_value_b=$((part_value_a))
+            echo "[${part_value_a}] The partition ${part_label} must be loaded using STM32CubeProgrammer tool"
+          else
+            continue
+          fi
         fi
 
         # Fastboot mode with remote target connected via USB
@@ -556,7 +626,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               doit "[${part_value_a}] Loading ${part_label}${part_suffix_1} with the image ${part_image_path}/${part_filename}" || force_part=1
 
               if [ ${force_part} -eq 1 ]; then
-                \fastboot flash ${part_label}${part_suffix_1} ${part_image_path}/${part_filename}
+                \fastboot ${serial_opt} flash ${part_label}${part_suffix_1} ${part_image_path}/${part_filename}
                 if [ $? -ne 0 ]; then
                   provisioning_error=1
                   provisioning_error_msg+="${part_label}${part_suffix_1} "
@@ -568,7 +638,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
               doit "[${part_value_b}] Loading ${part_label}${part_suffix_2} with the image ${part_image_path}/${part_filename}" || force_part=1
 
               if [ ${force_part} -eq 1 ]; then
-                \fastboot flash ${part_label}${part_suffix_2} ${part_image_path}/${part_filename}
+                \fastboot ${serial_opt} flash ${part_label}${part_suffix_2} ${part_image_path}/${part_filename}
                 if [ $? -ne 0 ]; then
                   provisioning_error=1
                   provisioning_error_msg+="${part_label}${part_suffix_2} "
@@ -578,7 +648,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
             else
               empty_line
               doit "[${part_value_a}] Loading ${part_label} with the image ${part_image_path}/${part_filename}" || {
-                \fastboot flash ${part_label} ${part_image_path}/${part_filename}
+                \fastboot ${serial_opt} flash ${part_label} ${part_image_path}/${part_filename}
               }
             fi
           else
@@ -637,7 +707,7 @@ while IFS='' read -r line || [[ -n $line ]]; do
                   if [ $? -eq 0 ]; then
                     echo "${part_filename} sparse image converted to raw image"
                     # Resize in case of Userdata image
-                    if [[ ${part_name} =~ "USERDATA" ]];then
+                    if [[ ${part_name} =~ "USERDATA" ]] && [[ ${target_disk_type} -eq 1 ]];then
                       echo "Shrink ${part_filename} before writing"
                       \resize2fs -M ${tmp_image} &> /dev/null
                     fi
@@ -731,6 +801,6 @@ fi
 if [ -n "${fastboot_cmd}" ]; then
   if [ ${fastboot_cmd} == "reboot" ]; then
     echo "Reboot target..."
-    \fastboot reboot
+    \fastboot ${serial_opt} reboot
   fi
 fi

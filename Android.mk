@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-ifneq ($(filter stm32mp1%, $(SOC_FAMILY)),)
+ifneq ($(filter stm32mp2%, $(SOC_FAMILY)),)
 
 LOCAL_PATH := $(call my-dir)
 
