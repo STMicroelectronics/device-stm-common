@@ -102,6 +102,8 @@ genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/hctosys            
 # Wakeup
 genfscon sysfs /devices/platform/soc@0/46000000.rtc/wakeup                                  u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc@0/46000000.rtc/power/wakeup                            u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.0.auto/wakeup       u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.0.auto/power/wakeup u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.1.auto/wakeup       u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc@0/46000000.rtc/rtc/rtc0/alarmtimer.1.auto/power/wakeup u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc@0/42080000.rifsc/42080000.rifsc:usb@482e0000/482f0000.usb/usb1/power/wakeup        u:object_r:sysfs_wakeup:s0
@@ -120,3 +122,7 @@ genfscon sysfs /devices/platform/gpio-keys/power/wakeup                         
 
 # Coprocessor
 genfscon sysfs /devices/platform/ahb@1/ahb@1:m33@0/remoteproc   u:object_r:sysfs_remoteproc:s0
+
+# hdmi
+genfscon sysfs /devices/platform/soc@0/42080000.bus/48010000.display-controller/drm/card0/card0-HDMI-A-1/status     u:object_r:sysfs_hdmi:s0
+

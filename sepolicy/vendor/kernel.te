@@ -3,15 +3,27 @@ allow kernel device:chr_file { create getattr setattr unlink };
 allow kernel device:dir { create write add_name remove_name rmdir };
 allow kernel device:blk_file { getattr };
 allow kernel removable_device:blk_file { create };
-#allow kernel removable_device:blk_file { rw_file_perms read create getattr setattr unlink };
 
 allow kernel self:capability mknod;
 allow kernel self:capability sys_admin;
 allow kernel vendor_file:file { open read };
+allow kernel super_block_device:lnk_file relabelto;
+allow kernel dm_device:blk_file { open read };
+
+allow kernel sepolicy_file:file getattr;
+allow kernel system_bootstrap_lib_file:dir getattr;
+allow kernel system_bootstrap_lib_file:file getattr;
+
+allow kernel vendor_firmware_file:dir search;
+allow kernel vendor_firmware_file:file { open read };
 
 userdebug_or_eng(`
 allow kernel debugfs_tracing:filesystem mount;
 ')
 
+allow kernel debugfs_regulator:dir search;
+
 # for kdevtmpfs
 dontaudit kernel device:blk_file { create setattr unlink };
+
+dontaudit kernel kernel:capability { net_bind_service };

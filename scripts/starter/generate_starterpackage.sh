@@ -24,9 +24,9 @@ SCRIPT_VERSION="1.4"
 SOC_FAMILY="stm32mp2"
 SOC_VERSION="stm32mp257f"
 
-BOARD_NAME_LIST=( "eval" )
-BOARD_FLAVOUR_LIST=( "ev1" )
-BOARD_OPTION_LIST=( "st" "empty" )
+BOARD_NAME_LIST=( "eval" "dk" )
+BOARD_FLAVOUR_LIST=( "ev1" "dk" )
+BOARD_OPTION_LIST=( "st" "st-demo" )
 
 if [ -n "${ANDROID_BUILD_TOP+1}" ]; then
   TOP_PATH=${ANDROID_BUILD_TOP}
@@ -511,7 +511,7 @@ while test "$1" != ""; do
     "-o"|"--opt" )
       starter_board_option=$2
       if in_list_starter "${BOARD_OPTION_LIST[*]}" "$starter_board_option"; then
-        if [ "${starter_board_option}" = "st" ]; then
+        if [ "${starter_board_option}" = "st-demo" ]; then
           starter_type="demo"
         fi
       else
@@ -578,7 +578,7 @@ if [ ${starter_target_emmc} -eq 1 ]; then
   state_starter "set environment configuration for eMMC"
 
   source ./build/envsetup.sh &> /dev/null
-  source ./device/stm/${SOC_FAMILY}/scripts/layout/layoutsetup.sh -d emmc 4GiB
+  source ./device/stm/${SOC_FAMILY}/scripts/layout/layoutsetup.sh -d emmc ${starter_target_emmc_size}
   lunch ${starter_board_config}_${starter_board_name}-${STARTER_BUILD} >/dev/null 2>&1
 
   for board_flavour in ${starter_board_flavour}

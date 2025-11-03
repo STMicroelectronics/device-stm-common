@@ -47,6 +47,7 @@ BOARD_PREBUILT_DTBOIMAGE = $(PRODUCT_OUT)/$(DTBO_UNSIGNED)
 # Path for primary (TF-A) and secondary (U-Boot) bootloader files
 TARGET_PREBUILT_PBL := device/stm/stm32mp2-bootloader/prebuilt/fsbl/$(SOC_VERSION)-$(BOARD_FLAVOUR)
 TARGET_PREBUILT_SBL := device/stm/stm32mp2-bootloader/prebuilt/ssbl/$(SOC_VERSION)-$(BOARD_FLAVOUR)
+TARGET_PREBUILT_DDR := device/stm/stm32mp2-bootloader/prebuilt/ddr/$(SOC_FAMILY)
 TARGET_PREBUILT_TOOLS := device/stm/stm32mp2-bootloader/prebuilt/tools
 
 # Path for splash screen image (U-Boot)
@@ -64,6 +65,8 @@ TARGET_PREBUILT_TEEFS := device/stm/stm32mp2/teefs.img
 # ================= #
 # TEE configuration #
 # ================= #
+ifeq ($(BOARD_SECURITY),optee)
+
 BUILD_OPTEE_MK=device/stm/stm32mp2-tee/optee.mk
 
 ifeq ($(BOARD_DISK_TYPE),sd)
@@ -73,4 +76,6 @@ BOARD_ROOT_EXTRA_SYMLINKS += /mnt/vendor/teefs:/teefs
 else
 # Use RPMB (need to deactivate emulator in tee supplicant
 RPMB_EMU = 0
+endif
+
 endif

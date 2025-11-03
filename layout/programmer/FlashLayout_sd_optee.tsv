@@ -13,10 +13,10 @@ P		0x12	vbmeta_b	Binary		mmc0	0x08684400	vbmeta.img
 PE		0x21	boot_a		System		mmc0	0x08704400	boot.img
 PE		0x22	boot_b		System		mmc0	0x0c704400	boot.img
 PE		0x23	vendor_boot_a	System	mmc0	0x10704400	vendor_boot.img
-PE		0x24	vendor_boot_b	System	mmc0	0x11704400	vendor_boot.img
-PE		0x25	dtbo_a		System		mmc0	0x12704400	dtbo.img
-PE		0x26	dtbo_b		System		mmc0	0x12784400	dtbo.img
-PE		0x27	misc		FileSystem	mmc0	0x12804400	misc.img
-PE		0x28	super		Binary		mmc0	0x12884400	super.img
-PE		0x29	metadata	FileSystem	mmc0	0x6a084400	metadata.img
-PE		0x30	userdata	FileSystem	mmc0	0x6b084400	userdata.img
+PE		0x24	vendor_boot_b	System	mmc0	0x11b04400	vendor_boot.img
+PE		0x25	dtbo_a		System		mmc0	0x12f04400	dtbo.img
+PE		0x26	dtbo_b		System		mmc0	0x12f84400	dtbo.img
+PE		0x27	misc		FileSystem	mmc0	0x13004400	misc.img
+PE		0x28	super		Binary		mmc0	0x13084400	super.img
+PE		0x29	metadata	FileSystem	mmc0	0x6a884400	metadata.img
+PE		0x30	userdata	FileSystem	mmc0	0x6e884400	userdata.img

@@ -1,5 +1,5 @@
 #opt	Id		Name		Type		IP		Offset		Binary
--		0x01	fsbl-boot	Binary		none	0x00000000	fsbl-programmer.img
+-		0x01	fsbl-boot	Binary		none	0x00000000	fsbla-programmer.img
 -		0x02	fip-ddr		FIP			none	0x00000000	fip-ddr-programmer.img
 -		0x03	fip-boot	FIP			none	0x00000000	fip.img
 P		0x04	fsbl_a		Binary		mmc1	boot1		fsbl-optee.img
@@ -12,10 +12,10 @@ P		0x12	vbmeta_b	Binary		mmc1	0x00600000	vbmeta.img
 PE		0x21	boot_a		System		mmc1	0x00680000	boot.img
 PE		0x22	boot_b		System		mmc1	0x04680000	boot.img
 PE		0x23	vendor_boot_a	System	mmc1	0x08680000	vendor_boot.img
-PE		0x24	vendor_boot_b	System	mmc1	0x09680000	vendor_boot.img
-PE		0x25	dtbo_a		System		mmc1	0x0a680000	dtbo.img
-PE		0x26	dtbo_b		System		mmc1	0x0a700000	dtbo.img
-PE		0x27	misc		FileSystem	mmc1	0x0a780000	misc.img
-PE		0x28	super		Binary		mmc1	0x0a800000	super.img
-PE		0x29	metadata	FileSystem	mmc1	0x62000000	metadata.img
-PE		0x30	userdata	FileSystem	mmc1	0x63000000	userdata.img
+PE		0x24	vendor_boot_b	System	mmc1	0x09a80000	vendor_boot.img
+PE		0x25	dtbo_a		System		mmc1	0x0ae80000	dtbo.img
+PE		0x26	dtbo_b		System		mmc1	0x0af00000	dtbo.img
+PE		0x27	misc		FileSystem	mmc1	0x0af80000	misc.img
+PE		0x28	super		Binary		mmc1	0x0b000000	super.img
+PE		0x29	metadata	FileSystem	mmc1	0x62800000	metadata.img
+PE		0x30	userdata	FileSystem	mmc1	0x66800000	userdata.img

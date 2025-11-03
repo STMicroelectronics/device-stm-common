@@ -1,0 +1,29 @@
+From edcd3befd43ff9dab334a17bb618a7d35c87acac Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 4 Nov 2024 09:54:13 +0100
+Subject: [PATCH 2/2] Add privileged system permissions for SystemUpdateSample
+
+Following recommendations : https://android.googlesource.com/platform/bootable/recovery/+/main/updater_sample
+
+Change-Id: I9f35104f8a054ef8f491c08775a637bb8cba3587
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ data/etc/privapp-permissions-platform.xml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/data/etc/privapp-permissions-platform.xml b/data/etc/privapp-permissions-platform.xml
+index e1c9b3c121f8..70ac0de084fa 100644
+--- a/data/etc/privapp-permissions-platform.xml
++++ b/data/etc/privapp-permissions-platform.xml
+@@ -542,4 +542,8 @@ applications that come with the platform
+     <privapp-permissions package="com.android.calllogbackup">
+         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
+     </privapp-permissions>
++
++    <privapp-permissions package="com.example.android.systemupdatersample">
++        <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
++    </privapp-permissions>
+ </permissions>
+-- 
+2.34.1
+

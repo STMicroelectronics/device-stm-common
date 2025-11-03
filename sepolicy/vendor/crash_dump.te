@@ -1,1 +1,2 @@
 allow crash_dump vold:process ptrace;
+allow crash_dump resourcecache_data_file:file { getattr map open read };

@@ -1,0 +1,662 @@
+From ca52aa6bca05631a0a6b53e7a8af6e3fb1eec08d Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Mon, 3 Feb 2025 11:39:24 +0100
+Subject: [PATCH] v4l2_codec2: change the level of some logs
+
+In some files (mainly concerning the H.264 codec), the level of some logs are
+decreased from informational or debug to verbose.
+
+Change-Id: Ic925f19390f4440b1795282abc8f990ce5773c43
+---
+ components/h264/H264Decoder.cpp       | 30 +++++++-------
+ components/h264/V4L2H264Decoder.cpp   |  8 ++--
+ components/h264/parser/H264DPB.cpp    | 50 ++++++++++++------------
+ components/h264/parser/H264Parser.cpp | 56 +++++++++++++--------------
+ components/vp8/VP8Decoder.cpp         |  2 +-
+ 5 files changed, 73 insertions(+), 73 deletions(-)
+
+diff --git a/components/h264/H264Decoder.cpp b/components/h264/H264Decoder.cpp
+index 2888ae4..d3969a6 100644
+--- a/components/h264/H264Decoder.cpp
++++ b/components/h264/H264Decoder.cpp
+@@ -167,7 +167,7 @@ bool H264Decoder::parseSPS(const H264NalUnit &nalu) {
+         return false;
+     }
+ 
+-    ALOGI("SPS parsed (id: %d)", sps.id);
++    ALOGV("SPS parsed (id: %d)", sps.id);
+ 
+     if (!processSPS(sps)) {
+         ALOGW("Failed to process SPS");
+@@ -271,9 +271,9 @@ bool H264Decoder::processSPS(const H264SPS &sps) {
+     bool interlaced;
+ 
+     if (sps.mbAdaptiveFrameFieldFlag) {
+-        ALOGI("mb_adaptive_frame_field_flag == 1, MBAFF sequence");
++        ALOGV("mb_adaptive_frame_field_flag == 1, MBAFF sequence");
+     } else {
+-        ALOGI("mb_adaptive_frame_field_flag == 0, PAFF sequence");
++        ALOGV("mb_adaptive_frame_field_flag == 0, PAFF sequence");
+     }
+ 
+     interlaced = !sps.frameMBSOnlyFlag;
+@@ -360,7 +360,7 @@ bool H264Decoder::parsePPS(const H264NalUnit &nalu) {
+         return false;
+     }
+ 
+-    ALOGI("PPS parsed");
++    ALOGV("PPS parsed");
+ 
+     if (pps.numSliceGroupsMinus1 > 0) {
+         ALOGW("FMO is not supported");
+@@ -576,7 +576,7 @@ bool H264Decoder::decodeSlice() {
+     }
+     const H264PicturePtr &picture = mCurrentPicture;
+ 
+-    ALOGI("Decode picture %p (frame_num %d, poc %d)", mCurrentPicture.get(),
++    ALOGV("Decode picture %p (frame_num %d, poc %d)", mCurrentPicture.get(),
+             mCurrentPicture->frameNum, mCurrentPicture->picOrderCnt);
+ 
+     mMaxPicNum = mCurrentSlice.header.maxPicNum;
+@@ -622,7 +622,7 @@ bool H264Decoder::handleMemoryManagementOpt(const H264PicturePtr &picture) {
+ 
+         uint8_t type = refPicMarking.memoryManagementControlOperation;
+ 
+-        ALOGI("memory management operation %d, type %d", i, type);
++        ALOGV("memory management operation %d, type %d", i, type);
+ 
+         /* Normal end of operations' specification */
+         if (type == 0)
+@@ -691,7 +691,7 @@ bool H264Decoder::slidingWindowPictureMarking(const H264PicturePtr &picture) {
+             return false;
+         }
+ 
+-        ALOGI("Unmark reference flag of picture %p (frame_num %d, poc %d)",
++        ALOGV("Unmark reference flag of picture %p (frame_num %d, poc %d)",
+                 toUnmark.get(), toUnmark->frameNum, toUnmark->picOrderCnt);
+ 
+         toUnmark->setReference(H264Picture::None, true);
+@@ -767,7 +767,7 @@ H264DPB::BumpMode H264Decoder::getBumpLevel() const {
+ bool H264Decoder::doOutputPicture(const H264PicturePtr &picture) {
+     uint32_t lastOutputPoc;
+ 
+-    ALOGI("Outputting picture %p (frame_num %d, poc %d)",
++    ALOGV("Outputting picture %p (frame_num %d, poc %d)",
+             picture.get(), picture->frameNum, picture->picOrderCnt);
+ 
+     lastOutputPoc = mDPB.getLastOutputPoc();
+@@ -871,7 +871,7 @@ bool H264Decoder::outputPictureDirectly(const H264PicturePtr &picture) {
+             goto output;
+         }
+ 
+-        ALOGI("Pair the last field %p poc:%d and the current field %p poc:%d",
++        ALOGV("Pair the last field %p poc:%d and the current field %p poc:%d",
+                 mLastField.get(), mLastField->picOrderCnt,
+                 picture.get(), picture->picOrderCnt);
+ 
+@@ -917,7 +917,7 @@ bool H264Decoder::finishPicture(const H264PicturePtr &picture) {
+     bool res = true;
+     bool aux = true;
+     if (picture->memMgmt5) {
+-        ALOGI("Memory management type 5, drain the DPB");
++        ALOGV("Memory management type 5, drain the DPB");
+ 
+         aux = drainInternal();
+         UPDATE_FLOW_RET(res, aux);
+@@ -1076,18 +1076,18 @@ bool H264Decoder::handleFrameNumGap(int frameNum) {
+     }
+ 
+     if (mPrevRefFrameNum == frameNum) {
+-        ALOGI("frame_num == PrevRefFrameNum (%d), not a gap", frameNum);
++        ALOGV("frame_num == PrevRefFrameNum (%d), not a gap", frameNum);
+         return true;
+     }
+ 
+     if (((mPrevRefFrameNum + 1) % mMaxFrameNum) == frameNum) {
+-        ALOGI("frame_num == (PrevRefFrameNum + 1) %% MaxFramNum (%d), not a gap",
++        ALOGV("frame_num == (PrevRefFrameNum + 1) %% MaxFramNum (%d), not a gap",
+                 frameNum);
+         return true;
+     }
+ 
+     if (mDPB.getSize() == 0) {
+-        ALOGI("DPB is empty, not a gap");
++        ALOGV("DPB is empty, not a gap");
+         return true;
+     }
+ 
+@@ -1099,7 +1099,7 @@ bool H264Decoder::handleFrameNumGap(int frameNum) {
+         return true;
+     }
+ 
+-    ALOGI("Handling frame num gap %d -> %d (MaxFramNum: %d)",
++    ALOGV("Handling frame num gap %d -> %d (MaxFramNum: %d)",
+             mPrevRefFrameNum, frameNum, mMaxFrameNum);
+ 
+     /* 7.4.3/7-23 */
+@@ -1842,7 +1842,7 @@ bool H264Decoder::parseSlice(const H264NalUnit &nalu) {
+         }
+ 
+         if (curField != prevField) {
+-            ALOGI("Found new field picture, finishing the first field picture");
++            ALOGV("Found new field picture, finishing the first field picture");
+             ret = finishCurrentPicture();
+         }
+     }
+diff --git a/components/h264/V4L2H264Decoder.cpp b/components/h264/V4L2H264Decoder.cpp
+index 2486a8f..4ec8e83 100644
+--- a/components/h264/V4L2H264Decoder.cpp
++++ b/components/h264/V4L2H264Decoder.cpp
+@@ -341,19 +341,19 @@ bool V4L2H264Decoder::newSequence(const H264SPS &sps, int maxDPBSize) {
+     if (mInterlaced != interlaced) {
+         mInterlaced = interlaced;
+         negotiationNeeded = true;
+-        ALOGI("Interlaced mode changed to %d", interlaced);
++        ALOGV("Interlaced mode changed to %d", interlaced);
+     }
+ 
+     if (mBitdepth != sps.bitDepthLumaMinus8 + 8) {
+         mBitdepth = sps.bitDepthLumaMinus8 + 8;
+         negotiationNeeded = true;
+-        ALOGI("Bitdepth changed to %u", mBitdepth);
++        ALOGV("Bitdepth changed to %u", mBitdepth);
+     }
+ 
+     if (mChromaFormatIDC != sps.chromaFormatIDC) {
+         mChromaFormatIDC = sps.chromaFormatIDC;
+         negotiationNeeded = true;
+-        ALOGI("Chroma format changed to %i", mChromaFormatIDC);
++        ALOGV("Chroma format changed to %i", mChromaFormatIDC);
+     }
+ 
+     fillSequence(sps);
+@@ -387,7 +387,7 @@ bool V4L2H264Decoder::newFieldPicture(const H264PicturePtr &firstField,
+         return true;
+     }
+ 
+-    ALOGD("Assigned request %p to second field.", firstField->userData.get());
++    ALOGV("Assigned request %p to second field.", firstField->userData.get());
+ 
+     /* Associate the previous request with the new picture so that
+      * submit_bitstream can create sub-request */
+diff --git a/components/h264/parser/H264DPB.cpp b/components/h264/parser/H264DPB.cpp
+index 3a44098..7917505 100644
+--- a/components/h264/parser/H264DPB.cpp
++++ b/components/h264/parser/H264DPB.cpp
+@@ -106,7 +106,7 @@ void H264DPB::add(const H264PicturePtr &picture) {
+ 
+     /* The IDR frame or mem_mgmt_5 */
+     if (picture->picOrderCnt == 0) {
+-        ALOGD("last_output_poc reset because of IDR or mem_mgmt_5");
++        ALOGV("last_output_poc reset because of IDR or mem_mgmt_5");
+         mLastOutputPoc = std::numeric_limits<int32_t>::min();
+         mLastOutputNonRef = false;
+     }
+@@ -117,7 +117,7 @@ void H264DPB::deleteUnused() {
+         std::shared_ptr<H264Picture> picture = *it;
+ 
+         if (!picture->neededForOutput && picture->ref == H264Picture::None) {
+-            ALOGD("remove picture %p (frame num: %d, poc: %d, field: %d) from dpb",
++            ALOGV("remove picture %p (frame num: %d, poc: %d, field: %d) from dpb",
+                 picture.get(), picture->frameNum, picture->picOrderCnt, picture->field);
+             it = mPicList.erase(it);
+         } else {
+@@ -337,7 +337,7 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+ 
+         /* In case of POC type 2, decoding order is equal to output order*/
+         if (picture->picOrderCntType == 2) {
+-            ALOGD("POC type == 2, bumping");
++            ALOGV("POC type == 2, bumping");
+             return true;
+         }
+ 
+@@ -345,7 +345,7 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+             in consecutive access units in decoding order containing non-reference
+             pictures shall be non-decreasing. Safe. */
+         if (mLastOutputNonRef && !isRefPicture) {
+-            ALOGD("COntinious non-reference frame poc: %d -> %d,"
++            ALOGV("COntinious non-reference frame poc: %d -> %d,"
+                   " bumping for low-latency", mLastOutputPoc, lowestPoc);
+             return true;
+         }
+@@ -363,7 +363,7 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+             }
+ 
+             if (needOutput >= mMaxNumReorderFrames) {
+-                ALOGD("frame with lowest poc %d has %d preced frame, already"
++                ALOGV("frame with lowest poc %d has %d preced frame, already"
+                       " satisfy num_reorder_frames %d, bumping for low-latency.",
+                         mLastOutputPoc, lowestIndex, mMaxNumReorderFrames);
+                 return true;
+@@ -374,7 +374,7 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+           POC. It's even impossible to insert another negative POC after the
+           positive POCs. Almost safe. */
+         if (toInsert && toInsert->picOrderCnt > 0 && lowestPoc < 0) {
+-            ALOGD("The negative poc %d, bumping for low-latency.", lowestPoc);
++            ALOGV("The negative poc %d, bumping for low-latency.", lowestPoc);
+             return true;
+         }
+ 
+@@ -384,25 +384,25 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+          * POC order. Bump and should be safe.*/
+         if (lowestPoc == 0 && getSize() <= 1) {
+             if (toInsert && toInsert->picOrderCnt > lowestPoc) {
+-                ALOGD("The IDR or mem_mgmt_5 frame, bumping for low-latency.");
++                ALOGV("The IDR or mem_mgmt_5 frame, bumping for low-latency.");
+                 return true;
+             }
+ 
+-            ALOGD("The IDR or mem_mgmt_5 frmae is not the first frame.");
++            ALOGV("The IDR or mem_mgmt_5 frmae is not the first frame.");
+             goto normal_bump;
+         }
+ 
+         /* When non-ref frame has the lowest POC, it's unlike to insert another
+          * ref frame with very small POC. Bump and should be sage. */
+         if (!isRefPicture) {
+-            ALOGD("non ref with lowest-poc: %d bumping for low-latency", lowestPoc);
++            ALOGV("non ref with lowest-poc: %d bumping for low-latency", lowestPoc);
+             return true;
+         }
+ 
+         /* When insert non-ref frame with bigger POC, it's unlike to insert
+          * another ref frame with very small POC. Bump and should be sage. */
+         if (toInsert && !toInsert->refPic && lowestPoc < toInsert->picOrderCnt) {
+-            ALOGD("lowest-poc: %d < to insert non ref pic: %d, bumping "
++            ALOGV("lowest-poc: %d < to insert non ref pic: %d, bumping "
+                   "for low-latency", lowestPoc, toInsert->picOrderCnt);
+             return true;
+         }
+@@ -417,7 +417,7 @@ bool H264DPB::needsBump(const H264PicturePtr &toInsert, BumpMode latencyMode) co
+                 This can cause picture disorder. Most stream in practice has the
+                 2 poc increment, but this may have risk and be careful. */
+             if (lowestPoc > mLastOutputPoc && lowestPoc - mLastOutputPoc <= 2) {
+-                ALOGD("lowest-poc: %d, last-output-poc: %d, diff <= 2 "
++                ALOGV("lowest-poc: %d, last-output-poc: %d, diff <= 2 "
+                       "bumping for very-low-latency", lowestPoc, mLastOutputPoc);
+                 return true;
+             }
+@@ -436,23 +436,23 @@ normal_bump:
+        marked as "needed for output" that precede the current non-reference
+        picture in output order. */
+     if (hasEmptyFrameBuffer()) {
+-        ALOGD("DPB has empty frame buffer, no need bumping");
++        ALOGV("DPB has empty frame buffer, no need bumping");
+         return false;
+     }
+ 
+     if (toInsert && toInsert->refPic) {
+-        ALOGD("No empty frame buffer for ref frame, need bumping");
++        ALOGV("No empty frame buffer for ref frame, need bumping");
+         return true;
+     }
+ 
+     if (toInsert && toInsert->picOrderCnt > lowestPoc) {
+-        ALOGD("No empty frame buffer, lowest poc %d < current poc %d,"
++        ALOGV("No empty frame buffer, lowest poc %d < current poc %d,"
+               " need bumping.", lowestPoc, toInsert->picOrderCnt);
+         return true;
+     }
+ 
+     if (toInsert) {
+-        ALOGD("No empty frame buffer, but lowest poc %d > current poc %d,"
++        ALOGV("No empty frame buffer, but lowest poc %d > current poc %d,"
+               " no need bumping.", lowestPoc, toInsert->picOrderCnt);
+     }
+ 
+@@ -548,7 +548,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+         const H264PicturePtr &other = getShortRefByPicNum(picNumX);
+         if (other) {
+             other->setReference(H264Picture::None, picture->field == H264Picture::Frame);
+-            ALOGD("MMCO-1: unmark short-term ref picture %p, (poc %d)",
++            ALOGV("MMCO-1: unmark short-term ref picture %p, (poc %d)",
+                     other.get(), other->picOrderCnt);
+         } else {
+             ALOGW("Invalid picNumX %d for operation type 1", picNumX);
+@@ -563,7 +563,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+         const H264PicturePtr &other = getLongRefByLongTermPicNum(refPicMarking.longTermPicNum);
+         if (other) {
+             other->setReference(H264Picture::None, false);
+-            ALOGD("MMCO-2: unmark long-term ref picture %p, (poc %d)",
++            ALOGV("MMCO-2: unmark long-term ref picture %p, (poc %d)",
+                     other.get(), other->picOrderCnt);
+         } else {
+             ALOGW("Invalid LongTermPicNum %d for operation type 2",
+@@ -593,7 +593,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+                      * "unused for reference"
+                      */
+                     tmp->setReference(H264Picture::None, true);
+-                    ALOGD("MMCO-3: unmark old long-term frame %p (poc %d)",
++                    ALOGV("MMCO-3: unmark old long-term frame %p (poc %d)",
+                             tmp.get(), tmp->picOrderCnt);
+                 } else if (tmp->otherField &&
+                             tmp->otherField->field == H264Picture::LongTerm &&
+@@ -605,7 +605,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+                      * reference"
+                      */
+                     tmp->setReference(H264Picture::None, true);
+-                    ALOGD("MMCO-3: unmark old long-term field-pair %p (poc %d)",
++                    ALOGV("MMCO-3: unmark old long-term field-pair %p (poc %d)",
+                             tmp.get(), tmp->picOrderCnt);
+                 } else {
+                     /* When long_term_frame_idx is already assigned to a
+@@ -623,12 +623,12 @@ bool H264DPB::performMemoryManagementControlOperation(
+                      * must not be identical picture */
+                     if (!tmp->otherField) {
+                         tmp->setReference(H264Picture::None, false);
+-                        ALOGD("MMCO-3: unmark old long-term field %p (poc %d)",
++                        ALOGV("MMCO-3: unmark old long-term field %p (poc %d)",
+                                 tmp.get(), tmp->picOrderCnt);
+                     } else if (tmp->otherField != other &&
+                                 (!other->otherField || other->otherField != tmp)) {
+                         tmp->setReference(H264Picture::None, false);
+-                        ALOGD("MMCO-3: unmark old long-term field %p (poc %d)",
++                        ALOGV("MMCO-3: unmark old long-term field %p (poc %d)",
+                                 tmp.get(), tmp->picOrderCnt);
+                     }
+                 }
+@@ -639,7 +639,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+         other->setReference(H264Picture::LongTerm, picture->field == H264Picture::Frame);
+         other->longTermFrameIdx = refPicMarking.longTermFrameIdx;
+ 
+-        ALOGD("MMCO-3: mark long-term ref pic %p, index %d, (poc %d)",
++        ALOGV("MMCO-3: mark long-term ref pic %p, index %d, (poc %d)",
+                 other.get(), other->longTermFrameIdx, other->picOrderCnt);
+ 
+         if (other->otherField && other->otherField->ref == H264Picture::LongTerm) {
+@@ -654,13 +654,13 @@ bool H264DPB::performMemoryManagementControlOperation(
+          * long-term reference" are marked as "unused for reference */
+         int maxLongTermFrameIdx = refPicMarking.maxLongTermFrameIdxPlus1 - 1;
+ 
+-        ALOGD("MMCO-4: max_long_term_frame_idx %d", maxLongTermFrameIdx);
++        ALOGV("MMCO-4: max_long_term_frame_idx %d", maxLongTermFrameIdx);
+ 
+         for (const H264PicturePtr &other : mPicList) {
+             if (other->ref == H264Picture::LongTerm &&
+                     other->longTermFrameIdx > maxLongTermFrameIdx) {
+                 other->setReference(H264Picture::None, false);
+-                ALOGD("MMCO-4: unmark long-term ref pic %p, index %d, (poc %d)",
++                ALOGV("MMCO-4: unmark long-term ref pic %p, index %d, (poc %d)",
+                         other.get(), other->longTermFrameIdx, other->picOrderCnt);
+             }
+         }
+@@ -705,7 +705,7 @@ bool H264DPB::performMemoryManagementControlOperation(
+         for (const H264PicturePtr &other : mPicList) {
+             if (other->ref == H264Picture::LongTerm &&
+                     other->longTermFrameIdx == refPicMarking.longTermFrameIdx) {
+-                ALOGD("MMCO-6: unmark old long-term ref pic %p (poc %d)",
++                ALOGV("MMCO-6: unmark old long-term ref pic %p (poc %d)",
+                         other.get(), other->picOrderCnt);
+                 other->setReference(H264Picture::None, true);
+                 break;
+diff --git a/components/h264/parser/H264Parser.cpp b/components/h264/parser/H264Parser.cpp
+index 50f3d9f..0604a1a 100644
+--- a/components/h264/parser/H264Parser.cpp
++++ b/components/h264/parser/H264Parser.cpp
+@@ -205,7 +205,7 @@ static bool parseNaluHeader(H264NalUnit *nalu) {
+         break;
+     }
+ 
+-    ALOGI("Nal type %u, ref_idc %u", nalu->type, nalu->refIDC);
++    ALOGV("Nal type %u, ref_idc %u", nalu->type, nalu->refIDC);
+     return true;
+ }
+ 
+@@ -214,14 +214,14 @@ static H264Parser::Result identifyNaluUnchecked(const uint8_t *data,
+     int off1;
+ 
+     if (size < offset + 4) {
+-        ALOGI("Can't parse, buffer has too small size %zu, offset %u",
++        ALOGV("Can't parse, buffer has too small size %zu, offset %u",
+             size, offset);
+         return H264Parser::Error;
+     }
+ 
+     off1 = scanForStartCodes(data + offset, size - offset);
+     if (off1 < 0) {
+-        ALOGI("No start code prefix in this buffer");
++        ALOGV("No start code prefix in this buffer");
+         return H264Parser::NoNal;
+     }
+ 
+@@ -236,7 +236,7 @@ static H264Parser::Result identifyNaluUnchecked(const uint8_t *data,
+     nalu->size = size - nalu->offset;
+ 
+     if (!parseNaluHeader(nalu)) {
+-        ALOGI("not enough data to parse \"NAL unit header\"");
++        ALOGV("not enough data to parse \"NAL unit header\"");
+         nalu->size = 0;
+         return H264Parser::NoNal;
+     }
+@@ -245,7 +245,7 @@ static H264Parser::Result identifyNaluUnchecked(const uint8_t *data,
+ 
+     if (nalu->type == H264NalUnit::SeqEnd ||
+         nalu->type == H264NalUnit::StreamEnd) {
+-        ALOGI("end-of-seq or end-of-stream nal found");
++        ALOGV("end-of-seq or end-of-stream nal found");
+         nalu->size = 1;
+         return H264Parser::Ok;
+     }
+@@ -255,7 +255,7 @@ static H264Parser::Result identifyNaluUnchecked(const uint8_t *data,
+ 
+ H264Parser::Result H264Parser::identifyNalu(const uint8_t *data,
+         unsigned int offset, size_t size, H264NalUnit *nalu) {
+-    ALOGI("Identifying Nalu...");
++    ALOGV("Identifying Nalu...");
+ 
+     Result res;
+     int off2;
+@@ -289,7 +289,7 @@ H264Parser::Result H264Parser::identifyNalu(const uint8_t *data,
+     if (nalu->size < 2)
+         return BrokenData;
+ 
+-    ALOGI("Complete nal found. Off: %d, Size: %d", nalu->offset, nalu->size);
++    ALOGV("Complete nal found. Off: %d, Size: %d", nalu->offset, nalu->size);
+ 
+ beach:
+     return res;
+@@ -297,7 +297,7 @@ beach:
+ 
+ static bool parseHRDParameters(H264HRDParams *hrd, NalReader *nr) {
+         unsigned int schedSelIdx;
+-    ALOGI("parsing \"HRD Parameters\"");
++    ALOGV("parsing \"HRD Parameters\"");
+ 
+     READ_UE_MAX(nr, hrd->cpbCntMinus1, 31);
+     READ(nr, hrd->bitRateScale, 4);
+@@ -324,7 +324,7 @@ error:
+ static bool parseVUIParameters(H264SPS *sps, NalReader *nr) {
+     H264VUIParams *vui = &sps->vuiParameters;
+ 
+-    ALOGI("parsing \"VUI Parameters\"");
++    ALOGV("parsing \"VUI Parameters\"");
+ 
+     /* set default values for fields that might not be present in the bitstream
+        and have valid defaults */
+@@ -435,7 +435,7 @@ static bool parseScalingList(NalReader *nr,
+         default8x8Intra, default8x8Inter
+     };
+ 
+-    ALOGI("parsing scaling lists");
++    ALOGV("parsing scaling lists");
+ 
+     for (i = 0; i < 12; i++) {
+         bool useDefault = false;
+@@ -601,7 +601,7 @@ static bool h264SliceParseDecRefPicMarking(H264SliceHdr *slice,
+     H264DecRefPicMarking *decRefPicM;
+     unsigned int startPos, startEPB;
+ 
+-    ALOGI("parsing \"Decoded reference picture marking\"");
++    ALOGV("parsing \"Decoded reference picture marking\"");
+ 
+     startPos = nr->getPos();
+     startEPB = nr->getEPBCount();
+@@ -665,7 +665,7 @@ static bool h264SliceParsePredWeightTable(H264SliceHdr *slice,
+     int16_t defaultLumaWeight, defaultChromaWeight;
+     int i;
+ 
+-    ALOGI("parsing \"Prediction weight table\"");
++    ALOGV("parsing \"Prediction weight table\"");
+ 
+     p = &slice->predWeightTable;
+ 
+@@ -753,7 +753,7 @@ H264Parser::Result H264Parser::parseBufferingPeriod(H264BufferingPeriod *per,
+     H264SPS *sps;
+     uint8_t spsId;
+ 
+-    ALOGI("parsing \"Buffering period\"");
++    ALOGV("parsing \"Buffering period\"");
+ 
+     READ_UE_MAX(nr, spsId, H264_MAX_SPS_COUNT - 1);
+     sps = getSPS(spsId);
+@@ -803,7 +803,7 @@ error:
+ 
+ static bool h264ParseClockTimestamp(H264ClockTimestamp * tim,
+         uint8_t timeOffsetLength, NalReader *nr) {
+-    ALOGI("parsing \"Clock timestamp\"");
++    ALOGV("parsing \"Clock timestamp\"");
+ 
+     /* default values */
+     tim->timeOffset = 0;
+@@ -853,7 +853,7 @@ H264Parser::Result H264Parser::parsePicTiming(H264PicTiming *tim,
+         NalReader * nr) {
+     Result error = Error;
+ 
+-    ALOGI("parsing \"Picture timing\"");
++    ALOGV("parsing \"Picture timing\"");
+     if (!mLastSPS || !mLastSPS->valid) {
+         ALOGW("didn't get the associated sequence parameter set for the "
+                 "current access unit");
+@@ -1007,7 +1007,7 @@ error:
+ H264Parser::Result H264Parser::parseRecoveryPoint(H264RecoveryPoint *rp, NalReader *nr) {
+     H264SPS *const sps = mLastSPS;
+ 
+-    ALOGI("parsing \"Recovery point\"");
++    ALOGV("parsing \"Recovery point\"");
+     if (!sps || !sps->valid) {
+         ALOGW("didn't get the associated sequence parameter set for the "
+                 "current access unit");
+@@ -1029,7 +1029,7 @@ error:
+ /* Parse SEI stereo_video_info() message */
+ H264Parser::Result H264Parser::parseStereoVideoInfo(H264StereoVideoInfo *info,
+         NalReader *nr) {
+-    ALOGI("parsing \"Stereo Video info\"");
++    ALOGV("parsing \"Stereo Video info\"");
+ 
+     READ(nr, info->fieldViewsFlag, 1);
+     if (info->fieldViewsFlag) {
+@@ -1054,7 +1054,7 @@ H264Parser::Result H264Parser::parseFramePacking(H264FramePacking *framePacking,
+     uint8_t framePackingExtensionFlag;
+     unsigned int startPos;
+ 
+-    ALOGI("parsing \"Frame Packing Arrangement\"");
++    ALOGV("parsing \"Frame Packing Arrangement\"");
+ 
+     startPos = nr->getPos();
+     READ_UE(nr, framePacking->framePackingId);
+@@ -1107,7 +1107,7 @@ H264Parser::Result H264Parser::parseMasteringDisplayColourVolume(
+         H264MasteringDisplayColourVolume *mdcv, NalReader *nr) {
+     unsigned int i;
+ 
+-    ALOGI("parsing \"Mastering display colour volume\"");
++    ALOGV("parsing \"Mastering display colour volume\"");
+ 
+     for (i = 0; i < 3; i++) {
+         READ(nr, mdcv->displayPrimariesX[i], 16);
+@@ -1128,7 +1128,7 @@ error:
+ 
+ H264Parser::Result H264Parser::parseContentLightLevelInfo(
+         H264ContentLightLevel *cll, NalReader *nr) {
+-    ALOGI("parsing \"Content light level\"");
++    ALOGV("parsing \"Content light level\"");
+ 
+     READ(nr, cll->maxContentLightLevel, 16);
+     READ(nr, cll->maxPicAverageLightLevel, 16);
+@@ -1171,7 +1171,7 @@ H264Parser::Result H264Parser::parseSEIMessage(NalReader *nr,
+     unsigned int remaining, payloadSize, next;
+     H264Parser::Result res;
+ 
+-    ALOGI("parsing \"SEI message\"");
++    ALOGV("parsing \"SEI message\"");
+ 
+     do {
+         READ(nr, payloadTypeByte, 8);
+@@ -1190,7 +1190,7 @@ H264Parser::Result H264Parser::parseSEIMessage(NalReader *nr,
+     payloadSize = aux * 8 < remaining ? aux * 8 : remaining;
+     next = nr->getPos() + payloadSize;
+ 
+-    ALOGI("SEI message received: payloadType  %u, payloadSize = %u bits",
++    ALOGV("SEI message received: payloadType  %u, payloadSize = %u bits",
+             sei->payloadType, payloadSize);
+ 
+     switch (sei->payloadType) {
+@@ -1465,7 +1465,7 @@ static bool parseSPSData(NalReader *nr, H264SPS *sps) {
+         sps->cropRectX = sps->frameCropLeftOffset * cropUnitX;
+         sps->cropRectY = sps->frameCropTopOffset * cropUnitY;
+ 
+-        ALOGI("crop_rectangle x=%u y=%u width=%u, height=%u", sps->cropRectX,
++        ALOGV("crop_rectangle x=%u y=%u width=%u, height=%u", sps->cropRectX,
+               sps->cropRectY, width, height);
+     }
+ 
+@@ -1479,7 +1479,7 @@ error:
+ }
+ 
+ H264Parser::Result H264Parser::parseSPS(const H264NalUnit &nalu, H264SPS *sps) {
+-    ALOGI("parsing SPS");
++    ALOGV("parsing SPS");
+ 
+     NalReader nr(nalu.data + nalu.offset + nalu.headerBytes,
+                  nalu.size - nalu.headerBytes);
+@@ -1502,7 +1502,7 @@ H264Parser::Result H264Parser::parsePPS(const H264NalUnit &nalu, H264PPS *pps) {
+     int spsId;
+     int qpBdOffset;
+ 
+-    ALOGI("parsing PPS");
++    ALOGV("parsing PPS");
+ 
+     NalReader nr(nalu.data + nalu.offset + nalu.headerBytes,
+                  nalu.size - nalu.headerBytes);
+@@ -1802,7 +1802,7 @@ error:
+ 
+ H264Parser::Result H264Parser::parseSEI(
+         const H264NalUnit &nalu, std::vector<H264SEIMessage> *messages) {
+-    ALOGI("parsing SEI nal");
++    ALOGV("parsing SEI nal");
+ 
+     if (messages == nullptr)
+         return Error;
+@@ -1834,7 +1834,7 @@ H264Parser::Result H264Parser::updateSPS(const H264SPS &sps) {
+         return Error;
+     }
+ 
+-    ALOGI("Updating sequence parameter set with id: %d", sps.id);
++    ALOGV("Updating sequence parameter set with id: %d", sps.id);
+ 
+     mSPS[sps.id] = sps;
+     mLastSPS = &mSPS[sps.id];
+@@ -1866,7 +1866,7 @@ H264Parser::Result H264Parser::updatePPS(const H264PPS &pps) {
+         return BrokenLink;
+     }
+ 
+-    ALOGI("Updating picture parameter set with id: %d", pps.id);
++    ALOGV("Updating picture parameter set with id: %d", pps.id);
+ 
+     mPPS[pps.id] = pps;
+     mLastPPS = &mPPS[pps.id];
+diff --git a/components/vp8/VP8Decoder.cpp b/components/vp8/VP8Decoder.cpp
+index 68f46bd..3f6de16 100644
+--- a/components/vp8/VP8Decoder.cpp
++++ b/components/vp8/VP8Decoder.cpp
+@@ -149,7 +149,7 @@ namespace android {
+ 
+     void VP8Decoder::flush (void)
+     {
+-        ALOGD("flush");
++        ALOGV("flush");
+ 
+         reset();
+     }
+-- 
+2.34.1
+

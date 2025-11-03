@@ -16,6 +16,9 @@ type sysfs_i2c, fs_type, sysfs_type;
 # Type useful for USB
 type sysfs_udc, fs_type, sysfs_type;
 
+# /vendor/firmware
+type vendor_firmware_file, vendor_file_type, file_type;
+
 # Type for /data/vendor/swapfile
 type swap_data_file, file_type, data_file_type;
 
@@ -27,6 +30,9 @@ type sysfs_remoteproc, fs_type, sysfs_type;
 
 # Type useful for rifsc
 type sysfs_rifsc, fs_type, sysfs_type;
+
+# Type useful for hdmi
+type sysfs_hdmi, fs_type, sysfs_type;
 
 # Type useful for init
 type sysfs_blocktuning, fs_type, sysfs_type;

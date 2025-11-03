@@ -91,6 +91,8 @@ vendor.VIV_VX_VIP_AXI_ID0_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
 vendor.VIV_VX_VIP_AXI_ID1_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
 vendor.VIV_VX_VIP_AXI_ID2_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
 vendor.VIV_VX_VIP_AXI_ID3_MIN_AXI_BURST_SIZE  u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_LATENCY_HIDING            u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VX_CORE_DELAY_CYCLE          u:object_r:vendor_graphics_prop:s0
 vendor.VIV_OVX_MULTI_DEVICES            u:object_r:vendor_graphics_prop:s0
 vendor.2D_DUMP_LEVEL                    u:object_r:vendor_graphics_prop:s0
 vendor.VIV_DUMP_FRAME_TGA               u:object_r:vendor_graphics_prop:s0
@@ -99,11 +101,18 @@ vendor.VIV_GRAPHICS_CARD_ID             u:object_r:vendor_graphics_prop:s0
 vendor.VP_ENABLE_DEBUG_COUNTER          u:object_r:vendor_graphics_prop:s0
 vendor.VP_SUPPORT_FPGA_COUNTER          u:object_r:vendor_graphics_prop:s0
 vendor.VP_SUPPORT_L2_COUNTER            u:object_r:vendor_graphics_prop:s0
+vendor.VP_SUPPORT_DX11_COUNTER          u:object_r:vendor_graphics_prop:s0
 vendor.USE_DECONV_MODE_SW               u:object_r:vendor_graphics_prop:s0
 vendor.GAL_DEVICE_NAME                  u:object_r:vendor_graphics_prop:s0
 vendor.OCL_USC_CACHE_RATIO              u:object_r:vendor_graphics_prop:s0
 vendor.TMPDIR                           u:object_r:vendor_graphics_prop:s0
 vendor.VIV_LIB_SHADER_DIR               u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_PERDRAWDUMP           u:object_r:vendor_graphics_prop:s0
+vendor.VIV_ENABLE_DUAL16                u:object_r:vendor_graphics_prop:s0
+vendor.VIV_USE_CONSTREG_FOR_UBO         u:object_r:vendor_graphics_prop:s0
+vendor.VIV_VK_USE_MULTI_DEVICE          u:object_r:vendor_graphics_prop:s0
+vendor.VIV_CMD_BUFFER_SIZE              u:object_r:vendor_graphics_prop:s0
+vendor.sys.hwc.disable                  u:object_r:vendor_graphics_prop:s0
 
 ro.boot.soc_type                        u:object_r:vendor_graphics_prop:s0
 ro.boot.soc_rev                         u:object_r:vendor_graphics_prop:s0
@@ -138,3 +147,8 @@ vendor.wlan.firmware.version            u:object_r:vendor_wifi_prop:s0
 # list of USB hal properties
 vendor.usb.ncm.config                   u:object_r:vendor_usb_prop:s0
 vendor.usb.rndis.config                 u:object_r:vendor_usb_prop:s0
+
+# hdmi
+persist.vendor.hdmi.cec_device          u:object_r:vendor_hdmi_config_prop:s0
+ro.vendor.hdmi.cec_version              u:object_r:vendor_hdmi_config_prop:s0
+ro.vendor.hdmi.vendor_id                u:object_r:vendor_hdmi_config_prop:s0

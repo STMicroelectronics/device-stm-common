@@ -1,0 +1,27 @@
+From 76b553c93bdf2791cc93feae5003bb1ecbf76168 Mon Sep 17 00:00:00 2001
+From: Akilesh Kailash <akailash@google.com>
+Date: Tue, 07 Nov 2023 21:02:50 -0800
+Subject: [PATCH] init: Start snapuserd_proxy after early-init
+
+When service is started prior to early init and if per-app memcg is enabled, service start will fail as the required directories for memcg isn't present viz /dev/memcg/apps.
+
+Bug: 308818430
+Test: th and CF OTA test with per-app memcg enabled
+Change-Id: Ic65e8d179fbfb8e2135f2de5cc7c77d6c29ea7d2
+Signed-off-by: Akilesh Kailash <akailash@google.com>
+---
+
+diff --git a/init/init.cpp b/init/init.cpp
+index 0439d22..83cb78b 100644
+--- a/init/init.cpp
++++ b/init/init.cpp
+@@ -1085,8 +1085,8 @@
+     am.QueueBuiltinAction(SetupCgroupsAction, "SetupCgroups");
+     am.QueueBuiltinAction(SetKptrRestrictAction, "SetKptrRestrict");
+     am.QueueBuiltinAction(TestPerfEventSelinuxAction, "TestPerfEventSelinux");
+-    am.QueueBuiltinAction(ConnectEarlyStageSnapuserdAction, "ConnectEarlyStageSnapuserd");
+     am.QueueEventTrigger("early-init");
++    am.QueueBuiltinAction(ConnectEarlyStageSnapuserdAction, "ConnectEarlyStageSnapuserd");
+ 
+     // Queue an action that waits for coldboot done so we know ueventd has set up all of /dev...
+     am.QueueBuiltinAction(wait_for_coldboot_done_action, "wait_for_coldboot_done");

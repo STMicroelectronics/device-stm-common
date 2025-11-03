@@ -60,4 +60,5 @@ userdebug_or_eng(`
   dontaudit flags_health_check net_dns_prop:file { getattr map open };
   dontaudit flags_health_check nnapi_ext_deny_product_prop:file { getattr map open };
   dontaudit flags_health_check oem_unlock_prop:file { getattr map open };
+  dontaudit flags_health_check vendor_hdmi_config_prop:file { getattr map open };
 ')

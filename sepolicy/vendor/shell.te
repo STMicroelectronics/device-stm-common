@@ -109,6 +109,7 @@ dontaudit shell {
   aac_drc_prop
   adaptive_haptics_prop
   apexd_config_prop
+  vendor_hdmi_config_prop
 }:file { getattr map open };
 
 dontaudit shell {

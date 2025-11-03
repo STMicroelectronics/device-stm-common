@@ -1,37 +1,14 @@
-From bf2fba5340d1e62a5c705260d293c6df0015f371 Mon Sep 17 00:00:00 2001
+From e9643d3661627600a98c9d28dc6e8f8e50da94e2 Mon Sep 17 00:00:00 2001
 From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
-Date: Wed, 27 Mar 2024 11:12:02 +0100
-Subject: [PATCH] Add License information
+Date: Mon, 22 Sep 2025 16:01:16 +0200
+Subject: [PATCH] Add missing LICENSE file
 
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 ---
- Android.bp | 15 +++++++++++++++
- LICENSE    | 17 +++++++++++++++++
- 2 files changed, 32 insertions(+)
+ LICENSE | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
  create mode 100644 LICENSE
 
-diff --git a/Android.bp b/Android.bp
-index 41f5ae9..d902321 100644
---- a/Android.bp
-+++ b/Android.bp
-@@ -1,3 +1,18 @@
-+package {
-+    default_applicable_licenses: ["proprietary_graphics_license"],
-+}
-+
-+license {
-+    name: "proprietary_graphics_license",
-+    visibility: [":__subpackages__"],
-+    license_kinds: [
-+        "legacy_proprietary",
-+    ],
-+    license_text: [
-+        "LICENSE",
-+    ],
-+}
-+
- // libdrm Vivante
- cc_prebuilt_library_shared {
-     srcs: ["libdrm_vivante.so"],
 diff --git a/LICENSE b/LICENSE
 new file mode 100644
 index 0000000..26f1f73

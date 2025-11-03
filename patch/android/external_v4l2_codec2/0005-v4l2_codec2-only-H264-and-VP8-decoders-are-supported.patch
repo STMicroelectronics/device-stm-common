@@ -1,0 +1,32 @@
+From f71ddd79cd4d12c8919c3d9d20dfc4969b394338 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Tue, 7 Jan 2025 16:33:17 +0100
+Subject: [PATCH] v4l2_codec2: only H264 and VP8 decoders are supported
+
+The "c2.v4l2.avc.decoder" and "c2.v4l2.vp8.decoder" component names are the only
+ones that are valid: only the H264 and VP8 video codecs are supported by the
+hardware decoder.
+
+Change-Id: I4463a11449e4349e74c6186c853e3c8a0658bfaa
+---
+ common/V4L2ComponentCommon.cpp | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/common/V4L2ComponentCommon.cpp b/common/V4L2ComponentCommon.cpp
+index 518b489..2c49a17 100644
+--- a/common/V4L2ComponentCommon.cpp
++++ b/common/V4L2ComponentCommon.cpp
+@@ -24,9 +24,7 @@ const std::string V4L2ComponentName::kVP9SecureDecoder = "c2.v4l2.vp9.decoder.se
+ 
+ // static
+ bool V4L2ComponentName::isValid(const char* name) {
+-    return name == kH264Encoder || name == kVP8Encoder || name == kVP9Encoder ||
+-           name == kH264Decoder || name == kVP8Decoder || name == kVP9Decoder ||
+-           name == kH264SecureDecoder || name == kVP8SecureDecoder || name == kVP9SecureDecoder;
++    return name == kH264Decoder || name == kVP8Decoder;
+ }
+ 
+ // static
+-- 
+2.34.1
+

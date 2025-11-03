@@ -1,3 +1,4 @@
 type removable_device, dev_type;
 type teefs_block_device, dev_type;
 type rpmb_block_device, dev_type;
+type cec_device, dev_type;

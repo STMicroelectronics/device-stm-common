@@ -9,6 +9,10 @@ allow initdriver self:capability sys_module;
 allow initdriver vendor_kernel_modules:system module_load;
 allow initdriver vendor_toolbox_exec:file execute_no_trans;
 
+# added for initprop
+allow initdriver proc_cmdline:file { getattr open read };
+allow initdriver qemu_sf_lcd_density_prop:property_service set;
+
 # added waiting clarification of kernel configuration generating this need
 allow initdriver self:key write;
 

@@ -1,0 +1,2 @@
+android.hardware.copro.ICopro/default                               u:object_r:hal_copro_service:s0
+android.hardware.copro.ICoproSerialPort/default                     u:object_r:hal_copro_service:s0

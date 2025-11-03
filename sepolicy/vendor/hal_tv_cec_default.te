@@ -1,0 +1,7 @@
+allow hal_tv_cec_default cec_device:chr_file { ioctl open read write };
+allow hal_tv_cec_default vendor_hdmi_config_prop:file { getattr map open read };
+
+# used to check HDMI connections status
+allow hal_tv_cec_default sysfs_display:dir search;
+allow hal_tv_cec_default sysfs_display:file { getattr open read };
+allow hal_tv_cec_default sysfs_rifsc:dir search;

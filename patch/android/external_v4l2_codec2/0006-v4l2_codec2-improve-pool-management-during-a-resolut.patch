@@ -1,0 +1,33 @@
+From 31d32c7bd60c0dc39e965de3a35900a420549abc Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Tue, 7 Jan 2025 16:36:10 +0100
+Subject: [PATCH] v4l2_codec2: improve pool management during a resolution
+ change
+
+During a video playback resolution change, if there is no more complete frame
+to release, then the old frame pool can be immediately deleted, and replaced by
+the new frame pool.
+
+Change-Id: I9d4059ee10a1cf5f938f3c54fda953cdcef5c054
+---
+ components/V4L2Decoder.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/components/V4L2Decoder.cpp b/components/V4L2Decoder.cpp
+index e02236b..b609763 100644
+--- a/components/V4L2Decoder.cpp
++++ b/components/V4L2Decoder.cpp
+@@ -682,6 +682,10 @@ bool V4L2Decoder::changeResolution(const ui::Size &size, std::vector<V4L2ExtCtrl
+         VideoFramePoolInfo &poolInfo = mVideoFramePools.front();
+         poolInfo.active = false;
+         poolInfo.deleteDelay = mCompletedFrames.size();
++        if (poolInfo.deleteDelay == 0) {
++            // It is safe to delete the old frame pool now
++            mVideoFramePools.pop_back();
++        }
+     }
+ 
+     // Release fetched video frames from old frame pool
+-- 
+2.34.1
+

@@ -1,7 +1,7 @@
 From ca22890db4c61ea12481f9d3c2c24c0f81fff647 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Julien=20Qu=C3=A9r=C3=A9?= <jquere@witekio.com>
 Date: Wed, 12 Jul 2023 14:31:23 +0200
-Subject: [PATCH 1/2] implement the AIDL composer3 HAL version
+Subject: [PATCH] implement the AIDL composer3 HAL version
 
 Change-Id: I2dbe8bbb2ba8122aa7451b2da620f3b98afb84c5
 ---

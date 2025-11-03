@@ -1,0 +1,48 @@
+From 4ab849f7b10020b6b59f2492cacc57e10fbaa6c8 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 2 Dec 2024 13:53:16 +0100
+Subject: [PATCH] [ftrace] ignore the nid field
+
+On new kernels, this field has a type that we don't know how to parse.
+
+Change-Id: Iefe385441cb46858f7318224fbc0b980cdf7fcce
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ src/traced/probes/ftrace/event_info.cc     | 3 ---
+ tools/ftrace_proto_gen/ftrace_proto_gen.cc | 6 ++++++
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/src/traced/probes/ftrace/event_info.cc b/src/traced/probes/ftrace/event_info.cc
+index 700503d240..f854a2ae44 100644
+--- a/src/traced/probes/ftrace/event_info.cc
++++ b/src/traced/probes/ftrace/event_info.cc
+@@ -4139,9 +4139,6 @@ std::vector<Event> GetStaticEventInfo() {
+            {kUnsetOffset, kUnsetSize, FtraceFieldType::kInvalidFtraceFieldType,
+             "ino", 2, ProtoSchemaType::kUint64,
+             TranslationStrategy::kInvalidTranslationStrategy},
+-           {kUnsetOffset, kUnsetSize, FtraceFieldType::kInvalidFtraceFieldType,
+-            "nid", 3, ProtoSchemaType::kUint32,
+-            TranslationStrategy::kInvalidTranslationStrategy},
+            {kUnsetOffset, kUnsetSize, FtraceFieldType::kInvalidFtraceFieldType,
+             "depth", 4, ProtoSchemaType::kInt32,
+             TranslationStrategy::kInvalidTranslationStrategy},
+diff --git a/tools/ftrace_proto_gen/ftrace_proto_gen.cc b/tools/ftrace_proto_gen/ftrace_proto_gen.cc
+index b372ee520b..5f2f596ec9 100644
+--- a/tools/ftrace_proto_gen/ftrace_proto_gen.cc
++++ b/tools/ftrace_proto_gen/ftrace_proto_gen.cc
+@@ -201,6 +201,12 @@ std::string SingleEventInfo(perfetto::Proto proto,
+     // configurations)
+     if (group == "ftrace" && proto.event_name == "print" && field->name == "ip")
+       continue;
++    // Ignore the "nid" field. On new kernels, this field has a type that we
++    // don't know how to parse. See b/281660544
++    if (group == "f2fs" && proto.event_name == "f2fs_truncate_partial_nodes" &&
++        field->name == "nid")
++      continue;
++
+     s += "{";
+     s += "kUnsetOffset, ";
+     s += "kUnsetSize, ";
+-- 
+2.34.1
+

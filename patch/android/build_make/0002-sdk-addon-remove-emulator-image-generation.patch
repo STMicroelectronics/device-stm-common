@@ -1,0 +1,75 @@
+From 64fb9649d5f137300e639a9a86ff735c0bd2ad74 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Fri, 4 Jul 2025 10:45:47 +0200
+Subject: [PATCH 2/2] sdk addon: remove emulator image generation
+
+Keep only the SDK addon generation to avoid dependencies with emulator.
+
+Change-Id: Iec7c0305d39e5ec93698d9690967ef58523beba6
+---
+ core/tasks/sdk-addon.mk | 29 ++---------------------------
+ 1 file changed, 2 insertions(+), 27 deletions(-)
+
+diff --git a/core/tasks/sdk-addon.mk b/core/tasks/sdk-addon.mk
+index 5097f1266f..702d12943e 100644
+--- a/core/tasks/sdk-addon.mk
++++ b/core/tasks/sdk-addon.mk
+@@ -23,7 +23,6 @@ addon_dir_leaf  := $(addon_name)-$(FILE_NAME_TAG)-$(INTERNAL_SDK_HOST_OS_NAME)
+ addon_dir_img   := $(addon_dir_leaf)-img
+ intermediates   := $(HOST_OUT_INTERMEDIATES)/SDK_ADDON/$(addon_name)_intermediates
+ full_target     := $(HOST_OUT_SDK_ADDON)/$(addon_dir_leaf).zip
+-full_target_img := $(HOST_OUT_SDK_ADDON)/$(addon_dir_img).zip
+ staging         := $(intermediates)
+ 
+ sdk_addon_deps :=
+@@ -62,22 +61,6 @@ $(foreach cf,$(PRODUCT_SDK_ADDON_COPY_FILES), \
+  )
+ endif
+ 
+-# Files copied in the system-image directory
+-files_to_copy += \
+-	$(addon_dir_img):$(INSTALLED_QEMU_SYSTEMIMAGE):images/$(TARGET_CPU_ABI)/system.img \
+-	$(addon_dir_img):$(INSTALLED_QEMU_VENDORIMAGE):images/$(TARGET_CPU_ABI)/vendor.img \
+-	$(addon_dir_img):$(INSTALLED_QEMU_RAMDISKIMAGE):images/$(TARGET_CPU_ABI)/ramdisk.img \
+-	$(addon_dir_img):$(PRODUCT_OUT)/system/build.prop:images/$(TARGET_CPU_ABI)/build.prop \
+-	$(addon_dir_img):device/generic/goldfish/data/etc/userdata.img:images/$(TARGET_CPU_ABI)/userdata.img \
+-	$(addon_dir_img):$(target_notice_file_txt):images/$(TARGET_CPU_ABI)/NOTICE.txt \
+-	$(addon_dir_img):$(PRODUCT_SDK_ADDON_SYS_IMG_SOURCE_PROP):images/source.properties
+-
+-
+-ifeq ($(BOARD_AVB_ENABLE),true)
+-files_to_copy += \
+-	$(addon_dir_img):$(QEMU_VERIFIED_BOOT_PARAMS):images/$(TARGET_CPU_ABI)/VerifiedBootParams.textproto
+-endif
+-
+ # Generate rules to copy the requested files
+ $(foreach cf,$(files_to_copy), \
+   $(eval _root := $(call word-colon,1,$(cf))) \
+@@ -121,22 +104,14 @@ $(full_target): $(sdk_addon_deps) | $(SOONG_ZIP)
+ 	$(hide) mkdir -p $(dir $@)
+ 	$(hide) $(SOONG_ZIP) -o $@ -C $(dir $(PRIVATE_STAGING_DIR)) -D $(PRIVATE_STAGING_DIR)
+ 
+-$(full_target_img): PRIVATE_STAGING_DIR := $(call append-path,$(staging),$(addon_dir_img))/images/$(TARGET_CPU_ABI)
+-$(full_target_img): $(full_target) $(addon_img_source_prop) | $(SOONG_ZIP)
+-	@echo Packaging SDK Addon System-Image: $@
+-	$(hide) mkdir -p $(dir $@)
+-	cp -R $(PRODUCT_OUT)/data $(PRIVATE_STAGING_DIR)/data
+-	$(hide) $(SOONG_ZIP) -o $@ -C $(dir $(PRIVATE_STAGING_DIR)) -D $(PRIVATE_STAGING_DIR)
+-
+-
+-sdk_addon: $(full_target) $(full_target_img)
++sdk_addon: $(full_target)
+ 
+ ifneq ($(sdk_repo_goal),)
+ # If we're building the sdk_repo, keep the name of the addon zip
+ # around so that development/build/tools/sdk_repo.mk can dist it
+ # at the appropriate location.
+ ADDON_SDK_ZIP        := $(full_target)
+-ADDON_SDK_IMG_ZIP    := $(full_target_img)
++
+ else
+ # When not building an sdk_repo, just dist the addon zip file
+ # as-is.
+-- 
+2.34.1
+

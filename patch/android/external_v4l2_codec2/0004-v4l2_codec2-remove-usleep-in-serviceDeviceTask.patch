@@ -1,0 +1,32 @@
+From b080736f0661f4b8918e2c7af3f103b61fe24360 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Wed, 6 Nov 2024 15:32:48 +0100
+Subject: [PATCH] v4l2_codec2: remove usleep in serviceDeviceTask
+
+Calling the usleep function in the serviceDeviceTask function penalizes the
+framerate when VP8 videos are played.
+
+Change-Id: Ie008d25fa7fd454fc51ca8745da392d79ca06c7f
+---
+ components/V4L2Decoder.cpp | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/components/V4L2Decoder.cpp b/components/V4L2Decoder.cpp
+index 6902772..e02236b 100644
+--- a/components/V4L2Decoder.cpp
++++ b/components/V4L2Decoder.cpp
+@@ -516,10 +516,8 @@ void V4L2Decoder::serviceDeviceTask(bool event) {
+             onError();
+             return;
+         }
+-        if (!dequeuedBuffer) { // This queued buffer hasn't been handled by V4L2 yet.
+-            usleep(5000);
++        if (!dequeuedBuffer) // This queued buffer hasn't been handled by V4L2 yet.
+             break;
+-        }
+ 
+         std::shared_ptr<V4L2Request> req = std::move(mPendingRequests.front());
+         if (!req) {
+-- 
+2.34.1
+

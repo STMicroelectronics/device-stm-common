@@ -1,0 +1,28 @@
+From 3e435bb4a9dba1ef6bd2e6aa472028476d2165d2 Mon Sep 17 00:00:00 2001
+From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+Date: Mon, 4 Nov 2024 09:57:04 +0100
+Subject: [PATCH] Add privileged system permissions for SystemUpdateSample
+
+Following recommendations : https://android.googlesource.com/platform/bootable/recovery/+/main/updater_sample
+
+Change-Id: I67d4a12c460f8e8b78ad3cbe9453d3fc49476815
+Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
+---
+ updater_sample/Android.bp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/updater_sample/Android.bp b/updater_sample/Android.bp
+index 9222d063..f391cec7 100644
+--- a/updater_sample/Android.bp
++++ b/updater_sample/Android.bp
+@@ -24,6 +24,7 @@ package {
+ android_app {
+     name: "SystemUpdaterSample",
+     sdk_version: "system_current",
++    privileged: true,
+ 
+     srcs: ["src/**/*.java"],
+ 
+-- 
+2.34.1
+

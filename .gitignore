@@ -15,6 +15,7 @@ hardware/camera
 hardware/composer
 hardware/copro
 hardware/gralloc
+hardware/hdmi_cec
 hardware/health
 hardware/interfaces
 hardware/memtrack
@@ -25,11 +26,12 @@ hardware/thermal
 hardware/usb
 hardware/wifi
 hardware/gcnano-userland
+services/CoproService
 tee/kmgk
 tee/optee_client
 tee/optee_test
 gcnano
 graphics
-disco
+dk
 eval
 valid3

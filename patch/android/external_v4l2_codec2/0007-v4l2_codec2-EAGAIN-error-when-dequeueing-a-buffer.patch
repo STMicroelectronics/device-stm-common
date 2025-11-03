@@ -1,0 +1,30 @@
+From 1e4fc8a383c0abf997cd1411385c63fb73839323 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Trotin <jean-christophe.trotin@st.com>
+Date: Wed, 22 Jan 2025 14:41:12 +0100
+Subject: [PATCH] v4l2_codec2: EAGAIN error when dequeueing a buffer
+
+In case of non-blocking I/O has been selected, VIDIOC_DQBUF returns immediately
+with an EAGAIN error code when no buffer is available. In this situation, it is
+not needed to continue polling: when a buffer will be available, it will be
+notified through the callback mechanism.
+
+Change-Id: Icc1fce7c7a879b03eb2dd7f71a8bcfb24126b2aa
+---
+ common/V4L2Device.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common/V4L2Device.cpp b/common/V4L2Device.cpp
+index cd7d45c..4911576 100644
+--- a/common/V4L2Device.cpp
++++ b/common/V4L2Device.cpp
+@@ -968,6 +968,7 @@ std::pair<bool, V4L2ReadableBufferRef> V4L2Queue::dequeueBuffer() {
+         // this method after the last buffer is dequeued.
+         switch (errno) {
+         case EAGAIN:
++            return std::make_pair(true, nullptr);
+         case EPIPE:
+             // This is not an error so we'll need to continue polling but won't provide a buffer.
+             mDevice->schedulePoll();
+-- 
+2.34.1
+

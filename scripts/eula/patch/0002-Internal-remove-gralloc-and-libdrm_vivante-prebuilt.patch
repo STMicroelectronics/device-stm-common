@@ -1,12 +1,11 @@
-From dd947fc49b8f38520ebbd282227e876aed837c15 Mon Sep 17 00:00:00 2001
+From fa9f301198d5d0ab44fb393c989daea7973ce648 Mon Sep 17 00:00:00 2001
 From: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 Date: Fri, 31 May 2024 15:40:52 +0200
-Subject: [PATCH] Internal : remove gralloc and libdrm_vivante prebuilt
+Subject: [PATCH 2/2] Internal : remove gralloc and libdrm_vivante prebuilt
 
 Integrate in source :
 - gralloc.stm.so source in device/stm/stm32mp2/hardware/gralloc/
 - libdrm_vivante source in external/libdrm/
-
 
 Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
 ---
@@ -14,7 +13,7 @@ Signed-off-by: Nicolas LOUBOUTIN <nicolas.louboutin@st.com>
  1 file changed, 18 insertions(+), 18 deletions(-)
 
 diff --git a/Android.bp b/Android.bp
-index d902321..64fcbe1 100644
+index 0ec64cb..2034087 100644
 --- a/Android.bp
 +++ b/Android.bp
 @@ -14,14 +14,14 @@ license {
@@ -40,7 +39,7 @@ index d902321..64fcbe1 100644
  
  // libGLESv2, libEGL and libGLESv1_CM names shall be set without proprietary extension (no more egl.cfg)
  cc_prebuilt_library_shared {
-@@ -83,13 +83,13 @@ cc_prebuilt_library_shared {
+@@ -111,13 +111,13 @@ cc_prebuilt_library_shared {
  }
  
  // gralloc HAL prebuilt library

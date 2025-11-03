@@ -20,9 +20,7 @@ endif
 SSBL_TRUSTED_BIN := $(TARGET_PREBUILT_SBL)/u-boot-nodtb-trusted-fb$(BOARD_DISK_TYPE).bin
 SSBL_TRUSTED_DTB := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-trusted-fb$(BOARD_DISK_TYPE).dtb
 
-SSBL_PROG := $(TARGET_PREBUILT_SBL)/u-boot-$(SOC_VERSION)-$(BOARD_FLAVOUR)-programmer.stm32
-
-.PHONY: u-boot-nodtb.bin u-boot.dtb ssbl-programmer.img
+.PHONY: u-boot-nodtb.bin u-boot.dtb
 
 u-boot-nodtb.bin:
 	$(ACP) -fp $(SSBL_TRUSTED_BIN) $(PRODUCT_OUT)/$@
@@ -30,10 +28,7 @@ u-boot-nodtb.bin:
 u-boot.dtb:
 	$(ACP) -fp $(SSBL_TRUSTED_DTB) $(PRODUCT_OUT)/$@
 
-ssbl-programmer.img:
-	$(ACP) -fp $(SSBL_PROG) $(PRODUCT_OUT)/$@
-
-droidcore: u-boot-nodtb.bin u-boot.dtb ssbl-programmer.img
+droidcore: u-boot-nodtb.bin u-boot.dtb
 
 endif
 endif

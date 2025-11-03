@@ -11,10 +11,8 @@ allow hal_copro_default sysfs_remoteproc:dir search;
 allow hal_copro_default sysfs_remoteproc:file rw_file_perms;
 allow hal_copro_default rpmsg_device:chr_file rw_file_perms;
 
+binder_call(hal_copro_default, servicemanager)
+
 userdebug_or_eng(`
 allow hal_copro_default debugfs_regulator:dir search;
 ')
-
-# Add copro to hwservice_manager and allow it to be discovered
-hal_attribute_hwservice(hal_copro, hal_copro_hwservice)
-hal_attribute_hwservice(hal_copro, hal_coproserial_hwservice)
