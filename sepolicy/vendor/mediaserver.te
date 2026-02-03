@@ -1,2 +1,1 @@
 gpu_access(mediaserver);
-dontaudit mediaserver vendor_file:file { read open getattr execute map };

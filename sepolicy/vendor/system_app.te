@@ -24,5 +24,11 @@ r_dir_file(system_app, sysfs_gc)
 r_dir_file(system_app, sysfs_display)
 r_dir_file(system_app, sysfs_zram)
 
+
+# frame rate info only with debugfs
+userdebug_or_eng(`
+r_dir_file(system_app, debugfs_dri)
+')
+
 allow system_app graphics_device:chr_file r_file_perms;
 allow system_app proc_pagetypeinfo:file r_file_perms;

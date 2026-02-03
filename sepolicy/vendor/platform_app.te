@@ -9,8 +9,10 @@ r_dir_file(platform_app, sysfs_gc)
 r_dir_file(platform_app, sysfs_display)
 r_dir_file(platform_app, sysfs_zram)
 
-allow platform_app graphics_device:chr_file r_file_perms;
+# frame rate info only with debugfs
+userdebug_or_eng(`
+r_dir_file(platform_app, debugfs_dri)
+')
 
-dontaudit platform_app debugfs:file { open read getattr };
-dontaudit platform_app debugfs_gc:dir search;
-dontaudit platform_app debugfs_gc:file { open read getattr };
+allow platform_app vendor_composer_prop:file { getattr map open read };
+allow platform_app graphics_device:chr_file r_file_perms;

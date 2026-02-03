@@ -1,2 +1,1 @@
 gpu_access(mediaswcodec);
-dontaudit mediaswcodec vendor_file:file { read open getattr execute map };

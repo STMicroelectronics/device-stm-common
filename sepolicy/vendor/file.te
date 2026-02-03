@@ -34,6 +34,9 @@ type sysfs_rifsc, fs_type, sysfs_type;
 # Type useful for hdmi
 type sysfs_hdmi, fs_type, sysfs_type;
 
+# Type useful for debug (perf monitoring)
+type debugfs_dri, fs_type, debugfs_type;
+
 # Type useful for init
 type sysfs_blocktuning, fs_type, sysfs_type;
 type proc_swappiness, fs_type, proc_type;

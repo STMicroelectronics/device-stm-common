@@ -19,6 +19,7 @@ genfscon debugfs /clk                           u:object_r:debugfs_clk:s0
 genfscon debugfs /regulator                     u:object_r:debugfs_regulator:s0
 genfscon debugfs /pinctrl                       u:object_r:debugfs_pinctrl:s0
 genfscon debugfs /gc                            u:object_r:debugfs_gc:s0
+genfscon debugfs /dri                           u:object_r:debugfs_dri:s0
 
 # RIF system configuration
 genfscon sysfs /devices/platform/soc@0/42080000.rifsc                           u:object_r:sysfs_rifsc:s0
@@ -125,4 +126,3 @@ genfscon sysfs /devices/platform/ahb@1/ahb@1:m33@0/remoteproc   u:object_r:sysfs
 
 # hdmi
 genfscon sysfs /devices/platform/soc@0/42080000.bus/48010000.display-controller/drm/card0/card0-HDMI-A-1/status     u:object_r:sysfs_hdmi:s0
-

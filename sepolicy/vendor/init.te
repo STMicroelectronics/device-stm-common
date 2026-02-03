@@ -36,5 +36,3 @@ allow init debugfs_regulator:dir relabelto;
 allow init debugfs_regulator:file relabelto;
 allow init debugfs_wakeup_sources:file getattr;
 ')
-
-dontaudit init self:capability dac_read_search;

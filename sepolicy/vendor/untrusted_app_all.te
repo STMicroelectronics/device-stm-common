@@ -1,12 +1,5 @@
 allow untrusted_app_all gpu_device:chr_file { rw_file_perms };
 get_prop(untrusted_app_all, vendor_allocator_prop)
 get_prop(untrusted_app_all, vendor_graphics_prop)
-# get_prop(untrusted_app_all, vendor_default_prop)
 
 allow untrusted_app_all proc_vmstat:file { getattr };
-
-dontaudit untrusted_app_all sysfs_zram:dir search;
-dontaudit untrusted_app_all vendor_file:file { read open getattr };
-dontaudit untrusted_app_all proc_vmstat:file { open };
-dontaudit untrusted_app_all block_device:dir getattr;
-dontaudit untrusted_app_all hal_memtrack_hwservice:hwservice_manager find;

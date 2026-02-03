@@ -1,3 +1,1 @@
 gpu_access(bootanim);
-
-dontaudit bootanim system_data_file:dir { search };

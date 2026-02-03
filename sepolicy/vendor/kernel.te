@@ -11,19 +11,11 @@ allow kernel super_block_device:lnk_file relabelto;
 allow kernel dm_device:blk_file { open read };
 
 allow kernel sepolicy_file:file getattr;
-allow kernel system_bootstrap_lib_file:dir getattr;
-allow kernel system_bootstrap_lib_file:file getattr;
 
-allow kernel vendor_firmware_file:dir search;
-allow kernel vendor_firmware_file:file { open read };
+r_dir_file(kernel, system_bootstrap_lib_file)
+r_dir_file(kernel, vendor_firmware_file)
 
 userdebug_or_eng(`
 allow kernel debugfs_tracing:filesystem mount;
-')
-
 allow kernel debugfs_regulator:dir search;
-
-# for kdevtmpfs
-dontaudit kernel device:blk_file { create setattr unlink };
-
-dontaudit kernel kernel:capability { net_bind_service };
+')

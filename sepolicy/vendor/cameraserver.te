@@ -1,2 +1,1 @@
 gpu_access(cameraserver);
-dontaudit cameraserver vendor_file:file { read open getattr execute map };
